@@ -10,9 +10,11 @@ class DBClient:
         
         # Local fallback data structures
         self.submissions = {}
-        self.embeddings = {}  # submission_id -> np.ndarray
-        self.demographics = {}  # ward -> dict
-        self.facilities = []    # list of dicts
+        self.enriched_submissions = {}
+        self.embeddings = {}      # submission_id -> np.ndarray
+        self.demographics = {}    # ward -> dict
+        self.facilities = []      # list of dicts
+        self.priorities = []      # list of dicts
         
         # Paths for local file backup
         self.local_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +25,7 @@ class DBClient:
                 import psycopg2
                 self.conn = psycopg2.connect(self.db_url)
                 self.is_postgres = True
-                print("🔌 Connected to PostgreSQL database successfully.")
+                print("🔌 Connected to Supabase/PostgreSQL database successfully.")
                 self._init_db_schema()
             except Exception as e:
                 print(f"⚠️ Failed to connect to PostgreSQL ({e}). Falling back to local memory database.")
@@ -34,38 +36,65 @@ class DBClient:
             self._load_local_backup()
 
     def _init_db_schema(self):
-        """Initializes tables in PostgreSQL."""
+        """Ensures all tables exist in Supabase/PostgreSQL, matching migration sql."""
         with self.conn.cursor() as cur:
             # Enable vector extension
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             
-            # Submissions table
+            # Submissions table (Raw)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS submissions (
-                    id VARCHAR(50) PRIMARY KEY,
-                    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    channel VARCHAR(20) DEFAULT 'web',
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    timestamp TIMESTAMPTZ DEFAULT now() NOT NULL,
+                    channel TEXT DEFAULT 'web' NOT NULL,
                     raw_text TEXT,
-                    normalized_text_en TEXT,
-                    language VARCHAR(10),
-                    latitude DOUBLE PRECISION,
-                    longitude DOUBLE PRECISION,
-                    ward VARCHAR(100),
-                    citizen_id_hash VARCHAR(64),
-                    category VARCHAR(100),
-                    need_type VARCHAR(100),
-                    urgency VARCHAR(20),
-                    sentiment VARCHAR(20),
-                    canonical_location VARCHAR(200),
-                    extracted_entities TEXT[]
+                    audio_url TEXT,
+                    photo_url TEXT,
+                    language TEXT NOT NULL,
+                    geo JSONB,
+                    citizen_id_hash TEXT NOT NULL
+                );
+            """)
+            
+            # Enriched Submissions table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS enriched_submissions (
+                    id UUID PRIMARY KEY REFERENCES submissions(id) ON DELETE CASCADE,
+                    normalized_text_en TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    need_type TEXT NOT NULL,
+                    urgency TEXT NOT NULL,
+                    sentiment TEXT NOT NULL,
+                    canonical_location TEXT,
+                    extracted_entities JSONB DEFAULT '{}'::jsonb NOT NULL,
+                    created_at TIMESTAMPTZ DEFAULT now() NOT NULL
                 );
             """)
             
             # Embeddings table
             cur.execute("""
-                CREATE TABLE IF NOT EXISTS submission_embeddings (
-                    submission_id VARCHAR(50) PRIMARY KEY REFERENCES submissions(id) ON DELETE CASCADE,
-                    embedding vector(768)
+                CREATE TABLE IF NOT EXISTS embeddings (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    submission_id UUID UNIQUE NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
+                    vector vector(768) NOT NULL,
+                    created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+                );
+            """)
+            
+            # Priorities table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS priorities (
+                    work_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    title TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    demand_score NUMERIC DEFAULT 0.0 NOT NULL,
+                    demand_count INTEGER DEFAULT 0 NOT NULL,
+                    hotspot_geo JSONB DEFAULT '{}'::jsonb NOT NULL,
+                    supporting_evidence JSONB DEFAULT '[]'::jsonb NOT NULL,
+                    rank INTEGER,
+                    explanation TEXT NOT NULL,
+                    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+                    updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
                 );
             """)
             
@@ -95,7 +124,7 @@ class DBClient:
                 );
             """)
             self.conn.commit()
-            print("✅ Database schema initialized successfully.")
+            print("✅ Database schema verified/initialized successfully.")
 
     def _load_local_backup(self):
         """Loads data from a local JSON file if it exists."""
@@ -104,13 +133,15 @@ class DBClient:
                 with open(self.backup_path, 'r', encoding='utf-8') as f:
                     backup = json.load(f)
                     self.submissions = backup.get("submissions", {})
+                    self.enriched_submissions = backup.get("enriched_submissions", {})
                     self.demographics = backup.get("demographics", {})
                     self.facilities = backup.get("facilities", [])
+                    self.priorities = backup.get("priorities", [])
                     
                     # Convert list back to numpy array for embeddings
                     raw_embeds = backup.get("embeddings", {})
                     self.embeddings = {k: np.array(v) for k, v in raw_embeds.items()}
-                print(f"💾 Loaded {len(self.submissions)} submissions from local backup.")
+                print(f"💾 Loaded {len(self.submissions)} submissions and {len(self.priorities)} priorities from local backup.")
             except Exception as e:
                 print(f"⚠️ Failed to load local backup ({e}). Starting fresh.")
 
@@ -121,9 +152,11 @@ class DBClient:
         try:
             backup = {
                 "submissions": self.submissions,
+                "enriched_submissions": self.enriched_submissions,
                 "embeddings": {k: v.tolist() for k, v in self.embeddings.items()},
                 "demographics": self.demographics,
-                "facilities": self.facilities
+                "facilities": self.facilities,
+                "priorities": self.priorities
             }
             with open(self.backup_path, 'w', encoding='utf-8') as f:
                 json.dump(backup, f, indent=2, ensure_ascii=False)
@@ -133,53 +166,72 @@ class DBClient:
     # API Methods
 
     def insert_submission(self, sub: dict):
-        """Inserts a submission into the DB."""
+        """Inserts raw and enriched submissions into the respective tables."""
         if self.is_postgres:
             with self.conn.cursor() as cur:
+                # 1. Insert into raw submissions
                 cur.execute("""
                     INSERT INTO submissions (
-                        id, timestamp, channel, raw_text, normalized_text_en, language,
-                        latitude, longitude, ward, citizen_id_hash, category,
-                        need_type, urgency, sentiment, canonical_location, extracted_entities
-                    ) VALUES (
-                        %(id)s, %(timestamp)s, %(channel)s, %(raw_text)s, %(normalized_text_en)s, %(language)s,
-                        %(geo)s.lat, %(geo)s.lng, %(geo)s.ward, %(citizen_id_hash)s, %(category)s,
-                        %(need_type)s, %(urgency)s, %(sentiment)s, %(canonical_location)s, %(extracted_entities)s
-                    ) ON CONFLICT (id) DO UPDATE SET
+                        id, timestamp, channel, raw_text, photo_url, language, geo, citizen_id_hash
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
                         raw_text = EXCLUDED.raw_text,
+                        photo_url = EXCLUDED.photo_url;
+                """, (
+                    sub['id'],
+                    sub.get('timestamp'),
+                    sub.get('channel', 'web'),
+                    sub.get('raw_text'),
+                    sub.get('photo_url'),
+                    sub.get('language'),
+                    json.dumps(sub.get('geo', {'lat': None, 'lng': None, 'ward': None})),
+                    sub.get('citizen_id_hash')
+                ))
+                
+                # 2. Insert into enriched submissions
+                cur.execute("""
+                    INSERT INTO enriched_submissions (
+                        id, normalized_text_en, category, need_type, urgency, sentiment, canonical_location, extracted_entities
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
                         normalized_text_en = EXCLUDED.normalized_text_en,
                         urgency = EXCLUDED.urgency,
                         sentiment = EXCLUDED.sentiment,
                         canonical_location = EXCLUDED.canonical_location;
-                """, {
-                    'id': sub['id'],
-                    'timestamp': sub.get('timestamp'),
-                    'channel': sub.get('channel', 'web'),
-                    'raw_text': sub.get('raw_text'),
-                    'normalized_text_en': sub.get('normalized_text_en'),
-                    'language': sub.get('language'),
-                    'geo': sub.get('geo', {'lat': None, 'lng': None, 'ward': None}),
-                    'citizen_id_hash': sub.get('citizen_id_hash'),
-                    'category': sub.get('category'),
-                    'need_type': sub.get('need_type'),
-                    'urgency': sub.get('urgency'),
-                    'sentiment': sub.get('sentiment'),
-                    'canonical_location': sub.get('canonical_location'),
-                    'extracted_entities': sub.get('extracted_entities', [])
-                })
+                """, (
+                    sub['id'],
+                    sub.get('normalized_text_en', ''),
+                    sub.get('category', ''),
+                    sub.get('need_type', ''),
+                    sub.get('urgency', ''),
+                    sub.get('sentiment', ''),
+                    sub.get('canonical_location', ''),
+                    json.dumps(sub.get('extracted_entities', []))
+                ))
                 self.conn.commit()
         else:
+            # Reconstruct combined structure locally, but separate metadata
             self.submissions[sub['id']] = sub
+            self.enriched_submissions[sub['id']] = {
+                'id': sub['id'],
+                'normalized_text_en': sub.get('normalized_text_en'),
+                'category': sub.get('category'),
+                'need_type': sub.get('need_type'),
+                'urgency': sub.get('urgency'),
+                'sentiment': sub.get('sentiment'),
+                'canonical_location': sub.get('canonical_location'),
+                'extracted_entities': sub.get('extracted_entities', [])
+            }
             self._save_local_backup()
 
     def insert_embedding(self, submission_id: str, embedding: np.ndarray):
-        """Inserts an embedding vector into the DB."""
+        """Inserts an embedding vector into the embeddings table."""
         if self.is_postgres:
             with self.conn.cursor() as cur:
                 cur.execute("""
-                    INSERT INTO submission_embeddings (submission_id, embedding)
+                    INSERT INTO embeddings (submission_id, vector)
                     VALUES (%s, %s)
-                    ON CONFLICT (submission_id) DO UPDATE SET embedding = EXCLUDED.embedding;
+                    ON CONFLICT (submission_id) DO UPDATE SET vector = EXCLUDED.vector;
                 """, (submission_id, embedding.tolist()))
                 self.conn.commit()
         else:
@@ -187,65 +239,52 @@ class DBClient:
             self._save_local_backup()
 
     def get_submissions(self) -> list:
-        """Returns all submissions."""
+        """Returns all combined submissions (raw + enriched) to match our python code needs."""
         if self.is_postgres:
             with self.conn.cursor() as cur:
-                cur.execute("SELECT * FROM submissions;")
+                cur.execute("""
+                    SELECT 
+                        s.id, s.timestamp, s.channel, s.raw_text, s.photo_url, s.language, s.geo, s.citizen_id_hash,
+                        e.normalized_text_en, e.category, e.need_type, e.urgency, e.sentiment, e.canonical_location, e.extracted_entities
+                    FROM submissions s
+                    LEFT JOIN enriched_submissions e ON s.id = e.id;
+                """)
                 columns = [col[0] for col in cur.description]
                 results = []
                 for row in cur.fetchall():
                     row_dict = dict(zip(columns, row))
-                    # Reconstruct geo object to match contract
-                    row_dict['geo'] = {
-                        'lat': row_dict.pop('latitude'),
-                        'lng': row_dict.pop('longitude'),
-                        'ward': row_dict.pop('ward')
-                    }
+                    # Parse JSON structures
+                    if isinstance(row_dict['geo'], str):
+                        row_dict['geo'] = json.loads(row_dict['geo'])
+                    if isinstance(row_dict['extracted_entities'], str):
+                        row_dict['extracted_entities'] = json.loads(row_dict['extracted_entities'])
                     results.append(row_dict)
                 return results
         else:
-            return list(self.submissions.values())
-
-    def get_submission(self, sub_id: str) -> dict:
-        """Returns a single submission by ID."""
-        if self.is_postgres:
-            with self.conn.cursor() as cur:
-                cur.execute("SELECT * FROM submissions WHERE id = %s;", (sub_id,))
-                row = cur.fetchone()
-                if row:
-                    columns = [col[0] for col in cur.description]
-                    row_dict = dict(zip(columns, row))
-                    row_dict['geo'] = {
-                        'lat': row_dict.pop('latitude'),
-                        'lng': row_dict.pop('longitude'),
-                        'ward': row_dict.pop('ward')
-                    }
-                    return row_dict
-                return None
-        else:
-            return self.submissions.get(sub_id)
+            # Reconstruct combined dicts from local memory
+            results = []
+            for sub_id, sub in self.submissions.items():
+                enrich = self.enriched_submissions.get(sub_id, {})
+                combined = sub.copy()
+                combined.update(enrich)
+                results.append(combined)
+            return results
 
     def query_nearest_neighbors(self, query_vector: np.ndarray, limit: int = 5, distance_threshold: float = 0.15) -> list:
-        """Queries nearest neighbor submissions within a distance threshold.
-        Returns a list of tuples: (submission_id, distance) where distance <= distance_threshold.
-        Distance threshold of 0.15 matches cosine distance (i.e. similarity >= 0.85).
-        """
+        """Queries nearest neighbor submissions within a distance threshold."""
         results = []
         if self.is_postgres:
             with self.conn.cursor() as cur:
-                # pgvector <=> operator computes cosine distance
+                # Supabase table is 'embeddings', column is 'vector'
                 cur.execute("""
-                    SELECT submission_id, embedding <=> %s::vector AS distance
-                    FROM submission_embeddings
-                    WHERE (embedding <=> %s::vector) <= %s
+                    SELECT submission_id, vector <=> %s::vector AS distance
+                    FROM embeddings
+                    WHERE (vector <=> %s::vector) <= %s
                     ORDER BY distance ASC
                     LIMIT %s;
                 """, (query_vector.tolist(), query_vector.tolist(), distance_threshold, limit))
                 results = cur.fetchall()
         else:
-            # Local numpy calculation
-            # Cosine distance = 1 - Cosine Similarity
-            # Cosine Similarity = A . B / (||A|| ||B||)
             q_norm = np.linalg.norm(query_vector)
             if q_norm == 0:
                 return []
@@ -260,11 +299,48 @@ class DBClient:
                 if distance <= distance_threshold:
                     temp_results.append((sub_id, float(distance)))
             
-            # Sort by distance ascending and slice top limit
             temp_results.sort(key=lambda x: x[1])
             results = temp_results[:limit]
             
         return results
+
+    # Priorities CRUD (Next.js Dashboard Integration)
+
+    def clear_priorities(self):
+        """Clears existing priorities before uploading a refreshed ranked list."""
+        if self.is_postgres:
+            with self.conn.cursor() as cur:
+                cur.execute("TRUNCATE TABLE priorities;")
+                self.conn.commit()
+        else:
+            self.priorities = []
+            self._save_local_backup()
+
+    def insert_priority_item(self, item: dict):
+        """Inserts a priority item into the database."""
+        # Convert UUID to string/proper format
+        work_id = item.get("work_id")
+        # Ensure it's a valid UUID string in postgres, otherwise let default trigger
+        if self.is_postgres:
+            with self.conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO priorities (
+                        title, category, demand_score, demand_count, hotspot_geo, supporting_evidence, rank, explanation
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                """, (
+                    item['title'],
+                    item['category'],
+                    item['demand_score'],
+                    item['demand_count'],
+                    json.dumps(item['hotspot_geo']),
+                    json.dumps(item['supporting_evidence']),
+                    item['rank'],
+                    item['explanation']
+                ))
+                self.conn.commit()
+        else:
+            self.priorities.append(item)
+            self._save_local_backup()
 
     # Public Datasets API
 
@@ -323,7 +399,6 @@ class DBClient:
                 """, (facility['id'], facility['facility_type'], facility['name'], facility['latitude'], facility['longitude'], facility['ward']))
                 self.conn.commit()
         else:
-            # Prevent duplicates in local memory list
             self.facilities = [f for f in self.facilities if f['id'] != facility['id']]
             self.facilities.append(facility)
             self._save_local_backup()

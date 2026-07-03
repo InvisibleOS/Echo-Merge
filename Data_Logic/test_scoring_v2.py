@@ -52,6 +52,13 @@ def run_integration_pipeline_v2():
         
     print(f"\n💾 Ranked priorities exported successfully to: {output_path}")
     
+    # Push to DB (for Supabase / Next.js integration)
+    print("⚡ Uploading priorities to database...")
+    db.clear_priorities()
+    for item in priorities:
+        db.insert_priority_item(item)
+    print("✅ Uploaded priorities to database.")
+    
     # 7. Print Ranked Results Summary
     print("\n🏆 Top 5 Priority Items (v2):")
     for item in priorities[:5]:
