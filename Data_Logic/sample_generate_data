@@ -1,0 +1,89 @@
+import pandas as pd
+import numpy as np
+import json
+import uuid
+import random
+from deep_translator import GoogleTranslator
+
+def build_day1_dataset_free(csv_path, output_path, target_count=50):
+    print("🚀 Loading public dataset...")
+    try:
+        df = pd.read_csv(csv_path, low_memory=False)
+    except FileNotFoundError:
+        print(f"❌ Error: {csv_path} not found. Place the downloaded CSV in the 'data' folder.")
+        return
+
+    df = df.dropna(subset=['latitude', 'longitude', 'title', 'description'])
+    
+    # Filter for Bengaluru South geo-box
+    blr_south = df[
+        (df['latitude'].astype(float) > 12.85) & (df['latitude'].astype(float) < 12.95) &
+        (df['longitude'].astype(float) > 77.50) & (df['longitude'].astype(float) < 77.65)
+    ]
+    
+    # Using 50 rows so the free translator doesn't time out
+    sampled_df = blr_south.sample(n=min(len(blr_south), target_count), random_state=42).copy()
+        
+    print(f"⚙️ Translating {target_count} records into mock Indian languages. This takes a minute...")
+    enriched_submissions = []
+    
+    # Map our display languages to the exact codes deep-translator expects
+    language_map = {
+        'Kannada': 'kn',
+        'Hindi': 'hi',
+        'Tamil': 'ta',
+        'English': 'en'
+    }
+    
+    urgencies = ['Low', 'Medium', 'High', 'Critical']
+    sentiments = ['Frustrated', 'Neutral', 'Anxious', 'Angry']
+    
+    for idx, row in sampled_df.iterrows():
+        # The true CSV data serves as our English canonical baseline
+        english_text = f"{str(row['title']).strip()} - {str(row['description']).strip()}"
+        category = str(row.get('category_title', 'Infrastructure'))
+        
+        # Randomly select a language to simulate the citizen's native input
+        selected_lang = np.random.choice(list(language_map.keys()), p=[0.4, 0.3, 0.2, 0.1])
+        lang_code = language_map[selected_lang]
+        
+        # Translate the English text backwards to mock the "raw" native input
+        if lang_code == 'en':
+            raw_text = english_text
+        else:
+            try:
+                raw_text = GoogleTranslator(source='en', target=lang_code).translate(english_text)
+            except Exception as e:
+                print(f"Translation failed for row {idx}, falling back to English.")
+                raw_text = english_text 
+        
+        submission = {
+            "id": f"SUB-BLR-{idx}",
+            "timestamp": "2026-07-02T10:00:00Z", 
+            "channel": "web",
+            "language": selected_lang,
+            "raw_text": raw_text,                # The mock Kannada/Hindi/Tamil text
+            "normalized_text_en": english_text,  # The original English text
+            "photo_url": f"https://storage.googleapis.com/civic-mock/img_{random.randint(1,10)}.jpg",
+            "geo": {
+                "lat": float(row['latitude']),
+                "lng": float(row['longitude']),
+                "ward": "Bengaluru South"
+            },
+            "citizen_id_hash": str(uuid.uuid4())[:8],
+            "category": category,
+            "need_type": "Public Maintenance",
+            "urgency": np.random.choice(urgencies, p=[0.2, 0.4, 0.3, 0.1]),
+            "sentiment": random.choice(sentiments),
+            "canonical_location": str(row.get('address', 'Bengaluru South')),
+            "extracted_entities": ["infrastructure", category.lower()]
+        }
+        enriched_submissions.append(submission)
+        
+    with open(output_path, "w", encoding='utf-8') as f:
+        json.dump(enriched_submissions, f, indent=2, ensure_ascii=False)
+        
+    print(f"✅ Success! File saved to {output_path}")
+
+if __name__ == "__main__":
+    build_day1_dataset_free("Data_Logic/a60abf5c-3a15-4967-af32-c3074248580f.csv", "day1_enriched_submissions.json")
