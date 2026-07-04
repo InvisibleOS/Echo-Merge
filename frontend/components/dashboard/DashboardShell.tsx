@@ -1,0 +1,108 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { PriorityItem, Hotspot } from "@/lib/types";
+import { getPriorities, getHotspots } from "@/lib/api";
+import PriorityList from "./PriorityList";
+import HotspotMap from "./HotspotMap";
+import DrillDownPanel from "./DrillDownPanel";
+
+export default function DashboardShell() {
+  const [priorities, setPriorities] = useState<PriorityItem[]>([]);
+  const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [p, h] = await Promise.all([getPriorities(), getHotspots()]);
+        if (!cancelled) {
+          setPriorities(p);
+          setHotspots(h);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            "Couldn't load priorities. Check the API connection and try refreshing."
+          );
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    load();
+    // Refresh every 30s so new submissions surface without a manual reload
+    const interval = setInterval(load, 30000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const selectedItem = priorities.find((p) => p.work_id === selectedId) || null;
+
+  function handleSelect(workId: string) {
+    setSelectedId((current) => (current === workId ? null : workId));
+  }
+
+  return (
+    <div className="h-screen flex flex-col bg-ink-950">
+      <header className="px-6 py-4 border-b border-white/10 flex items-center justify-between shrink-0">
+        <div>
+          <span className="text-signal-amber font-display font-semibold text-xs uppercase tracking-wide">
+            People&rsquo;s Priorities
+          </span>
+          <h1 className="font-display font-bold text-lg text-white">
+            Constituency Dashboard
+          </h1>
+        </div>
+        <span className="text-xs text-white/40">
+          {priorities.length} ranked priorities
+        </span>
+      </header>
+
+      {error && (
+        <div className="mx-6 mt-4 px-4 py-3 rounded-md bg-red-950 border border-red-800 text-red-200 text-sm shrink-0">
+          {error}
+        </div>
+      )}
+
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 p-4 min-h-0">
+        <div className="overflow-y-auto bg-ink-900/60 rounded-lg p-4 border border-white/5">
+          <PriorityList
+            items={priorities}
+            isLoading={isLoading}
+            selectedId={selectedId}
+            onSelect={handleSelect}
+          />
+        </div>
+
+        <div className="relative min-h-[320px]">
+          <HotspotMap
+            hotspots={hotspots}
+            priorities={priorities}
+            selectedId={selectedId}
+            onSelectMarker={handleSelect}
+          />
+
+          {selectedItem && (
+            <div className="absolute top-0 right-0 w-full max-w-md h-full p-2">
+              <DrillDownPanel
+                item={selectedItem}
+                onClose={() => setSelectedId(null)}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
