@@ -1,56 +1,44 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../utils/supabase/server';
+import fs from 'fs';
+import path from 'path';
 
-export async function GET() {
+export async function GET(request) {
   try {
-    // 1. Fetch pre-calculated hotspots from the priorities table
-    const { data: priorities, error: pError } = await supabase
-      .from('priorities')
-      .select('work_id, title, category, hotspot_geo, demand_count, demand_score');
+    const { searchParams } = new URL(request.url);
+    const constituency = searchParams.get('constituency');
 
-    if (pError) {
-      return NextResponse.json({ error: pError.message }, { status: 400 });
+    const dbPath = path.join(process.cwd(), 'Data_Logic', 'local_db_backup.json');
+    
+    if (!fs.existsSync(dbPath)) {
+      return NextResponse.json([], { status: 200 });
     }
 
-    // Format priorities hotspot data. hotspot_geo contains { lat, lng, density }
+    const fileContent = fs.readFileSync(dbPath, 'utf-8');
+    const db = JSON.parse(fileContent);
+    let priorities = db.priorities || [];
+
+    if (constituency) {
+      priorities = priorities.filter(p => p.constituency === constituency);
+    }
+
+    // Format priorities into hotspots
     const hotspots = priorities
       .filter((p) => p.hotspot_geo && p.hotspot_geo.lat && p.hotspot_geo.lng)
       .map((p) => ({
         work_id: p.work_id,
         title: p.title,
         category: p.category,
-        lat: Number(p.hotspot_geo.lat),
-        lng: Number(p.hotspot_geo.lng),
-        density: Number(p.hotspot_geo.density || p.demand_count || 1),
+        geo: {
+          lat: Number(p.hotspot_geo.lat),
+          lng: Number(p.hotspot_geo.lng),
+        },
+        intensity: Math.min(1, (Number(p.hotspot_geo.density || p.demand_count || 1) / 10)),
+        demand_count: Number(p.demand_count || p.hotspot_geo.density || 1),
         demand_score: Number(p.demand_score),
       }));
 
-    // 2. Fetch raw submission coordinates for detailed heatmap aggregation if frontend wants it
-    const { data: rawSubmissions, error: sError } = await supabase
-      .from('submissions')
-      .select('id, geo, channel, timestamp');
-
-    if (sError) {
-      return NextResponse.json({ error: sError.message }, { status: 400 });
-    }
-
-    const rawGeoPoints = rawSubmissions
-      .filter((s) => s.geo && s.geo.lat && s.geo.lng)
-      .map((s) => ({
-        id: s.id,
-        lat: Number(s.geo.lat),
-        lng: Number(s.geo.lng),
-        channel: s.channel,
-        timestamp: s.timestamp,
-      }));
-
-    return NextResponse.json(
-      {
-        hotspots,
-        rawGeoPoints,
-      },
-      { status: 200 }
-    );
+    // lib/api.ts expects an array of Hotspot objects directly.
+    return NextResponse.json(hotspots, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { error: 'Server error: ' + error.message },

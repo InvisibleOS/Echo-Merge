@@ -83,6 +83,14 @@ export interface SupportingEvidence {
   language: string;
 }
 
+export interface SolutionPlan {
+  primary_department: string;
+  estimated_budget_tier: string;
+  remediation_timeline: string;
+  action_steps: string[];
+  strategic_rationale: string;
+}
+
 export interface PriorityItem {
   work_id: string;
   title: string;
@@ -95,6 +103,9 @@ export interface PriorityItem {
   supporting_evidence: SupportingEvidence[];
   rank: number;
   explanation: string; // human-readable "why this is ranked here"
+  state?: string;
+  constituency?: string;
+  solution_plan?: SolutionPlan;
 }
 
 // ---------- Hotspot (map aggregation) ----------

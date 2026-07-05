@@ -36,25 +36,47 @@ Resolve accumulation points in BTM Layout through immediate cleanups paired with
 
 ---
 
-### Priority 2: Address water supply and services gap in Bellandur
-- **Category**: Water Supply and Services
-- **Resolved Location**: Bellandur (Hotspot density: 1 reports)
-- **Scoring Priority Index**: 20.4/100
+### Priority 2: Address mobility - roads, footpaths and infrastructure gap in HSR Layout
+- **Category**: Mobility - Roads, Footpaths and Infrastructure
+- **Resolved Location**: HSR Layout (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 33.17/100
 - **Summary Action Plan**:
 
 | Attribute | Plan Blueprint |
 | :--- | :--- |
-| **Responsible Department** | BWSSB (Bangalore Water Supply and Sewerage Board) |
-| **Budget Tier Estimate** | Medium (10L - 50L INR) |
+| **Responsible Department** | BBMP Engineering / PWD |
+| **Budget Tier Estimate** | High (above 50L INR) |
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Address water issues in Bellandur by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
+Reconstruct deteriorating roadways in HSR Layout to improve public safety and ease heavy commercial/commuter traffic.
 
 **Immediate Actions Recommended**:
-1. [ ] Conduct immediate geo-spatial sensor mapping of the local supply lines and pipes to identify blocks.
-1. [ ] Deploy desilting machines and execute high-pressure line flushing to clear sewage/water blockage.
-1. [ ] Approve budget for upgrading old drainage pipelines to high-density polyethylene (HDPE) conduits.
+1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
+1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
+1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
+
+---
+
+### Priority 3: Address traffic and road safety gap in Koramangala
+- **Category**: Traffic and Road Safety
+- **Resolved Location**: Koramangala (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 31.86/100
+- **Summary Action Plan**:
+
+| Attribute | Plan Blueprint |
+| :--- | :--- |
+| **Responsible Department** | BBMP Engineering / PWD |
+| **Budget Tier Estimate** | High (above 50L INR) |
+| **Remediation Timeline** | Mid-term (1-3 Months) |
+
+**Strategic Rationale**:  
+Reconstruct deteriorating roadways in Koramangala to improve public safety and ease heavy commercial/commuter traffic.
+
+**Immediate Actions Recommended**:
+1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
+1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
+1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
 
 ---
 

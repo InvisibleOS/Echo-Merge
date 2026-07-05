@@ -51,24 +51,26 @@ export async function submitComplaint(
 
 // ---------- GET /priorities ----------
 
-export async function getPriorities(): Promise<PriorityItem[]> {
+export async function getPriorities(constituency?: string): Promise<PriorityItem[]> {
   if (USE_MOCK) {
     await new Promise((r) => setTimeout(r, 400));
     return MOCK_PRIORITIES;
   }
 
-  return safeFetch<PriorityItem[]>("/priorities");
+  const query = constituency ? `?constituency=${encodeURIComponent(constituency)}` : "";
+  return safeFetch<PriorityItem[]>(`/priorities${query}`);
 }
 
 // ---------- GET /hotspots ----------
 
-export async function getHotspots(): Promise<Hotspot[]> {
+export async function getHotspots(constituency?: string): Promise<Hotspot[]> {
   if (USE_MOCK) {
     await new Promise((r) => setTimeout(r, 400));
     return MOCK_HOTSPOTS;
   }
 
-  return safeFetch<Hotspot[]>("/hotspots");
+  const query = constituency ? `?constituency=${encodeURIComponent(constituency)}` : "";
+  return safeFetch<Hotspot[]>(`/hotspots${query}`);
 }
 
 // ---------- GET /submissions (used by drill-down, optional filter) ----------
