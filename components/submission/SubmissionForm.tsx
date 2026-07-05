@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Mic, Camera, Type } from "lucide-react";
+import clsx from "clsx";
 import LanguageSelector from "./LanguageSelector";
 import TextInput from "./TextInput";
 import VoiceRecorder from "./VoiceRecorder";
@@ -11,8 +13,17 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { submitComplaint } from "@/lib/api";
 import { GeoPoint } from "@/lib/types";
 
+type InputMode = "text" | "voice" | "photo";
+
+const INPUT_MODES: { id: InputMode; label: string; icon: typeof Mic }[] = [
+  { id: "voice", label: "Record Voice Note", icon: Mic },
+  { id: "photo", label: "Submit Photo", icon: Camera },
+  { id: "text", label: "Type Text", icon: Type },
+];
+
 export default function SubmissionForm() {
   const [language, setLanguage] = useState("hi");
+  const [activeMode, setActiveMode] = useState<InputMode | null>(null);
   const [text, setText] = useState("");
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
@@ -67,6 +78,19 @@ export default function SubmissionForm() {
     setPhotoBase64(null);
     setSubmissionId(null);
     setError(null);
+    setActiveMode(null);
+  }
+
+  /** Shows a filled dot when the mode has captured data */
+  function hasData(mode: InputMode): boolean {
+    switch (mode) {
+      case "text":
+        return text.trim().length > 0;
+      case "voice":
+        return audioBase64 !== null;
+      case "photo":
+        return photoBase64 !== null;
+    }
   }
 
   if (submissionId) {
@@ -82,12 +106,60 @@ export default function SubmissionForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <LanguageSelector value={language} onChange={setLanguage} />
 
-      <TextInput value={text} onChange={setText} />
+      {/* ── Input Mode Selector Row ── */}
+      <div>
+        <p className="block text-sm font-semibold text-ink-800 mb-3">
+          How would you like to report?
+        </p>
+        <div className="grid grid-cols-3 gap-3">
+          {INPUT_MODES.map(({ id, label, icon: Icon }) => {
+            const isActive = activeMode === id;
+            const captured = hasData(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveMode(isActive ? null : id)}
+                className={clsx(
+                  "relative flex flex-col items-center justify-center gap-2 rounded-md border-2 px-3 py-4 text-center transition-all duration-200",
+                  "font-display font-semibold text-xs sm:text-sm",
+                  isActive
+                    ? "border-civic-500 bg-civic-50 text-civic-700 shadow-sm"
+                    : "border-ink-900/12 bg-white text-ink-800/70 hover:border-civic-400/60 hover:text-civic-600 hover:bg-civic-50/40"
+                )}
+                id={`input-mode-${id}`}
+              >
+                <Icon
+                  size={22}
+                  strokeWidth={isActive ? 2.4 : 1.8}
+                  className="transition-colors"
+                />
+                <span className="leading-tight">{label}</span>
 
-      <div className="grid sm:grid-cols-2 gap-6">
-        <VoiceRecorder onAudioReady={setAudioBase64} />
-        <PhotoUpload onPhotoReady={setPhotoBase64} />
+                {/* Data-captured indicator dot */}
+                {captured && (
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-signal-green" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* ── Active Input Panel ── */}
+      {activeMode && (
+        <div className="rounded-md border border-ink-900/8 bg-ink-900/[0.02] p-4 animate-[fadeSlideIn_200ms_ease-out]">
+          {activeMode === "text" && (
+            <TextInput value={text} onChange={setText} />
+          )}
+          {activeMode === "voice" && (
+            <VoiceRecorder onAudioReady={setAudioBase64} />
+          )}
+          {activeMode === "photo" && (
+            <PhotoUpload onPhotoReady={setPhotoBase64} />
+          )}
+        </div>
+      )}
 
       <button
         type="button"

@@ -13,7 +13,7 @@ export default function TextInput({ value, onChange, placeholder }: Props) {
         htmlFor="complaint-text"
         className="block text-sm font-semibold text-ink-800 mb-2"
       >
-        Describe the issue (optional if you record voice or add a photo)
+        Describe the issue in your own words
       </label>
       <textarea
         id="complaint-text"
