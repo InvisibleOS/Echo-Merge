@@ -50,6 +50,44 @@ export default function DrillDownPanel({ item, onClose }: Props) {
         </p>
       </div>
 
+      {item.solution_plan && (
+        <div className="mt-5 p-4 rounded-md bg-signal-amber/10 border border-signal-amber/30">
+          <h3 className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-3 flex items-center gap-2">
+            ✨ AI Solution Plan
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-1">Primary Agency</span>
+              <span className="text-sm font-medium text-ink-900">{item.solution_plan.primary_department}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-1">Timeline</span>
+              <span className="text-sm font-medium text-ink-900">{item.solution_plan.remediation_timeline}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-1">Budget Tier</span>
+              <span className="text-sm font-medium text-ink-900">{item.solution_plan.estimated_budget_tier}</span>
+            </div>
+          </div>
+
+          <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-2">Recommended Action Steps</span>
+          <ul className="space-y-2 mb-4">
+            {item.solution_plan.action_steps.map((step, idx) => (
+              <li key={idx} className="text-sm text-ink-900 flex items-start gap-2">
+                <span className="text-signal-amber font-bold mt-0.5">•</span>
+                <span className="leading-snug">{step}</span>
+              </li>
+            ))}
+          </ul>
+          
+          <div className="pt-3 border-t border-amber-900/10">
+            <span className="block text-[10px] uppercase text-amber-800/60 font-semibold mb-1">Strategic Rationale</span>
+            <p className="text-xs text-amber-900/80 italic leading-relaxed">"{item.solution_plan.strategic_rationale}"</p>
+          </div>
+        </div>
+      )}
+
       <h3 className="text-xs font-semibold text-ink-800/60 uppercase tracking-wide mt-6 mb-3">
         Supporting evidence ({item.supporting_evidence.length})
       </h3>

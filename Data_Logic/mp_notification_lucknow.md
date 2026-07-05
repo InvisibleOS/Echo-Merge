@@ -14,10 +14,32 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 
 ---
 
-### Priority 1: Address mobility - roads, footpaths and infrastructure gap in Bengaluru South
-- **Category**: Mobility - Roads, Footpaths and Infrastructure
+### Priority 1: Address sanitation gap in Bengaluru South
+- **Category**: Sanitation
 - **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
-- **Scoring Priority Index**: 34.35/100
+- **Scoring Priority Index**: 34.59/100
+- **Summary Action Plan**:
+
+| Attribute | Plan Blueprint |
+| :--- | :--- |
+| **Responsible Department** | BWSSB (Bangalore Water Supply and Sewerage Board) |
+| **Budget Tier Estimate** | Medium (10L - 50L INR) |
+| **Remediation Timeline** | Mid-term (1-3 Months) |
+
+**Strategic Rationale**:  
+Address water issues in Bengaluru South by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
+
+**Immediate Actions Recommended**:
+1. [ ] Conduct immediate geo-spatial sensor mapping of the local supply lines and pipes to identify blocks.
+1. [ ] Deploy desilting machines and execute high-pressure line flushing to clear sewage/water blockage.
+1. [ ] Approve budget for upgrading old drainage pipelines to high-density polyethylene (HDPE) conduits.
+
+---
+
+### Priority 2: Address traffic and road safety gap in Bengaluru South
+- **Category**: Traffic and Road Safety
+- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 32.81/100
 - **Summary Action Plan**:
 
 | Attribute | Plan Blueprint |
@@ -33,6 +55,28 @@ Reconstruct deteriorating roadways in Bengaluru South to improve public safety a
 1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
 1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
 1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
+
+---
+
+### Priority 3: Address pollution gap in Bengaluru South
+- **Category**: Pollution
+- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 31.98/100
+- **Summary Action Plan**:
+
+| Attribute | Plan Blueprint |
+| :--- | :--- |
+| **Responsible Department** | Constituency Development Fund / Local Municipal Council |
+| **Budget Tier Estimate** | Medium (10L - 50L INR) |
+| **Remediation Timeline** | Mid-term (1-3 Months) |
+
+**Strategic Rationale**:  
+Deploy municipal officers to survey Bengaluru South and outline custom repairs backed by community-level funds.
+
+**Immediate Actions Recommended**:
+1. [ ] Direct ward officers to conduct a physical survey of the citizen complaint hotspot.
+1. [ ] Allocate ward-level development funds to resolve the immediate infrastructural bottleneck.
+1. [ ] Establish a periodic review meeting with local resident welfare associations (RWAs).
 
 ---
 
