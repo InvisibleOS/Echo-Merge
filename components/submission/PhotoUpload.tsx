@@ -29,9 +29,6 @@ export default function PhotoUpload({ onPhotoReady }: Props) {
 
   return (
     <div>
-      <p className="block text-sm font-semibold text-ink-800 mb-2">
-        Or add a photo
-      </p>
 
       <input
         ref={inputRef}
