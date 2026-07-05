@@ -91,6 +91,15 @@ export interface SolutionPlan {
   strategic_rationale: string;
 }
 
+export interface ScoringBreakdown {
+  base_demand: number;
+  urgency_multiplier: number;
+  equity_multiplier: number;
+  data_gap_multiplier: number;
+  feasibility_multiplier: number;
+  final_score: number;
+}
+
 export interface PriorityItem {
   work_id: string;
   title: string;
@@ -106,6 +115,7 @@ export interface PriorityItem {
   state?: string;
   constituency?: string;
   solution_plan?: SolutionPlan;
+  scoring_breakdown?: ScoringBreakdown;
 }
 
 // ---------- Hotspot (map aggregation) ----------

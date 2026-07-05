@@ -1,22 +1,16 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../utils/supabase/server';
-
 import { exec } from 'child_process';
 import path from 'path';
 
 // Helper to run the python pipeline asynchronously
-function triggerPythonPipeline(submissionData) {
-  const pythonScript = path.join(process.cwd(), '..', 'Data_Logic', 'process_single_submission.py');
+function triggerPythonPipeline(enrichedData) {
+  const pythonScript = path.join(process.cwd(), 'Data_Logic', 'process_single_submission.py');
   
-  // Use spawn/exec to run the python script
-  // process.cwd() is likely the frontend directory (e.g. /frontend).
-  // The Data_Logic dir is a sibling.
-  
-  const payload = JSON.stringify(submissionData).replace(/"/g, '\\"');
-  const pythonExecutable = path.join(process.cwd(), '..', '.venv', 'bin', 'python');
+  const payload = JSON.stringify(enrichedData).replace(/"/g, '\\"');
+  const pythonExecutable = path.join(process.cwd(), '.venv', 'bin', 'python');
   const command = `echo "${payload}" | ${pythonExecutable} ${pythonScript}`;
   
-  console.log(`Triggering Python Pipeline for submission ${submissionData.id}...`);
+  console.log(`Triggering Python Pipeline for submission ${enrichedData.id}...`);
   
   exec(command, (error, stdout, stderr) => {
     if (error) {
@@ -30,60 +24,63 @@ function triggerPythonPipeline(submissionData) {
   });
 }
 
-
 export async function POST(request) {
   try {
     const body = await request.json();
     const {
       channel = 'web',
       raw_text,
-      audio_url,
-      photo_url,
+      audio_base64,
+      photo_base64,
+      language,
+      geo,
+      citizen_id_hash = 'anon_' + Math.random().toString(36).substr(2, 9),
+    } = body;
+
+
+    // 1. Prepare payload for Ingestion Service
+    // The ingestion service expects `audio_url` and `photo_url`, but it natively 
+    // supports processing Base64 Data URIs as URLs!
+    const ingestionPayload = {
+      id: "live-" + Date.now().toString(),
+      channel,
+      raw_text,
+      audio_url: audio_base64, 
+      photo_url: photo_base64,
       language,
       geo,
       citizen_id_hash,
-    } = body;
+    };
 
-    if (!language || !citizen_id_hash) {
-      return NextResponse.json(
-        { error: 'Missing required fields: language or citizen_id_hash' },
-        { status: 400 }
-      );
+    // 2. Call the Python Ingestion Service (running on port 5001)
+    console.log("Calling Ingestion Service at :5001/enrich...");
+    const ingestionRes = await fetch('http://127.0.0.1:5001/enrich', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ingestionPayload),
+    });
+
+    if (!ingestionRes.ok) {
+      const errorText = await ingestionRes.text();
+      console.error("Ingestion Service Failed:", errorText);
+      return NextResponse.json({ error: 'Ingestion Service Error: ' + errorText }, { status: 500 });
     }
 
-    // Step 1: Insert the raw submission into Supabase
-    const { data: rawData, error: rawError } = await supabase
-      .from('submissions')
-      .insert({
-        channel,
-        raw_text,
-        audio_url,
-        photo_url,
-        language,
-        geo,
-        citizen_id_hash,
-      })
-      .select()
-      .single();
+    const enrichedSubmission = await ingestionRes.json();
+    console.log("Received Enriched Submission:", enrichedSubmission.id);
 
-    if (rawError) {
-      return NextResponse.json({ error: rawError.message }, { status: 400 });
-    }
-
-    const submissionId = rawData.id;
-
-    // Trigger the real Python backend pipeline asynchronously
-    // This will handle NLP enrichment, embedding, priority scoring, and MP solution planning
-    triggerPythonPipeline(rawData);
+    // 3. Trigger Data_Logic pipeline asynchronously
+    triggerPythonPipeline(enrichedSubmission);
 
     return NextResponse.json(
       {
         message: 'Submission received. AI processing has started in the background.',
-        submission: rawData,
+        submission_id: enrichedSubmission.id,
       },
       { status: 201 }
     );
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'Server error during orchestration: ' + error.message },
       { status: 500 }

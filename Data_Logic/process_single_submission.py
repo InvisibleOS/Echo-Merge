@@ -1,7 +1,6 @@
 import sys
 import os
 import json
-import uuid
 
 # Add parent directory to path so we can import modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -10,91 +9,6 @@ from embed_pipeline import EmbeddingPipeline
 from scoring_v2 import ScoringPipelineV2
 from solution_planner import SolutionPlanner
 from notification_service import NotificationService
-
-class NLPEnricher:
-    def __init__(self):
-        self.use_vertex = False
-        self.project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("ANTIGRAVITY_PROJECT_ID")
-        
-        if self.project_id and self.project_id != "outside-of-project":
-            try:
-                import vertexai
-                from vertexai.generative_models import GenerativeModel
-                vertexai.init(project=self.project_id, location="us-central1")
-                self.model = GenerativeModel("gemini-1.5-flash")
-                self.use_vertex = True
-                print("🤖 Vertex AI Gemini 1.5 model initialized successfully for NLP Enricher.")
-            except Exception as e:
-                print(f"⚠️ Failed to initialize Vertex AI Gemini model ({e}). Using rule-based fallback NLP.")
-        else:
-            print("ℹ️ Google Cloud Project not configured. Using rule-based fallback NLP.")
-            
-    def enrich(self, raw_text: str, geo: dict) -> dict:
-        if self.use_vertex:
-            try:
-                from vertexai.generative_models import GenerationConfig
-                prompt = f"""
-                You are an AI that classifies citizen complaints in India.
-                Given the complaint text: "{raw_text}"
-                
-                Provide the following in JSON format WITHOUT markdown wrapping:
-                - normalized_text_en (translate to English and normalize)
-                - category (e.g. Mobility - Roads, Footpaths and Infrastructure, Garbage and Unsanitary Practices, Water Supply and Services)
-                - need_type (e.g. Pothole Repair, Garbage Clearance, Drainage Repair)
-                - urgency (Low, Medium, High, Critical)
-                - sentiment (angry, frustrated, fearful, sad, neutral)
-                - extracted_entities (a list of keywords)
-                """
-                response = self.model.generate_content(
-                    prompt,
-                    generation_config=GenerationConfig(
-                        response_mime_type="application/json",
-                        temperature=0.1
-                    )
-                )
-                res = json.loads(response.text)
-                res["canonical_location"] = f"{geo.get('ward', 'Unknown Ward')}"
-                return res
-            except Exception as e:
-                print(f"⚠️ Gemini enrichment failed ({e}). Falling back to rule-based.")
-                
-        # Rule based fallback
-        text = raw_text.lower()
-        category = 'Public Infrastructure'
-        need_type = 'General Maintenance'
-        urgency = 'Medium'
-        normalized_text_en = raw_text
-        
-        if any(w in text for w in ['road', 'pothole', 'सड़क', 'potholes', 'ರಸ್ತೆ']):
-            category = 'Mobility - Roads, Footpaths and Infrastructure'
-            need_type = 'Pothole Repair'
-            urgency = 'High'
-            normalized_text_en = 'The road has major potholes and is unsafe for traffic.'
-        elif any(w in text for w in ['water', 'drain', 'leak', 'पानी', 'ನೀರು', 'drainage']):
-            category = 'Water Supply and Services'
-            need_type = 'Drainage Repair'
-            urgency = 'High'
-            normalized_text_en = 'Blocked drainage is causing water overflow and health issues.'
-        elif any(w in text for w in ['light', 'street', 'dark', 'बिजली', 'ಕತ್ತಲು']):
-            category = 'Streetlights'
-            need_type = 'Streetlight Repair'
-            urgency = 'Medium'
-            normalized_text_en = 'Streetlights are broken, causing safety concerns at night.'
-        elif any(w in text for w in ['waste', 'garbage', 'trash', 'कचरा', 'ಕಸ']):
-            category = 'Garbage and Unsanitary Practices'
-            need_type = 'Garbage Clearance'
-            urgency = 'Medium'
-            normalized_text_en = 'Garbage has accumulated at the corner and needs clearance.'
-
-        return {
-            "normalized_text_en": normalized_text_en,
-            "category": category,
-            "need_type": need_type,
-            "urgency": urgency,
-            "sentiment": "frustrated",
-            "canonical_location": geo.get('ward', 'Unknown Ward'),
-            "extracted_entities": [need_type.lower()]
-        }
 
 def process_submission(payload_json: str):
     print("🚀 Starting background submission processing...", flush=True)
@@ -106,31 +20,36 @@ def process_submission(payload_json: str):
         
     db = DBClient()
     
-    # 1. NLP Enrichment
-    print("🧠 Running NLP Enrichment...", flush=True)
-    enricher = NLPEnricher()
-    enriched_data = enricher.enrich(submission.get("raw_text", ""), submission.get("geo", {}))
+    # NLP enrichment is now handled upstream by the Ingestion Service
+    # We expect `submission` to already contain `normalized_text_en`, `category`, etc.
     
-    # Merge enriched data into submission dict
-    for k, v in enriched_data.items():
-        submission[k] = v
-        
-    # Ensure ID exists
     if "id" not in submission:
-        submission["id"] = str(uuid.uuid4())
+        print("❌ Submission missing ID.")
+        sys.exit(1)
+        
+    # Attempt to derive constituency from ward if not provided
+    constituency = submission.get("constituency")
+    ward = submission.get("geo", {}).get("ward") if submission.get("geo") else None
+    
+    if not constituency and ward:
+        # Search demographics for a matching ward
+        for (c_name, w_name) in db.demographics.keys():
+            if w_name == ward:
+                constituency = c_name
+                submission["constituency"] = constituency
+                break
+                
+    if not constituency:
+        # Default fallback for demo purposes
+        print("⚠️ No constituency provided or found. Defaulting to 'Bengaluru South' for Demo.")
+        constituency = "Bengaluru South"
+        submission["constituency"] = constituency
         
     # 2. Embedding & Saving Raw Submission
     print("🧬 Generating Embeddings...", flush=True)
     pipeline = EmbeddingPipeline(db)
     pipeline.process_and_store_submission(submission)
     
-    constituency = submission.get("constituency")
-    ward = submission.get("geo", {}).get("ward")
-    
-    if not constituency:
-        print("⚠️ No constituency provided. Skipping priority generation.")
-        sys.exit(0)
-        
     # 3. Generate Filtered priorities for the constituency
     print(f"⚡ Processing Priority Scores for Constituency: {constituency}...", flush=True)
     scoring = ScoringPipelineV2(db)
@@ -142,7 +61,7 @@ def process_submission(payload_json: str):
     for item in priorities:
         category = item["category"]
         need_type = item["title"]
-        item_ward = item["hotspot_geo"].get("ward", ward)
+        item_ward = item["hotspot_geo"].get("ward", ward) if item.get("hotspot_geo") else ward
         
         demo = db.get_demographics(constituency, item_ward) or {}
         

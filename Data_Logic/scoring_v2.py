@@ -157,6 +157,14 @@ class ScoringPipelineV2:
             "category": category,
             "demand_count": demand_count,
             "demand_score": round(total_score, 2),
+            "scoring_breakdown": {
+                "base_demand": round(demand_score, 2),
+                "urgency_multiplier": round(avg_urgency, 2),
+                "equity_multiplier": round(equity_boost, 2),
+                "data_gap_multiplier": round(public_data_gap, 2),
+                "feasibility_multiplier": round(feasibility, 2),
+                "final_score": round(total_score, 2)
+            },
             "supporting_evidence_count": len(subs),
             "hotspot_geo": {
                 "lat": avg_lat,
