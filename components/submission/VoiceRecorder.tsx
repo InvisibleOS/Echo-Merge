@@ -89,10 +89,6 @@ export default function VoiceRecorder({ onAudioReady }: Props) {
 
   return (
     <div>
-      <p className="block text-sm font-semibold text-ink-800 mb-2">
-        Or record a voice message
-      </p>
-
       {error && <p className="text-signal-red text-sm mb-2">{error}</p>}
 
       {!audioUrl && !isRecording && (
