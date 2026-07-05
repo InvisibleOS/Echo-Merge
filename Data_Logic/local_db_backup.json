@@ -1,7 +1,7 @@
 {
   "submissions": {
-    "a8e69e59-f192-4c12-af75-95dccf14a494": {
-      "id": "a8e69e59-f192-4c12-af75-95dccf14a494",
+    "f2cac59c-1893-42e9-bb43-77d7179f39d6": {
+      "id": "f2cac59c-1893-42e9-bb43-77d7179f39d6",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "The entire stretch of 27th Main HSR Layout is dotted with crater-sized potholes after the recent rains. Bikers are skidding daily. BBMP needs to act immediately.",
@@ -27,10 +27,10 @@
         "potholes"
       ]
     },
-    "73cef5b8-c179-47af-b4ec-c6c8e0266c79": {
-      "id": "73cef5b8-c179-47af-b4ec-c6c8e0266c79",
+    "8afd9a36-685c-487b-ba52-a09065086579": {
+      "id": "8afd9a36-685c-487b-ba52-a09065086579",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Near Agara Lake signal, the road is completely washed out. Traffic is crawling because everyone has to navigate the craters.",
       "normalized_text_en": "Near Agara Lake signal, the road is completely washed out. Traffic is crawling because everyone has to navigate the craters.",
       "language": "English",
@@ -53,10 +53,10 @@
         "craters"
       ]
     },
-    "4aee22e7-113d-4223-b4be-848a41ffda50": {
-      "id": "4aee22e7-113d-4223-b4be-848a41ffda50",
+    "8a214e1f-83eb-4d4a-abb3-d80014d21ce3": {
+      "id": "8a214e1f-83eb-4d4a-abb3-d80014d21ce3",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Bellandur Lake is frothing again. Toxic foam is flying onto the Outer Ring Road and causing severe irritation to commuters and nearby residents.",
       "normalized_text_en": "Bellandur Lake is frothing again. Toxic foam is flying onto the Outer Ring Road and causing severe irritation to commuters and nearby residents.",
       "language": "English",
@@ -79,8 +79,8 @@
         "toxic foam"
       ]
     },
-    "986a9052-522e-4e88-86a2-43c9a9636367": {
-      "id": "986a9052-522e-4e88-86a2-43c9a9636367",
+    "c0533329-b9c6-4224-9289-5a1dea79616e": {
+      "id": "c0533329-b9c6-4224-9289-5a1dea79616e",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Unbearable stench from Bellandur lake today. It seems untreated industrial effluent is being dumped illegally at night.",
@@ -105,10 +105,10 @@
         "stench"
       ]
     },
-    "b6413e35-f310-4b35-91bb-d9d6ffc3b3ff": {
-      "id": "b6413e35-f310-4b35-91bb-d9d6ffc3b3ff",
+    "c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4": {
+      "id": "c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Pourakarmikas haven't collected wet waste for 4 days in BTM 2nd Stage. Bins are overflowing onto the footpath.",
       "normalized_text_en": "Pourakarmikas haven't collected wet waste for 4 days in BTM 2nd Stage. Bins are overflowing onto the footpath.",
       "language": "English",
@@ -131,8 +131,8 @@
         "wet waste"
       ]
     },
-    "f090701f-945f-4f1a-8a0d-cc3e0854c76c": {
-      "id": "f090701f-945f-4f1a-8a0d-cc3e0854c76c",
+    "582cbaa6-0d51-459e-a790-cb68fbd2d79f": {
+      "id": "582cbaa6-0d51-459e-a790-cb68fbd2d79f",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Huge black spot developing near Udupi Garden signal. People are just throwing plastic covers full of garbage.",
@@ -157,8 +157,8 @@
         "garbage"
       ]
     },
-    "f7ca5b09-cb14-4338-813b-255aa94aee7c": {
-      "id": "f7ca5b09-cb14-4338-813b-255aa94aee7c",
+    "f10a8a3c-bed9-47ba-8d04-c950be1135f8": {
+      "id": "f10a8a3c-bed9-47ba-8d04-c950be1135f8",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Cauvery water supply has completely stopped in Jayanagar 4th Block for a week. Our apartment's borewell has also dried up. We are surviving on expensive private tankers.",
@@ -184,8 +184,8 @@
         "tankers"
       ]
     },
-    "7af97acf-af2b-4381-958d-874e732c097b": {
-      "id": "7af97acf-af2b-4381-958d-874e732c097b",
+    "943836a1-17b2-4081-a09b-e3c39eaec4f8": {
+      "id": "943836a1-17b2-4081-a09b-e3c39eaec4f8",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Absolute gridlock near Sony World Signal. The underpass construction has left zero space for pedestrians.",
@@ -210,8 +210,8 @@
         "underpass"
       ]
     },
-    "2e5de541-6154-4c59-9934-12ead0000d53": {
-      "id": "2e5de541-6154-4c59-9934-12ead0000d53",
+    "b8aa8e83-88e4-468a-8588-9b8d4224f165": {
+      "id": "b8aa8e83-88e4-468a-8588-9b8d4224f165",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Cars parked on both sides of 80ft road near the restaurants block a whole lane. Traffic police isn't towing them.",
@@ -236,10 +236,10 @@
         "traffic police"
       ]
     },
-    "eeacbfce-3aaf-49d3-b98d-9d62478b4c64": {
-      "id": "eeacbfce-3aaf-49d3-b98d-9d62478b4c64",
+    "e25b8bbe-b66b-445d-b82e-1fc416bbdc48": {
+      "id": "e25b8bbe-b66b-445d-b82e-1fc416bbdc48",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "BESCOM is doing unscheduled power cuts of 3-4 hours every afternoon in Basavanagudi. Working from home is impossible.",
       "normalized_text_en": "BESCOM is doing unscheduled power cuts of 3-4 hours every afternoon in Basavanagudi. Working from home is impossible.",
       "language": "English",
@@ -262,10 +262,10 @@
         "power cuts"
       ]
     },
-    "73d57761-3bda-477a-8057-6a2905790c94": {
-      "id": "73d57761-3bda-477a-8057-6a2905790c94",
+    "cfb4341a-f512-4ebc-a256-6861379980fe": {
+      "id": "cfb4341a-f512-4ebc-a256-6861379980fe",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "The open nalas in Chowk market are choked with plastic. Sewage water is literally entering the shops after a small shower.",
       "normalized_text_en": "The open nalas in Chowk market are choked with plastic. Sewage water is literally entering the shops after a small shower.",
       "language": "English",
@@ -289,8 +289,8 @@
         "shops"
       ]
     },
-    "15c4eee5-9cd4-4abe-bd9f-52d782147e66": {
-      "id": "15c4eee5-9cd4-4abe-bd9f-52d782147e66",
+    "cf77ee1a-383c-4bab-a3b7-93a8f5a6223f": {
+      "id": "cf77ee1a-383c-4bab-a3b7-93a8f5a6223f",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Terrible mosquito breeding in the stagnant drain water near Akbari Gate. Dengue cases will spike if not cleaned.",
@@ -315,10 +315,10 @@
         "dengue"
       ]
     },
-    "b7388278-995f-4e31-b8a2-24f9df4281a7": {
-      "id": "b7388278-995f-4e31-b8a2-24f9df4281a7",
+    "c64ad792-caa7-43d3-8e32-6da230d64b3b": {
+      "id": "c64ad792-caa7-43d3-8e32-6da230d64b3b",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "The Gomti riverfront stretch smells awful today. You can see thick black sludge and dead fish floating near the barrage.",
       "normalized_text_en": "The Gomti riverfront stretch smells awful today. You can see thick black sludge and dead fish floating near the barrage.",
       "language": "English",
@@ -341,8 +341,8 @@
         "dead fish"
       ]
     },
-    "d6511a49-9630-4d95-9556-6730d2b9ac44": {
-      "id": "d6511a49-9630-4d95-9556-6730d2b9ac44",
+    "503ad714-86c9-407f-9614-0bcdd561c8e3": {
+      "id": "503ad714-86c9-407f-9614-0bcdd561c8e3",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Untreated sewage is visibly flowing into the Gomti near Marine Drive. The water hyacinth has covered the entire surface.",
@@ -368,10 +368,10 @@
         "water hyacinth"
       ]
     },
-    "81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed": {
-      "id": "81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed",
+    "fd60d0fd-2386-43dd-b2a7-1df4bb368840": {
+      "id": "fd60d0fd-2386-43dd-b2a7-1df4bb368840",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "E-rickshaws have completely hijacked the Hazratganj crossing. They stop in the middle of the road blocking all traffic.",
       "normalized_text_en": "E-rickshaws have completely hijacked the Hazratganj crossing. They stop in the middle of the road blocking all traffic.",
       "language": "English",
@@ -394,8 +394,8 @@
         "traffic"
       ]
     },
-    "c59e9ddd-0476-4485-a862-20db1cef0157": {
-      "id": "c59e9ddd-0476-4485-a862-20db1cef0157",
+    "c3d97fc4-e21c-4ba0-b501-d7b3940800c6": {
+      "id": "c3d97fc4-e21c-4ba0-b501-d7b3940800c6",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Despite multi-level parking, VIP cars are parked on the main Janpath market road, causing a massive bottleneck.",
@@ -420,10 +420,10 @@
         "parking"
       ]
     },
-    "ca316a23-04ec-4ec6-b591-7b4fe652c7e3": {
-      "id": "ca316a23-04ec-4ec6-b591-7b4fe652c7e3",
+    "79653297-dee2-4df2-ad33-61c8efa543e7": {
+      "id": "79653297-dee2-4df2-ad33-61c8efa543e7",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "Kanpur road near Alambagh bus stand is broken. Dust pollution is immense due to the gravel on the road.",
       "normalized_text_en": "Kanpur road near Alambagh bus stand is broken. Dust pollution is immense due to the gravel on the road.",
       "language": "English",
@@ -446,8 +446,8 @@
         "dust"
       ]
     },
-    "3aaa9af1-c691-4799-8410-dfe7ac6b9292": {
-      "id": "3aaa9af1-c691-4799-8410-dfe7ac6b9292",
+    "cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5": {
+      "id": "cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "The local transformer in Aminabad market caught fire last night. Half the market is without power, LESA hasn't responded.",
@@ -472,10 +472,10 @@
         "LESA"
       ]
     },
-    "22f715a7-f351-4a8f-8f61-8dcb16a5b0fb": {
-      "id": "22f715a7-f351-4a8f-8f61-8dcb16a5b0fb",
+    "4555a2f3-9418-4245-b556-a41c2e170760": {
+      "id": "4555a2f3-9418-4245-b556-a41c2e170760",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "Frequent chain snatching incidents reported in Munshi Pulia sector 16. We need active police patrolling in the evenings.",
       "normalized_text_en": "Frequent chain snatching incidents reported in Munshi Pulia sector 16. We need active police patrolling in the evenings.",
       "language": "English",
@@ -498,10 +498,10 @@
         "police"
       ]
     },
-    "ee1eb8ec-da50-4c24-acc1-5ed09e80a33e": {
-      "id": "ee1eb8ec-da50-4c24-acc1-5ed09e80a33e",
+    "98e3247b-76c4-48b8-bf0d-0ee9505211f5": {
+      "id": "98e3247b-76c4-48b8-bf0d-0ee9505211f5",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Water pressure is so low in Gomti Nagar Ext that it doesn't even reach the first floor. Jal Sansthan must investigate.",
       "normalized_text_en": "Water pressure is so low in Gomti Nagar Ext that it doesn't even reach the first floor. Jal Sansthan must investigate.",
       "language": "English",
@@ -524,10 +524,10 @@
         "Jal Sansthan"
       ]
     },
-    "05c1f7b7-8744-4329-9841-8ed1f9daf813": {
-      "id": "05c1f7b7-8744-4329-9841-8ed1f9daf813",
+    "2c60da31-87bc-4a88-a6e8-54d0d04eda01": {
+      "id": "2c60da31-87bc-4a88-a6e8-54d0d04eda01",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "A herd of wild elephants entered Thondarnadu village last night, completely destroying the plantain and arecanut crops. Forest department fencing is broken.",
       "normalized_text_en": "A herd of wild elephants entered Thondarnadu village last night, completely destroying the plantain and arecanut crops. Forest department fencing is broken.",
       "language": "English",
@@ -551,8 +551,8 @@
         "forest department"
       ]
     },
-    "87cbb90a-7c9b-48ad-971a-fd1458e70b37": {
-      "id": "87cbb90a-7c9b-48ad-971a-fd1458e70b37",
+    "f5ad4dd2-e6ca-4a6d-9ced-2e5317b932b3": {
+      "id": "f5ad4dd2-e6ca-4a6d-9ced-2e5317b932b3",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Leopard sighted near the tribal colony in Thirunelly. Mothers are scared to send kids to the Anganwadi. We need tranquilizer darts and capture.",
@@ -577,10 +577,10 @@
         "Anganwadi"
       ]
     },
-    "73470287-4d04-43c3-9b5e-5a63ea3220a0": {
-      "id": "73470287-4d04-43c3-9b5e-5a63ea3220a0",
+    "f5a2db66-201b-4cc5-acf4-8b4c5984ffad": {
+      "id": "f5a2db66-201b-4cc5-acf4-8b4c5984ffad",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Heavy rains have caused a minor mudslip near the Ghat road in Vythiri. If the rain continues, the entire highway to Kozhikode will be blocked.",
       "normalized_text_en": "Heavy rains have caused a minor mudslip near the Ghat road in Vythiri. If the rain continues, the entire highway to Kozhikode will be blocked.",
       "language": "English",
@@ -603,8 +603,8 @@
         "Ghat road"
       ]
     },
-    "55fa8455-eb88-463a-891a-603668f7574c": {
-      "id": "55fa8455-eb88-463a-891a-603668f7574c",
+    "dd14412e-d2f7-440c-af4d-82e035a33f8d": {
+      "id": "dd14412e-d2f7-440c-af4d-82e035a33f8d",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Storm water drains are blocked with debris. Water is flooding into low-lying houses in Pookode.",
@@ -629,10 +629,10 @@
         "drains"
       ]
     },
-    "1b02aa68-7fc6-4e1a-b4f8-091cbe383334": {
-      "id": "1b02aa68-7fc6-4e1a-b4f8-091cbe383334",
+    "2c34e856-9d9c-460a-bf9b-0d8cae78548e": {
+      "id": "2c34e856-9d9c-460a-bf9b-0d8cae78548e",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "The Kalpetta General Hospital lacks a full-time pediatrician. For any serious child illness, we are forced to travel 70km to Kozhikode.",
       "normalized_text_en": "The Kalpetta General Hospital lacks a full-time pediatrician. For any serious child illness, we are forced to travel 70km to Kozhikode.",
       "language": "English",
@@ -655,10 +655,10 @@
         "Kozhikode"
       ]
     },
-    "7a8d20cc-519c-4330-af57-f6728b411623": {
-      "id": "7a8d20cc-519c-4330-af57-f6728b411623",
+    "efb8ea64-fbb7-468a-a4d1-17ed6b4903e8": {
+      "id": "efb8ea64-fbb7-468a-a4d1-17ed6b4903e8",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Basic antibiotics and paracetamol are out of stock at the local PHC. Poor tribals cannot afford private pharmacies.",
       "normalized_text_en": "Basic antibiotics and paracetamol are out of stock at the local PHC. Poor tribals cannot afford private pharmacies.",
       "language": "English",
@@ -681,10 +681,10 @@
         "tribals"
       ]
     },
-    "ebf39ae5-8180-4bb4-83b7-4a75c3d6aab9": {
-      "id": "ebf39ae5-8180-4bb4-83b7-4a75c3d6aab9",
+    "4ff18934-f757-410b-8a77-ee1fea51f5c6": {
+      "id": "4ff18934-f757-410b-8a77-ee1fea51f5c6",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Quick wilt disease is destroying pepper vines across Bathery. Agriculture officers haven't visited to offer any fungicide solutions.",
       "normalized_text_en": "Quick wilt disease is destroying pepper vines across Bathery. Agriculture officers haven't visited to offer any fungicide solutions.",
       "language": "English",
@@ -707,10 +707,10 @@
         "Agriculture officers"
       ]
     },
-    "b20beb9f-ef22-48ea-a7c9-334ad0b01174": {
-      "id": "b20beb9f-ef22-48ea-a7c9-334ad0b01174",
+    "3a0d5c66-1ce6-48ac-bccf-9ddaad49d198": {
+      "id": "3a0d5c66-1ce6-48ac-bccf-9ddaad49d198",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "The Panchayat road leading to Krishnagiri stadium is untarred and washes away every monsoon. School buses refuse to come here.",
       "normalized_text_en": "The Panchayat road leading to Krishnagiri stadium is untarred and washes away every monsoon. School buses refuse to come here.",
       "language": "English",
@@ -733,8 +733,8 @@
         "monsoon"
       ]
     },
-    "04f612a8-03b8-4ec8-8ddb-38225603f152": {
-      "id": "04f612a8-03b8-4ec8-8ddb-38225603f152",
+    "fe6e63f6-64a2-410c-a8e4-535d1f38342b": {
+      "id": "fe6e63f6-64a2-410c-a8e4-535d1f38342b",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Jal Jeevan Mission pipes were laid a year ago but there is no water connection yet. Villagers rely on a single contaminated well.",
@@ -759,8 +759,8 @@
         "well"
       ]
     },
-    "aa102863-bcac-41ae-8fea-c4152dfc6561": {
-      "id": "aa102863-bcac-41ae-8fea-c4152dfc6561",
+    "f2e6a222-1f3e-443c-9f44-f94dda65f9d9": {
+      "id": "f2e6a222-1f3e-443c-9f44-f94dda65f9d9",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "The roof of the Govt UP School is leaking heavily. Students have to sit with umbrellas inside the classroom.",
@@ -785,8 +785,8 @@
         "students"
       ]
     },
-    "02fb39c7-efbd-4564-9f52-d4f6ae4e3069": {
-      "id": "02fb39c7-efbd-4564-9f52-d4f6ae4e3069",
+    "3f885157-17ac-4eea-a816-ad6cc75b48e1": {
+      "id": "3f885157-17ac-4eea-a816-ad6cc75b48e1",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "AQI has crossed 450 today. The smog is so thick near India Gate that visibility is zero. Urgent need to deploy anti-smog guns and stop construction.",
@@ -812,10 +812,10 @@
         "anti-smog guns"
       ]
     },
-    "ca8cfea2-095a-4f8d-8988-f002e2f31abb": {
-      "id": "ca8cfea2-095a-4f8d-8988-f002e2f31abb",
+    "7242b6e9-76ff-4985-8c88-3c86a52a4231": {
+      "id": "7242b6e9-76ff-4985-8c88-3c86a52a4231",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "MCD sweepers are sweeping dry dust into the air at Barakhamba road instead of using water sprinklers, worsening the pollution.",
       "normalized_text_en": "MCD sweepers are sweeping dry dust into the air at Barakhamba road instead of using water sprinklers, worsening the pollution.",
       "language": "English",
@@ -839,10 +839,10 @@
         "pollution"
       ]
     },
-    "21d051bb-f684-4303-9a38-03fa717aa96b": {
-      "id": "21d051bb-f684-4303-9a38-03fa717aa96b",
+    "e64ca046-5423-47b5-aaff-51f6ba752626": {
+      "id": "e64ca046-5423-47b5-aaff-51f6ba752626",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Arya Samaj Road in Karol Bagh is fully blocked. Two lanes are occupied by illegal parking by shop owners and hawkers.",
       "normalized_text_en": "Arya Samaj Road in Karol Bagh is fully blocked. Two lanes are occupied by illegal parking by shop owners and hawkers.",
       "language": "English",
@@ -865,8 +865,8 @@
         "illegal parking"
       ]
     },
-    "8a5996be-1b49-42a8-b72a-31d388113d67": {
-      "id": "8a5996be-1b49-42a8-b72a-31d388113d67",
+    "24076c2d-3089-4a10-97c7-26883b74adf7": {
+      "id": "24076c2d-3089-4a10-97c7-26883b74adf7",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Pedestrians are forced to walk on the busy street because the entire pavement is encroached by illegal extensions of local shops.",
@@ -891,8 +891,8 @@
         "shops"
       ]
     },
-    "73d49f46-61b8-4761-ac65-3fb0574af4f1": {
-      "id": "73d49f46-61b8-4761-ac65-3fb0574af4f1",
+    "6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb": {
+      "id": "6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Streetlights inside R.K. Puram Sector 3 parks are completely non-functional. It feels extremely unsafe for women returning from work in the evening.",
@@ -918,10 +918,10 @@
         "women"
       ]
     },
-    "0bafa015-7c0f-4eee-9114-cf43b89ee07a": {
-      "id": "0bafa015-7c0f-4eee-9114-cf43b89ee07a",
+    "5c34dd72-13e0-4421-bfcd-00a35543f0e6": {
+      "id": "5c34dd72-13e0-4421-bfcd-00a35543f0e6",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Anti-social elements gather near the local market after 9 PM. PCR vans rarely patrol the inner lanes.",
       "normalized_text_en": "Anti-social elements gather near the local market after 9 PM. PCR vans rarely patrol the inner lanes.",
       "language": "English",
@@ -943,8 +943,8 @@
         "anti-social elements"
       ]
     },
-    "8b5523f1-6085-412a-b2ae-17d08cc2661a": {
-      "id": "8b5523f1-6085-412a-b2ae-17d08cc2661a",
+    "d081ea6a-4b19-491d-a03c-a77703402f3d": {
+      "id": "d081ea6a-4b19-491d-a03c-a77703402f3d",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Delhi Jal Board water supply is erratic. We are getting muddy water for only 30 minutes at 2 AM. Tanker mafia is exploiting residents.",
@@ -969,10 +969,10 @@
         "Tanker mafia"
       ]
     },
-    "c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec": {
-      "id": "c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec",
+    "8697b44c-14f7-4370-ad7a-feb85677767e": {
+      "id": "8697b44c-14f7-4370-ad7a-feb85677767e",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "The Dhalao (garbage dump) in Central Market is overflowing onto the road. Cows and dogs are scattering it everywhere.",
       "normalized_text_en": "The Dhalao (garbage dump) in Central Market is overflowing onto the road. Cows and dogs are scattering it everywhere.",
       "language": "English",
@@ -995,10 +995,10 @@
         "garbage"
       ]
     },
-    "f9921200-17bf-422a-b491-09149d027995": {
-      "id": "f9921200-17bf-422a-b491-09149d027995",
+    "a29677cc-37cd-4751-bfa0-b76d4fd5eefe": {
+      "id": "a29677cc-37cd-4751-bfa0-b76d4fd5eefe",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "Severe voltage fluctuations in GK-1 M Block. Several appliances have burnt out. BSES is not responding to complaints.",
       "normalized_text_en": "Severe voltage fluctuations in GK-1 M Block. Several appliances have burnt out. BSES is not responding to complaints.",
       "language": "English",
@@ -1021,8 +1021,8 @@
         "BSES"
       ]
     },
-    "c0e1344f-d6b0-4346-b5f8-07f20df529c4": {
-      "id": "c0e1344f-d6b0-4346-b5f8-07f20df529c4",
+    "ec4221bc-9ac1-4c13-832d-bd22915b1d6b": {
+      "id": "ec4221bc-9ac1-4c13-832d-bd22915b1d6b",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Massive traffic jam every evening near Hauz Khas village entry due to valet parking blocking the main road.",
@@ -1047,8 +1047,8 @@
         "valet parking"
       ]
     },
-    "c26552b6-714b-477d-abac-76eb327f18f9": {
-      "id": "c26552b6-714b-477d-abac-76eb327f18f9",
+    "efa99824-00d0-4726-8a63-52e3bafd3135": {
+      "id": "efa99824-00d0-4726-8a63-52e3bafd3135",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Just 30 minutes of rain and Hindmata flyover below area is completely waterlogged. BMC's desilting claims are false. Cars are submerged.",
@@ -1074,10 +1074,10 @@
         "desilting"
       ]
     },
-    "9584a113-f4c7-4dec-b865-fabf960f821c": {
-      "id": "9584a113-f4c7-4dec-b865-fabf960f821c",
+    "41eae174-5cec-4d20-89f0-6f041f3a1db2": {
+      "id": "41eae174-5cec-4d20-89f0-6f041f3a1db2",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "The storm water drains in Dadar East are completely choked with plastic and debris, causing instant flooding.",
       "normalized_text_en": "The storm water drains in Dadar East are completely choked with plastic and debris, causing instant flooding.",
       "language": "English",
@@ -1100,10 +1100,10 @@
         "flooding"
       ]
     },
-    "47a6df5d-ef35-4d75-840f-cc0f50d04d91": {
-      "id": "47a6df5d-ef35-4d75-840f-cc0f50d04d91",
+    "a04f2551-97b0-4dc7-be06-030f8775a9ca": {
+      "id": "a04f2551-97b0-4dc7-be06-030f8775a9ca",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "Colaba Causeway footpaths are 100% taken over by illegal hawkers. Pedestrians are forced to walk among zooming BEST buses, causing accidents.",
       "normalized_text_en": "Colaba Causeway footpaths are 100% taken over by illegal hawkers. Pedestrians are forced to walk among zooming BEST buses, causing accidents.",
       "language": "English",
@@ -1127,10 +1127,10 @@
         "pedestrians"
       ]
     },
-    "8136176c-16c1-4912-9574-e85d2d048e6a": {
-      "id": "8136176c-16c1-4912-9574-e85d2d048e6a",
+    "db8afdb0-6d2b-4d36-b314-c4de17a30544": {
+      "id": "db8afdb0-6d2b-4d36-b314-c4de17a30544",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "whatsapp",
+      "channel": "web",
       "raw_text": "Tourists park haphazardly near Gateway of India causing a massive bottleneck extending all the way to Regal Cinema.",
       "normalized_text_en": "Tourists park haphazardly near Gateway of India causing a massive bottleneck extending all the way to Regal Cinema.",
       "language": "English",
@@ -1153,10 +1153,10 @@
         "parking"
       ]
     },
-    "2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17": {
-      "id": "2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17",
+    "5be0f76d-f4ce-4767-b69c-cd65a28269d1": {
+      "id": "5be0f76d-f4ce-4767-b69c-cd65a28269d1",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "BMC pipeline in Worli Koliwada seems to have mixed with a sewer line. Foul smelling, yellowish water is coming from the taps. Kids are falling sick.",
       "normalized_text_en": "BMC pipeline in Worli Koliwada seems to have mixed with a sewer line. Foul smelling, yellowish water is coming from the taps. Kids are falling sick.",
       "language": "English",
@@ -1180,10 +1180,10 @@
         "sick"
       ]
     },
-    "4bd833ab-265f-4679-bd8b-0c73f57a9e84": {
-      "id": "4bd833ab-265f-4679-bd8b-0c73f57a9e84",
+    "cabfa045-bb4e-4854-8555-765f3ad45bfb": {
+      "id": "cabfa045-bb4e-4854-8555-765f3ad45bfb",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "Unannounced 15% water cut implemented in Worli. Slum dwellers are suffering without any backup tanks.",
       "normalized_text_en": "Unannounced 15% water cut implemented in Worli. Slum dwellers are suffering without any backup tanks.",
       "language": "English",
@@ -1206,8 +1206,8 @@
         "slums"
       ]
     },
-    "66946ef2-0f52-4cad-97c1-e453d3548a3e": {
-      "id": "66946ef2-0f52-4cad-97c1-e453d3548a3e",
+    "e320bca9-c334-4bf1-b971-706237ce790f": {
+      "id": "e320bca9-c334-4bf1-b971-706237ce790f",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Constant heavy drilling and construction noise throughout the night from the coastal road project. Senior citizens cannot sleep.",
@@ -1232,8 +1232,8 @@
         "senior citizens"
       ]
     },
-    "d4731d75-9246-4a83-a148-d6a83b03569f": {
-      "id": "d4731d75-9246-4a83-a148-d6a83b03569f",
+    "64d8615a-0185-4f98-9d48-ebb32ddc5d26": {
+      "id": "64d8615a-0185-4f98-9d48-ebb32ddc5d26",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "web",
       "raw_text": "Massive potholes on Tardeo road near AC market. Two-wheelers are skidding daily due to the uneven paver blocks.",
@@ -1258,8 +1258,8 @@
         "paver blocks"
       ]
     },
-    "af43a8a5-71a2-496f-b9cb-66f770de527f": {
-      "id": "af43a8a5-71a2-496f-b9cb-66f770de527f",
+    "b607c808-b7cf-46ce-88f7-9f95dd97b934": {
+      "id": "b607c808-b7cf-46ce-88f7-9f95dd97b934",
       "timestamp": "2026-07-05T10:00:00Z",
       "channel": "whatsapp",
       "raw_text": "Open drug peddling near Byculla station east side at night. Addicts are harassing locals and snatching phones. Police must raid.",
@@ -1284,10 +1284,10 @@
         "Police"
       ]
     },
-    "c21cde04-39a8-463c-9fae-5fd5707f51cc": {
-      "id": "c21cde04-39a8-463c-9fae-5fd5707f51cc",
+    "66c29029-2057-4ce7-938f-df5ef1dd7643": {
+      "id": "66c29029-2057-4ce7-938f-df5ef1dd7643",
       "timestamp": "2026-07-05T10:00:00Z",
-      "channel": "web",
+      "channel": "whatsapp",
       "raw_text": "Marine Drive promenade is littered with plastic bottles and food waste by late-night crowds. BMC sweepers are insufficient.",
       "normalized_text_en": "Marine Drive promenade is littered with plastic bottles and food waste by late-night crowds. BMC sweepers are insufficient.",
       "language": "English",
@@ -1312,8 +1312,8 @@
     }
   },
   "enriched_submissions": {
-    "a8e69e59-f192-4c12-af75-95dccf14a494": {
-      "id": "a8e69e59-f192-4c12-af75-95dccf14a494",
+    "f2cac59c-1893-42e9-bb43-77d7179f39d6": {
+      "id": "f2cac59c-1893-42e9-bb43-77d7179f39d6",
       "normalized_text_en": "The entire stretch of 27th Main HSR Layout is dotted with crater-sized potholes after the recent rains. Bikers are skidding daily. BBMP needs to act immediately.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Pothole Repair",
@@ -1327,8 +1327,8 @@
         "potholes"
       ]
     },
-    "73cef5b8-c179-47af-b4ec-c6c8e0266c79": {
-      "id": "73cef5b8-c179-47af-b4ec-c6c8e0266c79",
+    "8afd9a36-685c-487b-ba52-a09065086579": {
+      "id": "8afd9a36-685c-487b-ba52-a09065086579",
       "normalized_text_en": "Near Agara Lake signal, the road is completely washed out. Traffic is crawling because everyone has to navigate the craters.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Pothole Repair",
@@ -1341,8 +1341,8 @@
         "craters"
       ]
     },
-    "4aee22e7-113d-4223-b4be-848a41ffda50": {
-      "id": "4aee22e7-113d-4223-b4be-848a41ffda50",
+    "8a214e1f-83eb-4d4a-abb3-d80014d21ce3": {
+      "id": "8a214e1f-83eb-4d4a-abb3-d80014d21ce3",
       "normalized_text_en": "Bellandur Lake is frothing again. Toxic foam is flying onto the Outer Ring Road and causing severe irritation to commuters and nearby residents.",
       "category": "Pollution",
       "need_type": "Water Pollution",
@@ -1355,8 +1355,8 @@
         "toxic foam"
       ]
     },
-    "986a9052-522e-4e88-86a2-43c9a9636367": {
-      "id": "986a9052-522e-4e88-86a2-43c9a9636367",
+    "c0533329-b9c6-4224-9289-5a1dea79616e": {
+      "id": "c0533329-b9c6-4224-9289-5a1dea79616e",
       "normalized_text_en": "Unbearable stench from Bellandur lake today. It seems untreated industrial effluent is being dumped illegally at night.",
       "category": "Pollution",
       "need_type": "Water Pollution",
@@ -1369,8 +1369,8 @@
         "stench"
       ]
     },
-    "b6413e35-f310-4b35-91bb-d9d6ffc3b3ff": {
-      "id": "b6413e35-f310-4b35-91bb-d9d6ffc3b3ff",
+    "c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4": {
+      "id": "c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4",
       "normalized_text_en": "Pourakarmikas haven't collected wet waste for 4 days in BTM 2nd Stage. Bins are overflowing onto the footpath.",
       "category": "Garbage and Unsanitary Practices",
       "need_type": "Waste Clearance",
@@ -1383,8 +1383,8 @@
         "wet waste"
       ]
     },
-    "f090701f-945f-4f1a-8a0d-cc3e0854c76c": {
-      "id": "f090701f-945f-4f1a-8a0d-cc3e0854c76c",
+    "582cbaa6-0d51-459e-a790-cb68fbd2d79f": {
+      "id": "582cbaa6-0d51-459e-a790-cb68fbd2d79f",
       "normalized_text_en": "Huge black spot developing near Udupi Garden signal. People are just throwing plastic covers full of garbage.",
       "category": "Garbage and Unsanitary Practices",
       "need_type": "Waste Clearance",
@@ -1397,8 +1397,8 @@
         "garbage"
       ]
     },
-    "f7ca5b09-cb14-4338-813b-255aa94aee7c": {
-      "id": "f7ca5b09-cb14-4338-813b-255aa94aee7c",
+    "f10a8a3c-bed9-47ba-8d04-c950be1135f8": {
+      "id": "f10a8a3c-bed9-47ba-8d04-c950be1135f8",
       "normalized_text_en": "Cauvery water supply has completely stopped in Jayanagar 4th Block for a week. Our apartment's borewell has also dried up. We are surviving on expensive private tankers.",
       "category": "Water Supply and Services",
       "need_type": "Borewell Drying",
@@ -1412,8 +1412,8 @@
         "tankers"
       ]
     },
-    "7af97acf-af2b-4381-958d-874e732c097b": {
-      "id": "7af97acf-af2b-4381-958d-874e732c097b",
+    "943836a1-17b2-4081-a09b-e3c39eaec4f8": {
+      "id": "943836a1-17b2-4081-a09b-e3c39eaec4f8",
       "normalized_text_en": "Absolute gridlock near Sony World Signal. The underpass construction has left zero space for pedestrians.",
       "category": "Traffic and Road Safety",
       "need_type": "Traffic Management",
@@ -1426,8 +1426,8 @@
         "underpass"
       ]
     },
-    "2e5de541-6154-4c59-9934-12ead0000d53": {
-      "id": "2e5de541-6154-4c59-9934-12ead0000d53",
+    "b8aa8e83-88e4-468a-8588-9b8d4224f165": {
+      "id": "b8aa8e83-88e4-468a-8588-9b8d4224f165",
       "normalized_text_en": "Cars parked on both sides of 80ft road near the restaurants block a whole lane. Traffic police isn't towing them.",
       "category": "Traffic and Road Safety",
       "need_type": "Illegal Parking",
@@ -1440,8 +1440,8 @@
         "traffic police"
       ]
     },
-    "eeacbfce-3aaf-49d3-b98d-9d62478b4c64": {
-      "id": "eeacbfce-3aaf-49d3-b98d-9d62478b4c64",
+    "e25b8bbe-b66b-445d-b82e-1fc416bbdc48": {
+      "id": "e25b8bbe-b66b-445d-b82e-1fc416bbdc48",
       "normalized_text_en": "BESCOM is doing unscheduled power cuts of 3-4 hours every afternoon in Basavanagudi. Working from home is impossible.",
       "category": "Electricity and Power Supply",
       "need_type": "Power Cuts",
@@ -1454,8 +1454,8 @@
         "power cuts"
       ]
     },
-    "73d57761-3bda-477a-8057-6a2905790c94": {
-      "id": "73d57761-3bda-477a-8057-6a2905790c94",
+    "cfb4341a-f512-4ebc-a256-6861379980fe": {
+      "id": "cfb4341a-f512-4ebc-a256-6861379980fe",
       "normalized_text_en": "The open nalas in Chowk market are choked with plastic. Sewage water is literally entering the shops after a small shower.",
       "category": "Sanitation",
       "need_type": "Drain Cleaning",
@@ -1469,8 +1469,8 @@
         "shops"
       ]
     },
-    "15c4eee5-9cd4-4abe-bd9f-52d782147e66": {
-      "id": "15c4eee5-9cd4-4abe-bd9f-52d782147e66",
+    "cf77ee1a-383c-4bab-a3b7-93a8f5a6223f": {
+      "id": "cf77ee1a-383c-4bab-a3b7-93a8f5a6223f",
       "normalized_text_en": "Terrible mosquito breeding in the stagnant drain water near Akbari Gate. Dengue cases will spike if not cleaned.",
       "category": "Sanitation",
       "need_type": "Drain Cleaning",
@@ -1483,8 +1483,8 @@
         "dengue"
       ]
     },
-    "b7388278-995f-4e31-b8a2-24f9df4281a7": {
-      "id": "b7388278-995f-4e31-b8a2-24f9df4281a7",
+    "c64ad792-caa7-43d3-8e32-6da230d64b3b": {
+      "id": "c64ad792-caa7-43d3-8e32-6da230d64b3b",
       "normalized_text_en": "The Gomti riverfront stretch smells awful today. You can see thick black sludge and dead fish floating near the barrage.",
       "category": "Pollution",
       "need_type": "Water Pollution",
@@ -1497,8 +1497,8 @@
         "dead fish"
       ]
     },
-    "d6511a49-9630-4d95-9556-6730d2b9ac44": {
-      "id": "d6511a49-9630-4d95-9556-6730d2b9ac44",
+    "503ad714-86c9-407f-9614-0bcdd561c8e3": {
+      "id": "503ad714-86c9-407f-9614-0bcdd561c8e3",
       "normalized_text_en": "Untreated sewage is visibly flowing into the Gomti near Marine Drive. The water hyacinth has covered the entire surface.",
       "category": "Pollution",
       "need_type": "Water Pollution",
@@ -1512,8 +1512,8 @@
         "water hyacinth"
       ]
     },
-    "81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed": {
-      "id": "81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed",
+    "fd60d0fd-2386-43dd-b2a7-1df4bb368840": {
+      "id": "fd60d0fd-2386-43dd-b2a7-1df4bb368840",
       "normalized_text_en": "E-rickshaws have completely hijacked the Hazratganj crossing. They stop in the middle of the road blocking all traffic.",
       "category": "Traffic and Road Safety",
       "need_type": "Traffic Management",
@@ -1526,8 +1526,8 @@
         "traffic"
       ]
     },
-    "c59e9ddd-0476-4485-a862-20db1cef0157": {
-      "id": "c59e9ddd-0476-4485-a862-20db1cef0157",
+    "c3d97fc4-e21c-4ba0-b501-d7b3940800c6": {
+      "id": "c3d97fc4-e21c-4ba0-b501-d7b3940800c6",
       "normalized_text_en": "Despite multi-level parking, VIP cars are parked on the main Janpath market road, causing a massive bottleneck.",
       "category": "Traffic and Road Safety",
       "need_type": "Illegal Parking",
@@ -1540,8 +1540,8 @@
         "parking"
       ]
     },
-    "ca316a23-04ec-4ec6-b591-7b4fe652c7e3": {
-      "id": "ca316a23-04ec-4ec6-b591-7b4fe652c7e3",
+    "79653297-dee2-4df2-ad33-61c8efa543e7": {
+      "id": "79653297-dee2-4df2-ad33-61c8efa543e7",
       "normalized_text_en": "Kanpur road near Alambagh bus stand is broken. Dust pollution is immense due to the gravel on the road.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Road Repair",
@@ -1554,8 +1554,8 @@
         "dust"
       ]
     },
-    "3aaa9af1-c691-4799-8410-dfe7ac6b9292": {
-      "id": "3aaa9af1-c691-4799-8410-dfe7ac6b9292",
+    "cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5": {
+      "id": "cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5",
       "normalized_text_en": "The local transformer in Aminabad market caught fire last night. Half the market is without power, LESA hasn't responded.",
       "category": "Electricity and Power Supply",
       "need_type": "Transformer Repair",
@@ -1568,8 +1568,8 @@
         "LESA"
       ]
     },
-    "22f715a7-f351-4a8f-8f61-8dcb16a5b0fb": {
-      "id": "22f715a7-f351-4a8f-8f61-8dcb16a5b0fb",
+    "4555a2f3-9418-4245-b556-a41c2e170760": {
+      "id": "4555a2f3-9418-4245-b556-a41c2e170760",
       "normalized_text_en": "Frequent chain snatching incidents reported in Munshi Pulia sector 16. We need active police patrolling in the evenings.",
       "category": "Crime and Safety",
       "need_type": "Patrolling",
@@ -1582,8 +1582,8 @@
         "police"
       ]
     },
-    "ee1eb8ec-da50-4c24-acc1-5ed09e80a33e": {
-      "id": "ee1eb8ec-da50-4c24-acc1-5ed09e80a33e",
+    "98e3247b-76c4-48b8-bf0d-0ee9505211f5": {
+      "id": "98e3247b-76c4-48b8-bf0d-0ee9505211f5",
       "normalized_text_en": "Water pressure is so low in Gomti Nagar Ext that it doesn't even reach the first floor. Jal Sansthan must investigate.",
       "category": "Water Supply and Services",
       "need_type": "Water Pressure",
@@ -1596,8 +1596,8 @@
         "Jal Sansthan"
       ]
     },
-    "05c1f7b7-8744-4329-9841-8ed1f9daf813": {
-      "id": "05c1f7b7-8744-4329-9841-8ed1f9daf813",
+    "2c60da31-87bc-4a88-a6e8-54d0d04eda01": {
+      "id": "2c60da31-87bc-4a88-a6e8-54d0d04eda01",
       "normalized_text_en": "A herd of wild elephants entered Thondarnadu village last night, completely destroying the plantain and arecanut crops. Forest department fencing is broken.",
       "category": "Animal Husbandry",
       "need_type": "Wildlife Conflict",
@@ -1611,8 +1611,8 @@
         "forest department"
       ]
     },
-    "87cbb90a-7c9b-48ad-971a-fd1458e70b37": {
-      "id": "87cbb90a-7c9b-48ad-971a-fd1458e70b37",
+    "f5ad4dd2-e6ca-4a6d-9ced-2e5317b932b3": {
+      "id": "f5ad4dd2-e6ca-4a6d-9ced-2e5317b932b3",
       "normalized_text_en": "Leopard sighted near the tribal colony in Thirunelly. Mothers are scared to send kids to the Anganwadi. We need tranquilizer darts and capture.",
       "category": "Animal Husbandry",
       "need_type": "Wildlife Conflict",
@@ -1625,8 +1625,8 @@
         "Anganwadi"
       ]
     },
-    "73470287-4d04-43c3-9b5e-5a63ea3220a0": {
-      "id": "73470287-4d04-43c3-9b5e-5a63ea3220a0",
+    "f5a2db66-201b-4cc5-acf4-8b4c5984ffad": {
+      "id": "f5a2db66-201b-4cc5-acf4-8b4c5984ffad",
       "normalized_text_en": "Heavy rains have caused a minor mudslip near the Ghat road in Vythiri. If the rain continues, the entire highway to Kozhikode will be blocked.",
       "category": "Disaster Management",
       "need_type": "Landslide Risk",
@@ -1639,8 +1639,8 @@
         "Ghat road"
       ]
     },
-    "55fa8455-eb88-463a-891a-603668f7574c": {
-      "id": "55fa8455-eb88-463a-891a-603668f7574c",
+    "dd14412e-d2f7-440c-af4d-82e035a33f8d": {
+      "id": "dd14412e-d2f7-440c-af4d-82e035a33f8d",
       "normalized_text_en": "Storm water drains are blocked with debris. Water is flooding into low-lying houses in Pookode.",
       "category": "Disaster Management",
       "need_type": "Drainage",
@@ -1653,8 +1653,8 @@
         "drains"
       ]
     },
-    "1b02aa68-7fc6-4e1a-b4f8-091cbe383334": {
-      "id": "1b02aa68-7fc6-4e1a-b4f8-091cbe383334",
+    "2c34e856-9d9c-460a-bf9b-0d8cae78548e": {
+      "id": "2c34e856-9d9c-460a-bf9b-0d8cae78548e",
       "normalized_text_en": "The Kalpetta General Hospital lacks a full-time pediatrician. For any serious child illness, we are forced to travel 70km to Kozhikode.",
       "category": "Public Health and Healthcare Infrastructure",
       "need_type": "Doctor Shortage",
@@ -1667,8 +1667,8 @@
         "Kozhikode"
       ]
     },
-    "7a8d20cc-519c-4330-af57-f6728b411623": {
-      "id": "7a8d20cc-519c-4330-af57-f6728b411623",
+    "efb8ea64-fbb7-468a-a4d1-17ed6b4903e8": {
+      "id": "efb8ea64-fbb7-468a-a4d1-17ed6b4903e8",
       "normalized_text_en": "Basic antibiotics and paracetamol are out of stock at the local PHC. Poor tribals cannot afford private pharmacies.",
       "category": "Public Health and Healthcare Infrastructure",
       "need_type": "Medicine Shortage",
@@ -1681,8 +1681,8 @@
         "tribals"
       ]
     },
-    "ebf39ae5-8180-4bb4-83b7-4a75c3d6aab9": {
-      "id": "ebf39ae5-8180-4bb4-83b7-4a75c3d6aab9",
+    "4ff18934-f757-410b-8a77-ee1fea51f5c6": {
+      "id": "4ff18934-f757-410b-8a77-ee1fea51f5c6",
       "normalized_text_en": "Quick wilt disease is destroying pepper vines across Bathery. Agriculture officers haven't visited to offer any fungicide solutions.",
       "category": "Agriculture",
       "need_type": "Crop Disease",
@@ -1695,8 +1695,8 @@
         "Agriculture officers"
       ]
     },
-    "b20beb9f-ef22-48ea-a7c9-334ad0b01174": {
-      "id": "b20beb9f-ef22-48ea-a7c9-334ad0b01174",
+    "3a0d5c66-1ce6-48ac-bccf-9ddaad49d198": {
+      "id": "3a0d5c66-1ce6-48ac-bccf-9ddaad49d198",
       "normalized_text_en": "The Panchayat road leading to Krishnagiri stadium is untarred and washes away every monsoon. School buses refuse to come here.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Rural Roads",
@@ -1709,8 +1709,8 @@
         "monsoon"
       ]
     },
-    "04f612a8-03b8-4ec8-8ddb-38225603f152": {
-      "id": "04f612a8-03b8-4ec8-8ddb-38225603f152",
+    "fe6e63f6-64a2-410c-a8e4-535d1f38342b": {
+      "id": "fe6e63f6-64a2-410c-a8e4-535d1f38342b",
       "normalized_text_en": "Jal Jeevan Mission pipes were laid a year ago but there is no water connection yet. Villagers rely on a single contaminated well.",
       "category": "Water Supply and Services",
       "need_type": "Drinking Water",
@@ -1723,8 +1723,8 @@
         "well"
       ]
     },
-    "aa102863-bcac-41ae-8fea-c4152dfc6561": {
-      "id": "aa102863-bcac-41ae-8fea-c4152dfc6561",
+    "f2e6a222-1f3e-443c-9f44-f94dda65f9d9": {
+      "id": "f2e6a222-1f3e-443c-9f44-f94dda65f9d9",
       "normalized_text_en": "The roof of the Govt UP School is leaking heavily. Students have to sit with umbrellas inside the classroom.",
       "category": "School Infrastructure and Quality",
       "need_type": "School Roof",
@@ -1737,8 +1737,8 @@
         "students"
       ]
     },
-    "02fb39c7-efbd-4564-9f52-d4f6ae4e3069": {
-      "id": "02fb39c7-efbd-4564-9f52-d4f6ae4e3069",
+    "3f885157-17ac-4eea-a816-ad6cc75b48e1": {
+      "id": "3f885157-17ac-4eea-a816-ad6cc75b48e1",
       "normalized_text_en": "AQI has crossed 450 today. The smog is so thick near India Gate that visibility is zero. Urgent need to deploy anti-smog guns and stop construction.",
       "category": "Pollution",
       "need_type": "Air Quality",
@@ -1752,8 +1752,8 @@
         "anti-smog guns"
       ]
     },
-    "ca8cfea2-095a-4f8d-8988-f002e2f31abb": {
-      "id": "ca8cfea2-095a-4f8d-8988-f002e2f31abb",
+    "7242b6e9-76ff-4985-8c88-3c86a52a4231": {
+      "id": "7242b6e9-76ff-4985-8c88-3c86a52a4231",
       "normalized_text_en": "MCD sweepers are sweeping dry dust into the air at Barakhamba road instead of using water sprinklers, worsening the pollution.",
       "category": "Pollution",
       "need_type": "Air Quality",
@@ -1767,8 +1767,8 @@
         "pollution"
       ]
     },
-    "21d051bb-f684-4303-9a38-03fa717aa96b": {
-      "id": "21d051bb-f684-4303-9a38-03fa717aa96b",
+    "e64ca046-5423-47b5-aaff-51f6ba752626": {
+      "id": "e64ca046-5423-47b5-aaff-51f6ba752626",
       "normalized_text_en": "Arya Samaj Road in Karol Bagh is fully blocked. Two lanes are occupied by illegal parking by shop owners and hawkers.",
       "category": "Traffic and Road Safety",
       "need_type": "Illegal Parking",
@@ -1781,8 +1781,8 @@
         "illegal parking"
       ]
     },
-    "8a5996be-1b49-42a8-b72a-31d388113d67": {
-      "id": "8a5996be-1b49-42a8-b72a-31d388113d67",
+    "24076c2d-3089-4a10-97c7-26883b74adf7": {
+      "id": "24076c2d-3089-4a10-97c7-26883b74adf7",
       "normalized_text_en": "Pedestrians are forced to walk on the busy street because the entire pavement is encroached by illegal extensions of local shops.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Encroachment",
@@ -1795,8 +1795,8 @@
         "shops"
       ]
     },
-    "73d49f46-61b8-4761-ac65-3fb0574af4f1": {
-      "id": "73d49f46-61b8-4761-ac65-3fb0574af4f1",
+    "6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb": {
+      "id": "6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb",
       "normalized_text_en": "Streetlights inside R.K. Puram Sector 3 parks are completely non-functional. It feels extremely unsafe for women returning from work in the evening.",
       "category": "Crime and Safety",
       "need_type": "Women Safety",
@@ -1810,8 +1810,8 @@
         "women"
       ]
     },
-    "0bafa015-7c0f-4eee-9114-cf43b89ee07a": {
-      "id": "0bafa015-7c0f-4eee-9114-cf43b89ee07a",
+    "5c34dd72-13e0-4421-bfcd-00a35543f0e6": {
+      "id": "5c34dd72-13e0-4421-bfcd-00a35543f0e6",
       "normalized_text_en": "Anti-social elements gather near the local market after 9 PM. PCR vans rarely patrol the inner lanes.",
       "category": "Crime and Safety",
       "need_type": "Patrolling",
@@ -1823,8 +1823,8 @@
         "anti-social elements"
       ]
     },
-    "8b5523f1-6085-412a-b2ae-17d08cc2661a": {
-      "id": "8b5523f1-6085-412a-b2ae-17d08cc2661a",
+    "d081ea6a-4b19-491d-a03c-a77703402f3d": {
+      "id": "d081ea6a-4b19-491d-a03c-a77703402f3d",
       "normalized_text_en": "Delhi Jal Board water supply is erratic. We are getting muddy water for only 30 minutes at 2 AM. Tanker mafia is exploiting residents.",
       "category": "Water Supply and Services",
       "need_type": "Water Supply",
@@ -1837,8 +1837,8 @@
         "Tanker mafia"
       ]
     },
-    "c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec": {
-      "id": "c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec",
+    "8697b44c-14f7-4370-ad7a-feb85677767e": {
+      "id": "8697b44c-14f7-4370-ad7a-feb85677767e",
       "normalized_text_en": "The Dhalao (garbage dump) in Central Market is overflowing onto the road. Cows and dogs are scattering it everywhere.",
       "category": "Sanitation",
       "need_type": "Waste Clearance",
@@ -1851,8 +1851,8 @@
         "garbage"
       ]
     },
-    "f9921200-17bf-422a-b491-09149d027995": {
-      "id": "f9921200-17bf-422a-b491-09149d027995",
+    "a29677cc-37cd-4751-bfa0-b76d4fd5eefe": {
+      "id": "a29677cc-37cd-4751-bfa0-b76d4fd5eefe",
       "normalized_text_en": "Severe voltage fluctuations in GK-1 M Block. Several appliances have burnt out. BSES is not responding to complaints.",
       "category": "Electricity and Power Supply",
       "need_type": "Voltage Fluctuations",
@@ -1865,8 +1865,8 @@
         "BSES"
       ]
     },
-    "c0e1344f-d6b0-4346-b5f8-07f20df529c4": {
-      "id": "c0e1344f-d6b0-4346-b5f8-07f20df529c4",
+    "ec4221bc-9ac1-4c13-832d-bd22915b1d6b": {
+      "id": "ec4221bc-9ac1-4c13-832d-bd22915b1d6b",
       "normalized_text_en": "Massive traffic jam every evening near Hauz Khas village entry due to valet parking blocking the main road.",
       "category": "Traffic and Road Safety",
       "need_type": "Traffic Management",
@@ -1879,8 +1879,8 @@
         "valet parking"
       ]
     },
-    "c26552b6-714b-477d-abac-76eb327f18f9": {
-      "id": "c26552b6-714b-477d-abac-76eb327f18f9",
+    "efa99824-00d0-4726-8a63-52e3bafd3135": {
+      "id": "efa99824-00d0-4726-8a63-52e3bafd3135",
       "normalized_text_en": "Just 30 minutes of rain and Hindmata flyover below area is completely waterlogged. BMC's desilting claims are false. Cars are submerged.",
       "category": "Disaster Management",
       "need_type": "Flooding",
@@ -1894,8 +1894,8 @@
         "desilting"
       ]
     },
-    "9584a113-f4c7-4dec-b865-fabf960f821c": {
-      "id": "9584a113-f4c7-4dec-b865-fabf960f821c",
+    "41eae174-5cec-4d20-89f0-6f041f3a1db2": {
+      "id": "41eae174-5cec-4d20-89f0-6f041f3a1db2",
       "normalized_text_en": "The storm water drains in Dadar East are completely choked with plastic and debris, causing instant flooding.",
       "category": "Sanitation",
       "need_type": "Drain Cleaning",
@@ -1908,8 +1908,8 @@
         "flooding"
       ]
     },
-    "47a6df5d-ef35-4d75-840f-cc0f50d04d91": {
-      "id": "47a6df5d-ef35-4d75-840f-cc0f50d04d91",
+    "a04f2551-97b0-4dc7-be06-030f8775a9ca": {
+      "id": "a04f2551-97b0-4dc7-be06-030f8775a9ca",
       "normalized_text_en": "Colaba Causeway footpaths are 100% taken over by illegal hawkers. Pedestrians are forced to walk among zooming BEST buses, causing accidents.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Footpath Encroachment",
@@ -1923,8 +1923,8 @@
         "pedestrians"
       ]
     },
-    "8136176c-16c1-4912-9574-e85d2d048e6a": {
-      "id": "8136176c-16c1-4912-9574-e85d2d048e6a",
+    "db8afdb0-6d2b-4d36-b314-c4de17a30544": {
+      "id": "db8afdb0-6d2b-4d36-b314-c4de17a30544",
       "normalized_text_en": "Tourists park haphazardly near Gateway of India causing a massive bottleneck extending all the way to Regal Cinema.",
       "category": "Traffic and Road Safety",
       "need_type": "Traffic Management",
@@ -1937,8 +1937,8 @@
         "parking"
       ]
     },
-    "2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17": {
-      "id": "2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17",
+    "5be0f76d-f4ce-4767-b69c-cd65a28269d1": {
+      "id": "5be0f76d-f4ce-4767-b69c-cd65a28269d1",
       "normalized_text_en": "BMC pipeline in Worli Koliwada seems to have mixed with a sewer line. Foul smelling, yellowish water is coming from the taps. Kids are falling sick.",
       "category": "Water Supply and Services",
       "need_type": "Contaminated Water",
@@ -1952,8 +1952,8 @@
         "sick"
       ]
     },
-    "4bd833ab-265f-4679-bd8b-0c73f57a9e84": {
-      "id": "4bd833ab-265f-4679-bd8b-0c73f57a9e84",
+    "cabfa045-bb4e-4854-8555-765f3ad45bfb": {
+      "id": "cabfa045-bb4e-4854-8555-765f3ad45bfb",
       "normalized_text_en": "Unannounced 15% water cut implemented in Worli. Slum dwellers are suffering without any backup tanks.",
       "category": "Water Supply and Services",
       "need_type": "Water Cuts",
@@ -1966,8 +1966,8 @@
         "slums"
       ]
     },
-    "66946ef2-0f52-4cad-97c1-e453d3548a3e": {
-      "id": "66946ef2-0f52-4cad-97c1-e453d3548a3e",
+    "e320bca9-c334-4bf1-b971-706237ce790f": {
+      "id": "e320bca9-c334-4bf1-b971-706237ce790f",
       "normalized_text_en": "Constant heavy drilling and construction noise throughout the night from the coastal road project. Senior citizens cannot sleep.",
       "category": "Pollution",
       "need_type": "Noise Pollution",
@@ -1980,8 +1980,8 @@
         "senior citizens"
       ]
     },
-    "d4731d75-9246-4a83-a148-d6a83b03569f": {
-      "id": "d4731d75-9246-4a83-a148-d6a83b03569f",
+    "64d8615a-0185-4f98-9d48-ebb32ddc5d26": {
+      "id": "64d8615a-0185-4f98-9d48-ebb32ddc5d26",
       "normalized_text_en": "Massive potholes on Tardeo road near AC market. Two-wheelers are skidding daily due to the uneven paver blocks.",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "need_type": "Pothole Repair",
@@ -1994,8 +1994,8 @@
         "paver blocks"
       ]
     },
-    "af43a8a5-71a2-496f-b9cb-66f770de527f": {
-      "id": "af43a8a5-71a2-496f-b9cb-66f770de527f",
+    "b607c808-b7cf-46ce-88f7-9f95dd97b934": {
+      "id": "b607c808-b7cf-46ce-88f7-9f95dd97b934",
       "normalized_text_en": "Open drug peddling near Byculla station east side at night. Addicts are harassing locals and snatching phones. Police must raid.",
       "category": "Crime and Safety",
       "need_type": "Drug Menace",
@@ -2008,8 +2008,8 @@
         "Police"
       ]
     },
-    "c21cde04-39a8-463c-9fae-5fd5707f51cc": {
-      "id": "c21cde04-39a8-463c-9fae-5fd5707f51cc",
+    "66c29029-2057-4ce7-938f-df5ef1dd7643": {
+      "id": "66c29029-2057-4ce7-938f-df5ef1dd7643",
       "normalized_text_en": "Marine Drive promenade is littered with plastic bottles and food waste by late-night crowds. BMC sweepers are insufficient.",
       "category": "Sanitation",
       "need_type": "Littering",
@@ -2024,7 +2024,7 @@
     }
   },
   "embeddings": {
-    "a8e69e59-f192-4c12-af75-95dccf14a494": [
+    "f2cac59c-1893-42e9-bb43-77d7179f39d6": [
       0.019383324310183525,
       0.004735289607197046,
       0.017615046352148056,
@@ -2794,7 +2794,7 @@
       0.011038512922823429,
       0.06251831352710724
     ],
-    "73cef5b8-c179-47af-b4ec-c6c8e0266c79": [
+    "8afd9a36-685c-487b-ba52-a09065086579": [
       0.01463349163532257,
       -0.0026035618502646685,
       0.029427420347929,
@@ -3564,7 +3564,7 @@
       0.005713122431188822,
       0.06301437318325043
     ],
-    "4aee22e7-113d-4223-b4be-848a41ffda50": [
+    "8a214e1f-83eb-4d4a-abb3-d80014d21ce3": [
       -0.021542426198720932,
       0.035176150500774384,
       0.028743954375386238,
@@ -4334,7 +4334,7 @@
       -0.023600907996296883,
       -0.02747013047337532
     ],
-    "986a9052-522e-4e88-86a2-43c9a9636367": [
+    "c0533329-b9c6-4224-9289-5a1dea79616e": [
       -0.020915307104587555,
       0.034302350133657455,
       0.04133649542927742,
@@ -5104,7 +5104,7 @@
       -0.02055250108242035,
       -0.031507547944784164
     ],
-    "b6413e35-f310-4b35-91bb-d9d6ffc3b3ff": [
+    "c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4": [
       -0.019247202202677727,
       0.06580984592437744,
       0.02776777744293213,
@@ -5874,7 +5874,7 @@
       -0.015257446095347404,
       -0.04883749037981033
     ],
-    "f090701f-945f-4f1a-8a0d-cc3e0854c76c": [
+    "582cbaa6-0d51-459e-a790-cb68fbd2d79f": [
       -0.02587287873029709,
       0.06573864072561264,
       0.02494545467197895,
@@ -6644,7 +6644,7 @@
       -0.02062682993710041,
       -0.06451711058616638
     ],
-    "f7ca5b09-cb14-4338-813b-255aa94aee7c": [
+    "f10a8a3c-bed9-47ba-8d04-c950be1135f8": [
       0.010006032884120941,
       0.05294524133205414,
       -0.020660389214754105,
@@ -7414,7 +7414,7 @@
       -0.03696417808532715,
       -0.003806877415627241
     ],
-    "7af97acf-af2b-4381-958d-874e732c097b": [
+    "943836a1-17b2-4081-a09b-e3c39eaec4f8": [
       0.023515185341238976,
       -0.019431279972195625,
       -0.044550441205501556,
@@ -8184,7 +8184,7 @@
       -0.007021571975201368,
       0.018565332517027855
     ],
-    "2e5de541-6154-4c59-9934-12ead0000d53": [
+    "b8aa8e83-88e4-468a-8588-9b8d4224f165": [
       0.021843302994966507,
       -0.0186335239559412,
       -0.04708618298172951,
@@ -8954,7 +8954,7 @@
       -0.015369988977909088,
       0.006655690260231495
     ],
-    "eeacbfce-3aaf-49d3-b98d-9d62478b4c64": [
+    "e25b8bbe-b66b-445d-b82e-1fc416bbdc48": [
       0.016102353110909462,
       -0.02597871795296669,
       -0.008335408754646778,
@@ -9724,7 +9724,7 @@
       0.013344569131731987,
       0.07628444582223892
     ],
-    "73d57761-3bda-477a-8057-6a2905790c94": [
+    "cfb4341a-f512-4ebc-a256-6861379980fe": [
       0.027428623288869858,
       -0.007032647728919983,
       0.008043735288083553,
@@ -10494,7 +10494,7 @@
       -0.07159576565027237,
       0.04325234144926071
     ],
-    "15c4eee5-9cd4-4abe-bd9f-52d782147e66": [
+    "cf77ee1a-383c-4bab-a3b7-93a8f5a6223f": [
       0.02011280320584774,
       -0.014318506233394146,
       0.00726480083540082,
@@ -11264,7 +11264,7 @@
       -0.07704107463359833,
       0.053295768797397614
     ],
-    "b7388278-995f-4e31-b8a2-24f9df4281a7": [
+    "c64ad792-caa7-43d3-8e32-6da230d64b3b": [
       -0.02440052479505539,
       0.041760705411434174,
       0.042687516659498215,
@@ -12034,7 +12034,7 @@
       -0.023273784667253494,
       -0.02343456633388996
     ],
-    "d6511a49-9630-4d95-9556-6730d2b9ac44": [
+    "503ad714-86c9-407f-9614-0bcdd561c8e3": [
       -0.01826467178761959,
       0.03224291279911995,
       0.030828896909952164,
@@ -12804,7 +12804,7 @@
       -0.020647326484322548,
       -0.02905942313373089
     ],
-    "81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed": [
+    "fd60d0fd-2386-43dd-b2a7-1df4bb368840": [
       0.01850643940269947,
       -0.014942517504096031,
       -0.052843913435935974,
@@ -13574,7 +13574,7 @@
       -0.015556275844573975,
       -0.0025072672870010138
     ],
-    "c59e9ddd-0476-4485-a862-20db1cef0157": [
+    "c3d97fc4-e21c-4ba0-b501-d7b3940800c6": [
       0.01679643616080284,
       -0.017599785700440407,
       -0.03749828413128853,
@@ -14344,7 +14344,7 @@
       -0.01902890019118786,
       0.010241846553981304
     ],
-    "ca316a23-04ec-4ec6-b591-7b4fe652c7e3": [
+    "79653297-dee2-4df2-ad33-61c8efa543e7": [
       0.016688469797372818,
       -0.011525984853506088,
       0.03628198802471161,
@@ -15114,7 +15114,7 @@
       -0.007589749526232481,
       0.06994444876909256
     ],
-    "3aaa9af1-c691-4799-8410-dfe7ac6b9292": [
+    "cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5": [
       0.02342786267399788,
       -0.03978964313864708,
       -0.0033133605029433966,
@@ -15884,7 +15884,7 @@
       0.029894130304455757,
       0.07147620618343353
     ],
-    "22f715a7-f351-4a8f-8f61-8dcb16a5b0fb": [
+    "4555a2f3-9418-4245-b556-a41c2e170760": [
       0.08606016635894775,
       -0.08277886360883713,
       0.026715530082583427,
@@ -16654,7 +16654,7 @@
       -0.005605295766144991,
       0.022979775443673134
     ],
-    "ee1eb8ec-da50-4c24-acc1-5ed09e80a33e": [
+    "98e3247b-76c4-48b8-bf0d-0ee9505211f5": [
       0.008880010806024075,
       0.05734947323799133,
       -0.03288355469703674,
@@ -17424,7 +17424,7 @@
       -0.0315849632024765,
       -0.008856292814016342
     ],
-    "05c1f7b7-8744-4329-9841-8ed1f9daf813": [
+    "2c60da31-87bc-4a88-a6e8-54d0d04eda01": [
       -0.023188786581158638,
       -0.020535370334982872,
       0.03325025364756584,
@@ -18194,7 +18194,7 @@
       -0.010227163322269917,
       0.024020425975322723
     ],
-    "87cbb90a-7c9b-48ad-971a-fd1458e70b37": [
+    "f5ad4dd2-e6ca-4a6d-9ced-2e5317b932b3": [
       -0.01842418685555458,
       -0.02358124777674675,
       0.03432760387659073,
@@ -18964,7 +18964,7 @@
       -0.00864504650235176,
       0.011308195069432259
     ],
-    "73470287-4d04-43c3-9b5e-5a63ea3220a0": [
+    "f5a2db66-201b-4cc5-acf4-8b4c5984ffad": [
       0.015358650125563145,
       -0.02930309996008873,
       -0.005771352909505367,
@@ -19734,7 +19734,7 @@
       0.02257254533469677,
       0.0760582834482193
     ],
-    "55fa8455-eb88-463a-891a-603668f7574c": [
+    "dd14412e-d2f7-440c-af4d-82e035a33f8d": [
       0.013875732198357582,
       -0.03213990479707718,
       -0.01676604524254799,
@@ -20504,7 +20504,7 @@
       0.022266825661063194,
       0.0743667408823967
     ],
-    "1b02aa68-7fc6-4e1a-b4f8-091cbe383334": [
+    "2c34e856-9d9c-460a-bf9b-0d8cae78548e": [
       0.020987654104828835,
       -0.03230836242437363,
       -0.0037465766072273254,
@@ -21274,7 +21274,7 @@
       0.01834956556558609,
       0.08367621153593063
     ],
-    "7a8d20cc-519c-4330-af57-f6728b411623": [
+    "efb8ea64-fbb7-468a-a4d1-17ed6b4903e8": [
       0.03179650753736496,
       -0.02753813937306404,
       -0.018674971535801888,
@@ -22044,7 +22044,7 @@
       0.02301451563835144,
       0.07048983126878738
     ],
-    "ebf39ae5-8180-4bb4-83b7-4a75c3d6aab9": [
+    "4ff18934-f757-410b-8a77-ee1fea51f5c6": [
       0.008643821813166142,
       -0.027255311608314514,
       -0.00423984182998538,
@@ -22814,7 +22814,7 @@
       0.024525543674826622,
       0.08166630566120148
     ],
-    "b20beb9f-ef22-48ea-a7c9-334ad0b01174": [
+    "3a0d5c66-1ce6-48ac-bccf-9ddaad49d198": [
       0.004981439560651779,
       -0.0024218568578362465,
       0.026511412113904953,
@@ -23584,7 +23584,7 @@
       -0.002419848460704088,
       0.07560227066278458
     ],
-    "04f612a8-03b8-4ec8-8ddb-38225603f152": [
+    "fe6e63f6-64a2-410c-a8e4-535d1f38342b": [
       0.010448832996189594,
       0.055246371775865555,
       -0.026004809886217117,
@@ -24354,7 +24354,7 @@
       -0.0271788090467453,
       -0.01580674946308136
     ],
-    "aa102863-bcac-41ae-8fea-c4152dfc6561": [
+    "f2e6a222-1f3e-443c-9f44-f94dda65f9d9": [
       0.01914646476507187,
       -0.030253887176513672,
       -0.006161615718156099,
@@ -25124,7 +25124,7 @@
       0.0162323247641325,
       0.07350923120975494
     ],
-    "02fb39c7-efbd-4564-9f52-d4f6ae4e3069": [
+    "3f885157-17ac-4eea-a816-ad6cc75b48e1": [
       -0.01568954437971115,
       0.03744901344180107,
       0.03710789978504181,
@@ -25894,7 +25894,7 @@
       -0.0248623825609684,
       -0.02989252097904682
     ],
-    "ca8cfea2-095a-4f8d-8988-f002e2f31abb": [
+    "7242b6e9-76ff-4985-8c88-3c86a52a4231": [
       -0.021026121452450752,
       0.03976742923259735,
       0.0253432746976614,
@@ -26664,7 +26664,7 @@
       -0.023727605119347572,
       -0.03120613656938076
     ],
-    "21d051bb-f684-4303-9a38-03fa717aa96b": [
+    "e64ca046-5423-47b5-aaff-51f6ba752626": [
       0.024291371926665306,
       -0.023632625117897987,
       -0.04566635191440582,
@@ -27434,7 +27434,7 @@
       -0.010061977431178093,
       0.011855332180857658
     ],
-    "8a5996be-1b49-42a8-b72a-31d388113d67": [
+    "24076c2d-3089-4a10-97c7-26883b74adf7": [
       0.02832428179681301,
       -0.004483245778828859,
       0.01764284074306488,
@@ -28204,7 +28204,7 @@
       -0.0010551923187449574,
       0.06308429688215256
     ],
-    "73d49f46-61b8-4761-ac65-3fb0574af4f1": [
+    "6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb": [
       0.08139640837907791,
       -0.0738430917263031,
       0.026219442486763,
@@ -28974,7 +28974,7 @@
       0.0012935618869960308,
       0.02862136997282505
     ],
-    "0bafa015-7c0f-4eee-9114-cf43b89ee07a": [
+    "5c34dd72-13e0-4421-bfcd-00a35543f0e6": [
       0.08736207336187363,
       -0.08388718962669373,
       0.017751146107912064,
@@ -29744,7 +29744,7 @@
       -0.003248650347813964,
       0.02771838940680027
     ],
-    "8b5523f1-6085-412a-b2ae-17d08cc2661a": [
+    "d081ea6a-4b19-491d-a03c-a77703402f3d": [
       0.0065735988318920135,
       0.05963759124279022,
       -0.02185901068150997,
@@ -30514,7 +30514,7 @@
       -0.03811771795153618,
       -0.015228490345180035
     ],
-    "c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec": [
+    "8697b44c-14f7-4370-ad7a-feb85677767e": [
       0.020358173176646233,
       -0.007462473586201668,
       0.0028072067070752382,
@@ -31284,7 +31284,7 @@
       -0.0665651261806488,
       0.045445241034030914
     ],
-    "f9921200-17bf-422a-b491-09149d027995": [
+    "a29677cc-37cd-4751-bfa0-b76d4fd5eefe": [
       0.01672629825770855,
       -0.03850269317626953,
       0.0012284835102036595,
@@ -32054,7 +32054,7 @@
       0.0218531284481287,
       0.07911527156829834
     ],
-    "c0e1344f-d6b0-4346-b5f8-07f20df529c4": [
+    "ec4221bc-9ac1-4c13-832d-bd22915b1d6b": [
       0.015785709023475647,
       -0.011273542419075966,
       -0.04830123111605644,
@@ -32824,7 +32824,7 @@
       -0.01713082194328308,
       0.002818971872329712
     ],
-    "c26552b6-714b-477d-abac-76eb327f18f9": [
+    "efa99824-00d0-4726-8a63-52e3bafd3135": [
       0.016046443954110146,
       -0.026952920481562614,
       -0.004833120387047529,
@@ -33594,7 +33594,7 @@
       0.031898338347673416,
       0.07636038959026337
     ],
-    "9584a113-f4c7-4dec-b865-fabf960f821c": [
+    "41eae174-5cec-4d20-89f0-6f041f3a1db2": [
       0.02061273716390133,
       0.0019235176732763648,
       0.004332045558840036,
@@ -34364,7 +34364,7 @@
       -0.0774502232670784,
       0.052143171429634094
     ],
-    "47a6df5d-ef35-4d75-840f-cc0f50d04d91": [
+    "a04f2551-97b0-4dc7-be06-030f8775a9ca": [
       0.027826793491840363,
       -0.013471494428813457,
       0.02552306465804577,
@@ -35134,7 +35134,7 @@
       0.010755612514913082,
       0.0566047802567482
     ],
-    "8136176c-16c1-4912-9574-e85d2d048e6a": [
+    "db8afdb0-6d2b-4d36-b314-c4de17a30544": [
       0.021719081327319145,
       -0.014621821232140064,
       -0.052273206412792206,
@@ -35904,7 +35904,7 @@
       -0.011032710783183575,
       0.007884872145950794
     ],
-    "2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17": [
+    "5be0f76d-f4ce-4767-b69c-cd65a28269d1": [
       0.0031379389110952616,
       0.05326003208756447,
       -0.030546903610229492,
@@ -36674,7 +36674,7 @@
       -0.03800947964191437,
       -0.008217490278184414
     ],
-    "4bd833ab-265f-4679-bd8b-0c73f57a9e84": [
+    "cabfa045-bb4e-4854-8555-765f3ad45bfb": [
       0.01112727914005518,
       0.058648865669965744,
       -0.023975634947419167,
@@ -37444,7 +37444,7 @@
       -0.03613407164812088,
       -0.006425339728593826
     ],
-    "66946ef2-0f52-4cad-97c1-e453d3548a3e": [
+    "e320bca9-c334-4bf1-b971-706237ce790f": [
       -0.020332271233201027,
       0.03553124889731407,
       0.036116018891334534,
@@ -38214,7 +38214,7 @@
       -0.03007551096379757,
       -0.021997075527906418
     ],
-    "d4731d75-9246-4a83-a148-d6a83b03569f": [
+    "64d8615a-0185-4f98-9d48-ebb32ddc5d26": [
       0.016358958557248116,
       -0.0015465717297047377,
       0.02359258197247982,
@@ -38984,7 +38984,7 @@
       -0.006463210564106703,
       0.07478947192430496
     ],
-    "af43a8a5-71a2-496f-b9cb-66f770de527f": [
+    "b607c808-b7cf-46ce-88f7-9f95dd97b934": [
       0.09533213078975677,
       -0.07932301610708237,
       0.02488793432712555,
@@ -39754,7 +39754,7 @@
       0.007707515731453896,
       0.029271934181451797
     ],
-    "c21cde04-39a8-463c-9fae-5fd5707f51cc": [
+    "66c29029-2057-4ce7-938f-df5ef1dd7643": [
       0.020639551803469658,
       -0.013834944926202297,
       0.001266790321096778,
@@ -43645,8 +43645,8 @@
       "id": "fac-0",
       "facility_type": "Primary School",
       "name": "Bengaluru South HSR Layout Primary School",
-      "latitude": 12.904813685790375,
-      "longitude": 77.63278955915852,
+      "latitude": 12.906989756618644,
+      "longitude": 77.6484743134244,
       "ward": "HSR Layout",
       "constituency": "Bengaluru South"
     },
@@ -43654,8 +43654,8 @@
       "id": "fac-1",
       "facility_type": "Government High School",
       "name": "Bengaluru South HSR Layout Government High School",
-      "latitude": 12.92000433991419,
-      "longitude": 77.63291314856319,
+      "latitude": 12.919795705859702,
+      "longitude": 77.64137268016674,
       "ward": "HSR Layout",
       "constituency": "Bengaluru South"
     },
@@ -43663,8 +43663,8 @@
       "id": "fac-2",
       "facility_type": "Public Health Center",
       "name": "Bengaluru South HSR Layout Public Health Center",
-      "latitude": 12.908454255740237,
-      "longitude": 77.64733960869867,
+      "latitude": 12.907285362205203,
+      "longitude": 77.64510170491647,
       "ward": "HSR Layout",
       "constituency": "Bengaluru South"
     },
@@ -43672,8 +43672,8 @@
       "id": "fac-3",
       "facility_type": "Water Tanker Station",
       "name": "Bengaluru South HSR Layout Water Tanker Station",
-      "latitude": 12.907237457430407,
-      "longitude": 77.64825371889027,
+      "latitude": 12.911578786742107,
+      "longitude": 77.64020760704642,
       "ward": "HSR Layout",
       "constituency": "Bengaluru South"
     },
@@ -43681,8 +43681,8 @@
       "id": "fac-4",
       "facility_type": "Waste Management Center",
       "name": "Bengaluru South HSR Layout Waste Management Center",
-      "latitude": 12.906691807072619,
-      "longitude": 77.63105849247245,
+      "latitude": 12.91038369532968,
+      "longitude": 77.6409607222474,
       "ward": "HSR Layout",
       "constituency": "Bengaluru South"
     },
@@ -43690,8 +43690,8 @@
       "id": "fac-5",
       "facility_type": "Primary School",
       "name": "Bengaluru South Bellandur Primary School",
-      "latitude": 12.930587064755791,
-      "longitude": 77.67544539675782,
+      "latitude": 12.938681158055859,
+      "longitude": 77.67235379734171,
       "ward": "Bellandur",
       "constituency": "Bengaluru South"
     },
@@ -43699,8 +43699,8 @@
       "id": "fac-6",
       "facility_type": "Government High School",
       "name": "Bengaluru South Bellandur Government High School",
-      "latitude": 12.934368204738844,
-      "longitude": 77.67959420001048,
+      "latitude": 12.938007179734614,
+      "longitude": 77.68121126178428,
       "ward": "Bellandur",
       "constituency": "Bengaluru South"
     },
@@ -43708,8 +43708,8 @@
       "id": "fac-7",
       "facility_type": "Public Health Center",
       "name": "Bengaluru South Bellandur Public Health Center",
-      "latitude": 12.930414836382685,
-      "longitude": 77.68404150875945,
+      "latitude": 12.925971438332036,
+      "longitude": 77.67421302558358,
       "ward": "Bellandur",
       "constituency": "Bengaluru South"
     },
@@ -43717,8 +43717,8 @@
       "id": "fac-8",
       "facility_type": "Water Tanker Station",
       "name": "Bengaluru South Bellandur Water Tanker Station",
-      "latitude": 12.931792124714299,
-      "longitude": 77.67224475826382,
+      "latitude": 12.939461148944481,
+      "longitude": 77.6813872175079,
       "ward": "Bellandur",
       "constituency": "Bengaluru South"
     },
@@ -43726,8 +43726,8 @@
       "id": "fac-9",
       "facility_type": "Waste Management Center",
       "name": "Bengaluru South Bellandur Waste Management Center",
-      "latitude": 12.935800193222699,
-      "longitude": 77.68688121952887,
+      "latitude": 12.93414085789279,
+      "longitude": 77.66970810701261,
       "ward": "Bellandur",
       "constituency": "Bengaluru South"
     },
@@ -43735,8 +43735,8 @@
       "id": "fac-10",
       "facility_type": "Primary School",
       "name": "Bengaluru South BTM Layout Primary School",
-      "latitude": 12.919690586127963,
-      "longitude": 77.61327817273651,
+      "latitude": 12.916523662734663,
+      "longitude": 77.6039160264785,
       "ward": "BTM Layout",
       "constituency": "Bengaluru South"
     },
@@ -43744,8 +43744,8 @@
       "id": "fac-11",
       "facility_type": "Government High School",
       "name": "Bengaluru South BTM Layout Government High School",
-      "latitude": 12.908194682066174,
-      "longitude": 77.61257937225943,
+      "latitude": 12.90661136235839,
+      "longitude": 77.60108215522557,
       "ward": "BTM Layout",
       "constituency": "Bengaluru South"
     },
@@ -43753,8 +43753,8 @@
       "id": "fac-12",
       "facility_type": "Public Health Center",
       "name": "Bengaluru South BTM Layout Public Health Center",
-      "latitude": 12.917259077364914,
-      "longitude": 77.60441868072591,
+      "latitude": 12.913894516100765,
+      "longitude": 77.60349434977053,
       "ward": "BTM Layout",
       "constituency": "Bengaluru South"
     },
@@ -43762,8 +43762,8 @@
       "id": "fac-13",
       "facility_type": "Water Tanker Station",
       "name": "Bengaluru South BTM Layout Water Tanker Station",
-      "latitude": 12.910021268038944,
-      "longitude": 77.61615794896451,
+      "latitude": 12.911925735915059,
+      "longitude": 77.6136780747779,
       "ward": "BTM Layout",
       "constituency": "Bengaluru South"
     },
@@ -43771,19 +43771,27 @@
       "id": "fac-14",
       "facility_type": "Waste Management Center",
       "name": "Bengaluru South BTM Layout Waste Management Center",
-      "latitude": 12.91166518208309,
-      "longitude": 77.61670565277292,
+      "latitude": 12.922182862426379,
+      "longitude": 77.60748315458643,
       "ward": "BTM Layout",
       "constituency": "Bengaluru South"
     }
   ],
   "priorities": [
     {
-      "work_id": "PRIORITY-V2-b6413e35-f310-4b35-91bb-d9d6ffc3b3ff",
+      "work_id": "PRIORITY-V2-c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4",
       "title": "Address garbage and unsanitary practices gap in BTM Layout",
       "category": "Garbage and Unsanitary Practices",
       "demand_count": 2,
       "demand_score": 34.0,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.15,
+        "equity_multiplier": 0.07,
+        "data_gap_multiplier": 0.06,
+        "feasibility_multiplier": 0.15,
+        "final_score": 34.0
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 12.91625,
@@ -43792,13 +43800,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "b6413e35-f310-4b35-91bb-d9d6ffc3b3ff",
+          "submission_id": "c6a2b3c8-ffb8-40f1-bcdb-fd5c2f4d03e4",
           "language": "English",
           "raw_text": "Pourakarmikas haven't collected wet waste for 4 days in BTM 2nd Stage. Bins are overflowing onto the footpath.",
           "normalized_text_en": "Pourakarmikas haven't collected wet waste for 4 days in BTM 2nd Stage. Bins are overflowing onto the footpath."
         },
         {
-          "submission_id": "f090701f-945f-4f1a-8a0d-cc3e0854c76c",
+          "submission_id": "582cbaa6-0d51-459e-a790-cb68fbd2d79f",
           "language": "English",
           "raw_text": "Huge black spot developing near Udupi Garden signal. People are just throwing plastic covers full of garbage.",
           "normalized_text_en": "Huge black spot developing near Udupi Garden signal. People are just throwing plastic covers full of garbage."
@@ -43821,11 +43829,19 @@
       "rank": 1
     },
     {
-      "work_id": "PRIORITY-V2-a8e69e59-f192-4c12-af75-95dccf14a494",
+      "work_id": "PRIORITY-V2-f2cac59c-1893-42e9-bb43-77d7179f39d6",
       "title": "Address mobility - roads, footpaths and infrastructure gap in HSR Layout",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "demand_count": 2,
       "demand_score": 33.17,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.03,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 33.17
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 12.91255,
@@ -43834,13 +43850,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "a8e69e59-f192-4c12-af75-95dccf14a494",
+          "submission_id": "f2cac59c-1893-42e9-bb43-77d7179f39d6",
           "language": "English",
           "raw_text": "The entire stretch of 27th Main HSR Layout is dotted with crater-sized potholes after the recent rains. Bikers are skidding daily. BBMP needs to act immediately.",
           "normalized_text_en": "The entire stretch of 27th Main HSR Layout is dotted with crater-sized potholes after the recent rains. Bikers are skidding daily. BBMP needs to act immediately."
         },
         {
-          "submission_id": "73cef5b8-c179-47af-b4ec-c6c8e0266c79",
+          "submission_id": "8afd9a36-685c-487b-ba52-a09065086579",
           "language": "English",
           "raw_text": "Near Agara Lake signal, the road is completely washed out. Traffic is crawling because everyone has to navigate the craters.",
           "normalized_text_en": "Near Agara Lake signal, the road is completely washed out. Traffic is crawling because everyone has to navigate the craters."
@@ -43863,11 +43879,19 @@
       "rank": 2
     },
     {
-      "work_id": "PRIORITY-V2-7af97acf-af2b-4381-958d-874e732c097b",
+      "work_id": "PRIORITY-V2-943836a1-17b2-4081-a09b-e3c39eaec4f8",
       "title": "Address traffic and road safety gap in Koramangala",
       "category": "Traffic and Road Safety",
       "demand_count": 2,
       "demand_score": 31.86,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.15,
+        "equity_multiplier": 0.04,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 31.86
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 12.935500000000001,
@@ -43876,13 +43900,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "2e5de541-6154-4c59-9934-12ead0000d53",
+          "submission_id": "b8aa8e83-88e4-468a-8588-9b8d4224f165",
           "language": "English",
           "raw_text": "Cars parked on both sides of 80ft road near the restaurants block a whole lane. Traffic police isn't towing them.",
           "normalized_text_en": "Cars parked on both sides of 80ft road near the restaurants block a whole lane. Traffic police isn't towing them."
         },
         {
-          "submission_id": "7af97acf-af2b-4381-958d-874e732c097b",
+          "submission_id": "943836a1-17b2-4081-a09b-e3c39eaec4f8",
           "language": "English",
           "raw_text": "Absolute gridlock near Sony World Signal. The underpass construction has left zero space for pedestrians.",
           "normalized_text_en": "Absolute gridlock near Sony World Signal. The underpass construction has left zero space for pedestrians."
@@ -43905,11 +43929,19 @@
       "rank": 3
     },
     {
-      "work_id": "PRIORITY-V2-4aee22e7-113d-4223-b4be-848a41ffda50",
+      "work_id": "PRIORITY-V2-8a214e1f-83eb-4d4a-abb3-d80014d21ce3",
       "title": "Address pollution gap in Bellandur",
       "category": "Pollution",
       "demand_count": 2,
       "demand_score": 31.5,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 31.5
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 12.9315,
@@ -43918,13 +43950,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "4aee22e7-113d-4223-b4be-848a41ffda50",
+          "submission_id": "8a214e1f-83eb-4d4a-abb3-d80014d21ce3",
           "language": "English",
           "raw_text": "Bellandur Lake is frothing again. Toxic foam is flying onto the Outer Ring Road and causing severe irritation to commuters and nearby residents.",
           "normalized_text_en": "Bellandur Lake is frothing again. Toxic foam is flying onto the Outer Ring Road and causing severe irritation to commuters and nearby residents."
         },
         {
-          "submission_id": "986a9052-522e-4e88-86a2-43c9a9636367",
+          "submission_id": "c0533329-b9c6-4224-9289-5a1dea79616e",
           "language": "English",
           "raw_text": "Unbearable stench from Bellandur lake today. It seems untreated industrial effluent is being dumped illegally at night.",
           "normalized_text_en": "Unbearable stench from Bellandur lake today. It seems untreated industrial effluent is being dumped illegally at night."
@@ -43947,11 +43979,19 @@
       "rank": 4
     },
     {
-      "work_id": "PRIORITY-V2-f7ca5b09-cb14-4338-813b-255aa94aee7c",
+      "work_id": "PRIORITY-V2-f10a8a3c-bed9-47ba-8d04-c950be1135f8",
       "title": "Address water supply and services gap in Jayanagar",
       "category": "Water Supply and Services",
       "demand_count": 1,
       "demand_score": 19.8,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.25,
+        "equity_multiplier": 0.02,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 19.8
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 12.9298,
@@ -43960,7 +44000,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "f7ca5b09-cb14-4338-813b-255aa94aee7c",
+          "submission_id": "f10a8a3c-bed9-47ba-8d04-c950be1135f8",
           "language": "English",
           "raw_text": "Cauvery water supply has completely stopped in Jayanagar 4th Block for a week. Our apartment's borewell has also dried up. We are surviving on expensive private tankers.",
           "normalized_text_en": "Cauvery water supply has completely stopped in Jayanagar 4th Block for a week. Our apartment's borewell has also dried up. We are surviving on expensive private tankers."
@@ -43983,11 +44023,19 @@
       "rank": 5
     },
     {
-      "work_id": "PRIORITY-V2-eeacbfce-3aaf-49d3-b98d-9d62478b4c64",
+      "work_id": "PRIORITY-V2-e25b8bbe-b66b-445d-b82e-1fc416bbdc48",
       "title": "Address electricity and power supply gap in Bengaluru South",
       "category": "Electricity and Power Supply",
       "demand_count": 1,
       "demand_score": 19.41,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 19.41
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 12.9421,
@@ -43996,7 +44044,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "eeacbfce-3aaf-49d3-b98d-9d62478b4c64",
+          "submission_id": "e25b8bbe-b66b-445d-b82e-1fc416bbdc48",
           "language": "English",
           "raw_text": "BESCOM is doing unscheduled power cuts of 3-4 hours every afternoon in Basavanagudi. Working from home is impossible.",
           "normalized_text_en": "BESCOM is doing unscheduled power cuts of 3-4 hours every afternoon in Basavanagudi. Working from home is impossible."
@@ -44019,11 +44067,19 @@
       "rank": 6
     },
     {
-      "work_id": "PRIORITY-V2-73d57761-3bda-477a-8057-6a2905790c94",
+      "work_id": "PRIORITY-V2-cfb4341a-f512-4ebc-a256-6861379980fe",
       "title": "Address sanitation gap in Bengaluru South",
       "category": "Sanitation",
       "demand_count": 2,
       "demand_score": 34.59,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.11,
+        "feasibility_multiplier": 0.05,
+        "final_score": 34.59
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 26.86625,
@@ -44032,13 +44088,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "73d57761-3bda-477a-8057-6a2905790c94",
+          "submission_id": "cfb4341a-f512-4ebc-a256-6861379980fe",
           "language": "English",
           "raw_text": "The open nalas in Chowk market are choked with plastic. Sewage water is literally entering the shops after a small shower.",
           "normalized_text_en": "The open nalas in Chowk market are choked with plastic. Sewage water is literally entering the shops after a small shower."
         },
         {
-          "submission_id": "15c4eee5-9cd4-4abe-bd9f-52d782147e66",
+          "submission_id": "cf77ee1a-383c-4bab-a3b7-93a8f5a6223f",
           "language": "English",
           "raw_text": "Terrible mosquito breeding in the stagnant drain water near Akbari Gate. Dengue cases will spike if not cleaned.",
           "normalized_text_en": "Terrible mosquito breeding in the stagnant drain water near Akbari Gate. Dengue cases will spike if not cleaned."
@@ -44061,11 +44117,19 @@
       "rank": 1
     },
     {
-      "work_id": "PRIORITY-V2-81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed",
+      "work_id": "PRIORITY-V2-fd60d0fd-2386-43dd-b2a7-1df4bb368840",
       "title": "Address traffic and road safety gap in Bengaluru South",
       "category": "Traffic and Road Safety",
       "demand_count": 2,
       "demand_score": 32.81,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.15,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 32.81
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 26.850250000000003,
@@ -44074,13 +44138,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "81fe326f-865b-4dc6-8dc7-a2cc4ff6e9ed",
+          "submission_id": "fd60d0fd-2386-43dd-b2a7-1df4bb368840",
           "language": "English",
           "raw_text": "E-rickshaws have completely hijacked the Hazratganj crossing. They stop in the middle of the road blocking all traffic.",
           "normalized_text_en": "E-rickshaws have completely hijacked the Hazratganj crossing. They stop in the middle of the road blocking all traffic."
         },
         {
-          "submission_id": "c59e9ddd-0476-4485-a862-20db1cef0157",
+          "submission_id": "c3d97fc4-e21c-4ba0-b501-d7b3940800c6",
           "language": "English",
           "raw_text": "Despite multi-level parking, VIP cars are parked on the main Janpath market road, causing a massive bottleneck.",
           "normalized_text_en": "Despite multi-level parking, VIP cars are parked on the main Janpath market road, causing a massive bottleneck."
@@ -44103,11 +44167,19 @@
       "rank": 2
     },
     {
-      "work_id": "PRIORITY-V2-b7388278-995f-4e31-b8a2-24f9df4281a7",
+      "work_id": "PRIORITY-V2-c64ad792-caa7-43d3-8e32-6da230d64b3b",
       "title": "Address pollution gap in Bengaluru South",
       "category": "Pollution",
       "demand_count": 2,
       "demand_score": 31.98,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 31.98
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 26.8505,
@@ -44116,13 +44188,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "b7388278-995f-4e31-b8a2-24f9df4281a7",
+          "submission_id": "c64ad792-caa7-43d3-8e32-6da230d64b3b",
           "language": "English",
           "raw_text": "The Gomti riverfront stretch smells awful today. You can see thick black sludge and dead fish floating near the barrage.",
           "normalized_text_en": "The Gomti riverfront stretch smells awful today. You can see thick black sludge and dead fish floating near the barrage."
         },
         {
-          "submission_id": "d6511a49-9630-4d95-9556-6730d2b9ac44",
+          "submission_id": "503ad714-86c9-407f-9614-0bcdd561c8e3",
           "language": "English",
           "raw_text": "Untreated sewage is visibly flowing into the Gomti near Marine Drive. The water hyacinth has covered the entire surface.",
           "normalized_text_en": "Untreated sewage is visibly flowing into the Gomti near Marine Drive. The water hyacinth has covered the entire surface."
@@ -44145,11 +44217,19 @@
       "rank": 3
     },
     {
-      "work_id": "PRIORITY-V2-ca316a23-04ec-4ec6-b591-7b4fe652c7e3",
+      "work_id": "PRIORITY-V2-79653297-dee2-4df2-ad33-61c8efa543e7",
       "title": "Address mobility - roads, footpaths and infrastructure gap in Bengaluru South",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "demand_count": 1,
       "demand_score": 21.15,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 21.15
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 26.8166,
@@ -44158,7 +44238,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "ca316a23-04ec-4ec6-b591-7b4fe652c7e3",
+          "submission_id": "79653297-dee2-4df2-ad33-61c8efa543e7",
           "language": "English",
           "raw_text": "Kanpur road near Alambagh bus stand is broken. Dust pollution is immense due to the gravel on the road.",
           "normalized_text_en": "Kanpur road near Alambagh bus stand is broken. Dust pollution is immense due to the gravel on the road."
@@ -44181,11 +44261,19 @@
       "rank": 4
     },
     {
-      "work_id": "PRIORITY-V2-3aaa9af1-c691-4799-8410-dfe7ac6b9292",
+      "work_id": "PRIORITY-V2-cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5",
       "title": "Address electricity and power supply gap in Bengaluru South",
       "category": "Electricity and Power Supply",
       "demand_count": 1,
       "demand_score": 20.7,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.25,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 20.7
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 26.845,
@@ -44194,7 +44282,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "3aaa9af1-c691-4799-8410-dfe7ac6b9292",
+          "submission_id": "cf74c470-a9d6-40c8-9a71-0b3f8dc1a9b5",
           "language": "English",
           "raw_text": "The local transformer in Aminabad market caught fire last night. Half the market is without power, LESA hasn't responded.",
           "normalized_text_en": "The local transformer in Aminabad market caught fire last night. Half the market is without power, LESA hasn't responded."
@@ -44217,11 +44305,19 @@
       "rank": 5
     },
     {
-      "work_id": "PRIORITY-V2-22f715a7-f351-4a8f-8f61-8dcb16a5b0fb",
+      "work_id": "PRIORITY-V2-4555a2f3-9418-4245-b556-a41c2e170760",
       "title": "Address crime and safety gap in Bengaluru South",
       "category": "Crime and Safety",
       "demand_count": 1,
       "demand_score": 19.65,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 19.65
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 26.879,
@@ -44230,7 +44326,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "22f715a7-f351-4a8f-8f61-8dcb16a5b0fb",
+          "submission_id": "4555a2f3-9418-4245-b556-a41c2e170760",
           "language": "English",
           "raw_text": "Frequent chain snatching incidents reported in Munshi Pulia sector 16. We need active police patrolling in the evenings.",
           "normalized_text_en": "Frequent chain snatching incidents reported in Munshi Pulia sector 16. We need active police patrolling in the evenings."
@@ -44253,11 +44349,19 @@
       "rank": 6
     },
     {
-      "work_id": "PRIORITY-V2-ee1eb8ec-da50-4c24-acc1-5ed09e80a33e",
+      "work_id": "PRIORITY-V2-98e3247b-76c4-48b8-bf0d-0ee9505211f5",
       "title": "Address water supply and services gap in Bengaluru South",
       "category": "Water Supply and Services",
       "demand_count": 1,
       "demand_score": 18.75,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.12,
+        "equity_multiplier": 0.08,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 18.75
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 26.83,
@@ -44266,7 +44370,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "ee1eb8ec-da50-4c24-acc1-5ed09e80a33e",
+          "submission_id": "98e3247b-76c4-48b8-bf0d-0ee9505211f5",
           "language": "English",
           "raw_text": "Water pressure is so low in Gomti Nagar Ext that it doesn't even reach the first floor. Jal Sansthan must investigate.",
           "normalized_text_en": "Water pressure is so low in Gomti Nagar Ext that it doesn't even reach the first floor. Jal Sansthan must investigate."
@@ -44289,11 +44393,19 @@
       "rank": 7
     },
     {
-      "work_id": "PRIORITY-V2-73470287-4d04-43c3-9b5e-5a63ea3220a0",
+      "work_id": "PRIORITY-V2-f5a2db66-201b-4cc5-acf4-8b4c5984ffad",
       "title": "Address disaster management gap in Bengaluru South",
       "category": "Disaster Management",
       "demand_count": 6,
       "demand_score": 54.81,
+      "scoring_breakdown": {
+        "base_demand": 42.11,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.07,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 54.81
+      },
       "supporting_evidence_count": 6,
       "hotspot_geo": {
         "lat": 11.620333333333335,
@@ -44302,19 +44414,19 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "73470287-4d04-43c3-9b5e-5a63ea3220a0",
+          "submission_id": "f5a2db66-201b-4cc5-acf4-8b4c5984ffad",
           "language": "English",
           "raw_text": "Heavy rains have caused a minor mudslip near the Ghat road in Vythiri. If the rain continues, the entire highway to Kozhikode will be blocked.",
           "normalized_text_en": "Heavy rains have caused a minor mudslip near the Ghat road in Vythiri. If the rain continues, the entire highway to Kozhikode will be blocked."
         },
         {
-          "submission_id": "1b02aa68-7fc6-4e1a-b4f8-091cbe383334",
+          "submission_id": "2c34e856-9d9c-460a-bf9b-0d8cae78548e",
           "language": "English",
           "raw_text": "The Kalpetta General Hospital lacks a full-time pediatrician. For any serious child illness, we are forced to travel 70km to Kozhikode.",
           "normalized_text_en": "The Kalpetta General Hospital lacks a full-time pediatrician. For any serious child illness, we are forced to travel 70km to Kozhikode."
         },
         {
-          "submission_id": "ebf39ae5-8180-4bb4-83b7-4a75c3d6aab9",
+          "submission_id": "4ff18934-f757-410b-8a77-ee1fea51f5c6",
           "language": "English",
           "raw_text": "Quick wilt disease is destroying pepper vines across Bathery. Agriculture officers haven't visited to offer any fungicide solutions.",
           "normalized_text_en": "Quick wilt disease is destroying pepper vines across Bathery. Agriculture officers haven't visited to offer any fungicide solutions."
@@ -44337,11 +44449,19 @@
       "rank": 1
     },
     {
-      "work_id": "PRIORITY-V2-05c1f7b7-8744-4329-9841-8ed1f9daf813",
+      "work_id": "PRIORITY-V2-2c60da31-87bc-4a88-a6e8-54d0d04eda01",
       "title": "Address animal husbandry gap in Bengaluru South",
       "category": "Animal Husbandry",
       "demand_count": 2,
       "demand_score": 32.57,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.25,
+        "equity_multiplier": 0.07,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 32.57
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 11.8005,
@@ -44350,13 +44470,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "05c1f7b7-8744-4329-9841-8ed1f9daf813",
+          "submission_id": "2c60da31-87bc-4a88-a6e8-54d0d04eda01",
           "language": "English",
           "raw_text": "A herd of wild elephants entered Thondarnadu village last night, completely destroying the plantain and arecanut crops. Forest department fencing is broken.",
           "normalized_text_en": "A herd of wild elephants entered Thondarnadu village last night, completely destroying the plantain and arecanut crops. Forest department fencing is broken."
         },
         {
-          "submission_id": "87cbb90a-7c9b-48ad-971a-fd1458e70b37",
+          "submission_id": "f5ad4dd2-e6ca-4a6d-9ced-2e5317b932b3",
           "language": "English",
           "raw_text": "Leopard sighted near the tribal colony in Thirunelly. Mothers are scared to send kids to the Anganwadi. We need tranquilizer darts and capture.",
           "normalized_text_en": "Leopard sighted near the tribal colony in Thirunelly. Mothers are scared to send kids to the Anganwadi. We need tranquilizer darts and capture."
@@ -44379,11 +44499,19 @@
       "rank": 2
     },
     {
-      "work_id": "PRIORITY-V2-b20beb9f-ef22-48ea-a7c9-334ad0b01174",
+      "work_id": "PRIORITY-V2-3a0d5c66-1ce6-48ac-bccf-9ddaad49d198",
       "title": "Address mobility - roads, footpaths and infrastructure gap in Bengaluru South",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "demand_count": 1,
       "demand_score": 20.1,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.12,
+        "equity_multiplier": 0.07,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 20.1
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 11.63,
@@ -44392,7 +44520,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "b20beb9f-ef22-48ea-a7c9-334ad0b01174",
+          "submission_id": "3a0d5c66-1ce6-48ac-bccf-9ddaad49d198",
           "language": "English",
           "raw_text": "The Panchayat road leading to Krishnagiri stadium is untarred and washes away every monsoon. School buses refuse to come here.",
           "normalized_text_en": "The Panchayat road leading to Krishnagiri stadium is untarred and washes away every monsoon. School buses refuse to come here."
@@ -44415,11 +44543,19 @@
       "rank": 3
     },
     {
-      "work_id": "PRIORITY-V2-04f612a8-03b8-4ec8-8ddb-38225603f152",
+      "work_id": "PRIORITY-V2-fe6e63f6-64a2-410c-a8e4-535d1f38342b",
       "title": "Address water supply and services gap in Bengaluru South",
       "category": "Water Supply and Services",
       "demand_count": 1,
       "demand_score": 19.5,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.07,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 19.5
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 11.62,
@@ -44428,7 +44564,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "04f612a8-03b8-4ec8-8ddb-38225603f152",
+          "submission_id": "fe6e63f6-64a2-410c-a8e4-535d1f38342b",
           "language": "English",
           "raw_text": "Jal Jeevan Mission pipes were laid a year ago but there is no water connection yet. Villagers rely on a single contaminated well.",
           "normalized_text_en": "Jal Jeevan Mission pipes were laid a year ago but there is no water connection yet. Villagers rely on a single contaminated well."
@@ -44451,11 +44587,19 @@
       "rank": 4
     },
     {
-      "work_id": "PRIORITY-V2-21d051bb-f684-4303-9a38-03fa717aa96b",
+      "work_id": "PRIORITY-V2-e64ca046-5423-47b5-aaff-51f6ba752626",
       "title": "Address traffic and road safety gap in Bengaluru South",
       "category": "Traffic and Road Safety",
       "demand_count": 2,
       "demand_score": 33.14,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 33.14
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 28.601399999999998,
@@ -44464,13 +44608,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "21d051bb-f684-4303-9a38-03fa717aa96b",
+          "submission_id": "e64ca046-5423-47b5-aaff-51f6ba752626",
           "language": "English",
           "raw_text": "Arya Samaj Road in Karol Bagh is fully blocked. Two lanes are occupied by illegal parking by shop owners and hawkers.",
           "normalized_text_en": "Arya Samaj Road in Karol Bagh is fully blocked. Two lanes are occupied by illegal parking by shop owners and hawkers."
         },
         {
-          "submission_id": "c0e1344f-d6b0-4346-b5f8-07f20df529c4",
+          "submission_id": "ec4221bc-9ac1-4c13-832d-bd22915b1d6b",
           "language": "English",
           "raw_text": "Massive traffic jam every evening near Hauz Khas village entry due to valet parking blocking the main road.",
           "normalized_text_en": "Massive traffic jam every evening near Hauz Khas village entry due to valet parking blocking the main road."
@@ -44493,11 +44637,19 @@
       "rank": 1
     },
     {
-      "work_id": "PRIORITY-V2-02fb39c7-efbd-4564-9f52-d4f6ae4e3069",
+      "work_id": "PRIORITY-V2-3f885157-17ac-4eea-a816-ad6cc75b48e1",
       "title": "Address pollution gap in Bengaluru South",
       "category": "Pollution",
       "demand_count": 2,
       "demand_score": 31.6,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 31.6
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 28.6307,
@@ -44506,13 +44658,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "02fb39c7-efbd-4564-9f52-d4f6ae4e3069",
+          "submission_id": "3f885157-17ac-4eea-a816-ad6cc75b48e1",
           "language": "English",
           "raw_text": "AQI has crossed 450 today. The smog is so thick near India Gate that visibility is zero. Urgent need to deploy anti-smog guns and stop construction.",
           "normalized_text_en": "AQI has crossed 450 today. The smog is so thick near India Gate that visibility is zero. Urgent need to deploy anti-smog guns and stop construction."
         },
         {
-          "submission_id": "ca8cfea2-095a-4f8d-8988-f002e2f31abb",
+          "submission_id": "7242b6e9-76ff-4985-8c88-3c86a52a4231",
           "language": "English",
           "raw_text": "MCD sweepers are sweeping dry dust into the air at Barakhamba road instead of using water sprinklers, worsening the pollution.",
           "normalized_text_en": "MCD sweepers are sweeping dry dust into the air at Barakhamba road instead of using water sprinklers, worsening the pollution."
@@ -44535,11 +44687,19 @@
       "rank": 2
     },
     {
-      "work_id": "PRIORITY-V2-73d49f46-61b8-4761-ac65-3fb0574af4f1",
+      "work_id": "PRIORITY-V2-6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb",
       "title": "Address crime and safety gap in Bengaluru South",
       "category": "Crime and Safety",
       "demand_count": 2,
       "demand_score": 31.6,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 31.6
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 28.5655,
@@ -44548,13 +44708,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "73d49f46-61b8-4761-ac65-3fb0574af4f1",
+          "submission_id": "6c6b3aa2-2e20-4804-b30b-b0d4a79a6cbb",
           "language": "English",
           "raw_text": "Streetlights inside R.K. Puram Sector 3 parks are completely non-functional. It feels extremely unsafe for women returning from work in the evening.",
           "normalized_text_en": "Streetlights inside R.K. Puram Sector 3 parks are completely non-functional. It feels extremely unsafe for women returning from work in the evening."
         },
         {
-          "submission_id": "0bafa015-7c0f-4eee-9114-cf43b89ee07a",
+          "submission_id": "5c34dd72-13e0-4421-bfcd-00a35543f0e6",
           "language": "English",
           "raw_text": "Anti-social elements gather near the local market after 9 PM. PCR vans rarely patrol the inner lanes.",
           "normalized_text_en": "Anti-social elements gather near the local market after 9 PM. PCR vans rarely patrol the inner lanes."
@@ -44577,11 +44737,19 @@
       "rank": 3
     },
     {
-      "work_id": "PRIORITY-V2-8b5523f1-6085-412a-b2ae-17d08cc2661a",
+      "work_id": "PRIORITY-V2-d081ea6a-4b19-491d-a03c-a77703402f3d",
       "title": "Address water supply and services gap in Bengaluru South",
       "category": "Water Supply and Services",
       "demand_count": 1,
       "demand_score": 20.46,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.25,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 20.46
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 28.534,
@@ -44590,7 +44758,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "8b5523f1-6085-412a-b2ae-17d08cc2661a",
+          "submission_id": "d081ea6a-4b19-491d-a03c-a77703402f3d",
           "language": "English",
           "raw_text": "Delhi Jal Board water supply is erratic. We are getting muddy water for only 30 minutes at 2 AM. Tanker mafia is exploiting residents.",
           "normalized_text_en": "Delhi Jal Board water supply is erratic. We are getting muddy water for only 30 minutes at 2 AM. Tanker mafia is exploiting residents."
@@ -44613,11 +44781,19 @@
       "rank": 4
     },
     {
-      "work_id": "PRIORITY-V2-c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec",
+      "work_id": "PRIORITY-V2-8697b44c-14f7-4370-ad7a-feb85677767e",
       "title": "Address sanitation gap in Bengaluru South",
       "category": "Sanitation",
       "demand_count": 1,
       "demand_score": 20.46,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.07,
+        "feasibility_multiplier": 0.05,
+        "final_score": 20.46
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 28.567,
@@ -44626,7 +44802,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "c2c1e3f1-f8df-4830-b9a5-d7d36ad48dec",
+          "submission_id": "8697b44c-14f7-4370-ad7a-feb85677767e",
           "language": "English",
           "raw_text": "The Dhalao (garbage dump) in Central Market is overflowing onto the road. Cows and dogs are scattering it everywhere.",
           "normalized_text_en": "The Dhalao (garbage dump) in Central Market is overflowing onto the road. Cows and dogs are scattering it everywhere."
@@ -44649,11 +44825,19 @@
       "rank": 5
     },
     {
-      "work_id": "PRIORITY-V2-8a5996be-1b49-42a8-b72a-31d388113d67",
+      "work_id": "PRIORITY-V2-24076c2d-3089-4a10-97c7-26883b74adf7",
       "title": "Address mobility - roads, footpaths and infrastructure gap in Bengaluru South",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "demand_count": 1,
       "demand_score": 20.01,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.12,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 20.01
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 28.654,
@@ -44662,7 +44846,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "8a5996be-1b49-42a8-b72a-31d388113d67",
+          "submission_id": "24076c2d-3089-4a10-97c7-26883b74adf7",
           "language": "English",
           "raw_text": "Pedestrians are forced to walk on the busy street because the entire pavement is encroached by illegal extensions of local shops.",
           "normalized_text_en": "Pedestrians are forced to walk on the busy street because the entire pavement is encroached by illegal extensions of local shops."
@@ -44685,11 +44869,19 @@
       "rank": 6
     },
     {
-      "work_id": "PRIORITY-V2-f9921200-17bf-422a-b491-09149d027995",
+      "work_id": "PRIORITY-V2-a29677cc-37cd-4751-bfa0-b76d4fd5eefe",
       "title": "Address electricity and power supply gap in Bengaluru South",
       "category": "Electricity and Power Supply",
       "demand_count": 1,
       "demand_score": 18.51,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.12,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 18.51
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 28.536,
@@ -44698,7 +44890,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "f9921200-17bf-422a-b491-09149d027995",
+          "submission_id": "a29677cc-37cd-4751-bfa0-b76d4fd5eefe",
           "language": "English",
           "raw_text": "Severe voltage fluctuations in GK-1 M Block. Several appliances have burnt out. BSES is not responding to complaints.",
           "normalized_text_en": "Severe voltage fluctuations in GK-1 M Block. Several appliances have burnt out. BSES is not responding to complaints."
@@ -44721,11 +44913,19 @@
       "rank": 7
     },
     {
-      "work_id": "PRIORITY-V2-47a6df5d-ef35-4d75-840f-cc0f50d04d91",
+      "work_id": "PRIORITY-V2-a04f2551-97b0-4dc7-be06-030f8775a9ca",
       "title": "Address mobility - roads, footpaths and infrastructure gap in Bengaluru South",
       "category": "Mobility - Roads, Footpaths and Infrastructure",
       "demand_count": 2,
       "demand_score": 33.14,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.18,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 33.14
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 18.939500000000002,
@@ -44734,13 +44934,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "47a6df5d-ef35-4d75-840f-cc0f50d04d91",
+          "submission_id": "a04f2551-97b0-4dc7-be06-030f8775a9ca",
           "language": "English",
           "raw_text": "Colaba Causeway footpaths are 100% taken over by illegal hawkers. Pedestrians are forced to walk among zooming BEST buses, causing accidents.",
           "normalized_text_en": "Colaba Causeway footpaths are 100% taken over by illegal hawkers. Pedestrians are forced to walk among zooming BEST buses, causing accidents."
         },
         {
-          "submission_id": "d4731d75-9246-4a83-a148-d6a83b03569f",
+          "submission_id": "64d8615a-0185-4f98-9d48-ebb32ddc5d26",
           "language": "English",
           "raw_text": "Massive potholes on Tardeo road near AC market. Two-wheelers are skidding daily due to the uneven paver blocks.",
           "normalized_text_en": "Massive potholes on Tardeo road near AC market. Two-wheelers are skidding daily due to the uneven paver blocks."
@@ -44763,11 +44963,19 @@
       "rank": 1
     },
     {
-      "work_id": "PRIORITY-V2-9584a113-f4c7-4dec-b865-fabf960f821c",
+      "work_id": "PRIORITY-V2-41eae174-5cec-4d20-89f0-6f041f3a1db2",
       "title": "Address sanitation gap in Bengaluru South",
       "category": "Sanitation",
       "demand_count": 2,
       "demand_score": 31.72,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.15,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.07,
+        "feasibility_multiplier": 0.05,
+        "final_score": 31.72
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 18.979999999999997,
@@ -44776,13 +44984,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "c21cde04-39a8-463c-9fae-5fd5707f51cc",
+          "submission_id": "66c29029-2057-4ce7-938f-df5ef1dd7643",
           "language": "English",
           "raw_text": "Marine Drive promenade is littered with plastic bottles and food waste by late-night crowds. BMC sweepers are insufficient.",
           "normalized_text_en": "Marine Drive promenade is littered with plastic bottles and food waste by late-night crowds. BMC sweepers are insufficient."
         },
         {
-          "submission_id": "9584a113-f4c7-4dec-b865-fabf960f821c",
+          "submission_id": "41eae174-5cec-4d20-89f0-6f041f3a1db2",
           "language": "English",
           "raw_text": "The storm water drains in Dadar East are completely choked with plastic and debris, causing instant flooding.",
           "normalized_text_en": "The storm water drains in Dadar East are completely choked with plastic and debris, causing instant flooding."
@@ -44805,11 +45013,19 @@
       "rank": 2
     },
     {
-      "work_id": "PRIORITY-V2-2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17",
+      "work_id": "PRIORITY-V2-5be0f76d-f4ce-4767-b69c-cd65a28269d1",
       "title": "Address water supply and services gap in Bengaluru South",
       "category": "Water Supply and Services",
       "demand_count": 2,
       "demand_score": 31.6,
+      "scoring_breakdown": {
+        "base_demand": 23.77,
+        "urgency_multiplier": 0.21,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 31.6
+      },
       "supporting_evidence_count": 2,
       "hotspot_geo": {
         "lat": 19.0155,
@@ -44818,13 +45034,13 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "2e48a9b0-0ff1-4fae-a4b8-64fe8caa7b17",
+          "submission_id": "5be0f76d-f4ce-4767-b69c-cd65a28269d1",
           "language": "English",
           "raw_text": "BMC pipeline in Worli Koliwada seems to have mixed with a sewer line. Foul smelling, yellowish water is coming from the taps. Kids are falling sick.",
           "normalized_text_en": "BMC pipeline in Worli Koliwada seems to have mixed with a sewer line. Foul smelling, yellowish water is coming from the taps. Kids are falling sick."
         },
         {
-          "submission_id": "4bd833ab-265f-4679-bd8b-0c73f57a9e84",
+          "submission_id": "cabfa045-bb4e-4854-8555-765f3ad45bfb",
           "language": "English",
           "raw_text": "Unannounced 15% water cut implemented in Worli. Slum dwellers are suffering without any backup tanks.",
           "normalized_text_en": "Unannounced 15% water cut implemented in Worli. Slum dwellers are suffering without any backup tanks."
@@ -44847,11 +45063,19 @@
       "rank": 3
     },
     {
-      "work_id": "PRIORITY-V2-c26552b6-714b-477d-abac-76eb327f18f9",
+      "work_id": "PRIORITY-V2-efa99824-00d0-4726-8a63-52e3bafd3135",
       "title": "Address disaster management gap in Bengaluru South",
       "category": "Disaster Management",
       "demand_count": 1,
       "demand_score": 20.46,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.25,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 20.46
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 19.015,
@@ -44860,7 +45084,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "c26552b6-714b-477d-abac-76eb327f18f9",
+          "submission_id": "efa99824-00d0-4726-8a63-52e3bafd3135",
           "language": "English",
           "raw_text": "Just 30 minutes of rain and Hindmata flyover below area is completely waterlogged. BMC's desilting claims are false. Cars are submerged.",
           "normalized_text_en": "Just 30 minutes of rain and Hindmata flyover below area is completely waterlogged. BMC's desilting claims are false. Cars are submerged."
@@ -44883,11 +45107,19 @@
       "rank": 4
     },
     {
-      "work_id": "PRIORITY-V2-af43a8a5-71a2-496f-b9cb-66f770de527f",
+      "work_id": "PRIORITY-V2-b607c808-b7cf-46ce-88f7-9f95dd97b934",
       "title": "Address crime and safety gap in Bengaluru South",
       "category": "Crime and Safety",
       "demand_count": 1,
       "demand_score": 20.46,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.25,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 20.46
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 18.975,
@@ -44896,7 +45128,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "af43a8a5-71a2-496f-b9cb-66f770de527f",
+          "submission_id": "b607c808-b7cf-46ce-88f7-9f95dd97b934",
           "language": "English",
           "raw_text": "Open drug peddling near Byculla station east side at night. Addicts are harassing locals and snatching phones. Police must raid.",
           "normalized_text_en": "Open drug peddling near Byculla station east side at night. Addicts are harassing locals and snatching phones. Police must raid."
@@ -44919,11 +45151,19 @@
       "rank": 5
     },
     {
-      "work_id": "PRIORITY-V2-8136176c-16c1-4912-9574-e85d2d048e6a",
+      "work_id": "PRIORITY-V2-db8afdb0-6d2b-4d36-b314-c4de17a30544",
       "title": "Address traffic and road safety gap in Bengaluru South",
       "category": "Traffic and Road Safety",
       "demand_count": 1,
       "demand_score": 20.01,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.12,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.15,
+        "final_score": 20.01
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 18.911,
@@ -44932,7 +45172,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "8136176c-16c1-4912-9574-e85d2d048e6a",
+          "submission_id": "db8afdb0-6d2b-4d36-b314-c4de17a30544",
           "language": "English",
           "raw_text": "Tourists park haphazardly near Gateway of India causing a massive bottleneck extending all the way to Regal Cinema.",
           "normalized_text_en": "Tourists park haphazardly near Gateway of India causing a massive bottleneck extending all the way to Regal Cinema."
@@ -44955,11 +45195,19 @@
       "rank": 6
     },
     {
-      "work_id": "PRIORITY-V2-66946ef2-0f52-4cad-97c1-e453d3548a3e",
+      "work_id": "PRIORITY-V2-e320bca9-c334-4bf1-b971-706237ce790f",
       "title": "Address pollution gap in Bengaluru South",
       "category": "Pollution",
       "demand_count": 1,
       "demand_score": 18.51,
+      "scoring_breakdown": {
+        "base_demand": 15.0,
+        "urgency_multiplier": 0.12,
+        "equity_multiplier": 0.06,
+        "data_gap_multiplier": 0.0,
+        "feasibility_multiplier": 0.05,
+        "final_score": 18.51
+      },
       "supporting_evidence_count": 1,
       "hotspot_geo": {
         "lat": 18.955,
@@ -44968,7 +45216,7 @@
       },
       "supporting_evidence": [
         {
-          "submission_id": "66946ef2-0f52-4cad-97c1-e453d3548a3e",
+          "submission_id": "e320bca9-c334-4bf1-b971-706237ce790f",
           "language": "English",
           "raw_text": "Constant heavy drilling and construction noise throughout the night from the coastal road project. Senior citizens cannot sleep.",
           "normalized_text_en": "Constant heavy drilling and construction noise throughout the night from the coastal road project. Senior citizens cannot sleep."

@@ -41,11 +41,61 @@ export default function DrillDownPanel({ item, onClose }: Props) {
         </span>
       </div>
 
-      <div className="mt-5 p-4 rounded-md bg-civic-50 border border-civic-100">
-        <h3 className="text-xs font-semibold text-civic-700 uppercase tracking-wide mb-1.5">
-          Why this ranking
+      <div className="mt-6">
+        <h3 className="text-xs font-semibold text-ink-800/60 uppercase tracking-wide mb-3 flex items-center justify-between">
+          <span>AI Scoring Breakdown</span>
+          <span className="text-civic-600 font-bold bg-civic-50 px-2 py-0.5 rounded-full">
+             {(item.scoring_breakdown?.final_score || item.demand_score).toFixed(1)} / 100
+          </span>
         </h3>
-        <p className="text-sm text-ink-900 leading-relaxed">
+        
+        <div className="bg-ink-900/5 rounded-lg p-1">
+          <div className="grid grid-cols-2 gap-1 mb-1">
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-civic-500 mb-1 block">Citizen Demand</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  {item.scoring_breakdown?.base_demand.toFixed(1) || item.demand_score.toFixed(1)}
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Base</span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-red-500 mb-1 block">Urgency</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.urgency_multiplier || 0.12).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-1">
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-purple-500 mb-1 block">Census Equity</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.equity_multiplier || 0.05).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-signal-amber mb-1 block">UDISE / Health Gap</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.data_gap_multiplier || 0.05).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-ink-800/60 mt-3 italic px-1 leading-relaxed">
           {item.explanation}
         </p>
       </div>

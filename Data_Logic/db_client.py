@@ -100,7 +100,8 @@ class DBClient:
                     updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
                     state VARCHAR(100),
                     constituency VARCHAR(100),
-                    solution_plan JSONB DEFAULT '{}'::jsonb
+                    solution_plan JSONB DEFAULT '{}'::jsonb,
+                    scoring_breakdown JSONB DEFAULT '{}'::jsonb
                 );
             """)
             
@@ -390,8 +391,8 @@ class DBClient:
             with self.conn.cursor() as cur:
                 cur.execute("""
                     INSERT INTO priorities (
-                        title, category, demand_score, demand_count, hotspot_geo, supporting_evidence, rank, explanation, state, constituency, solution_plan
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                        title, category, demand_score, demand_count, hotspot_geo, supporting_evidence, rank, explanation, state, constituency, solution_plan, scoring_breakdown
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """, (
                     item['title'],
                     item['category'],
@@ -403,7 +404,8 @@ class DBClient:
                     item['explanation'],
                     item.get('state'),
                     item.get('constituency'),
-                    json.dumps(item.get('solution_plan', {}))
+                    json.dumps(item.get('solution_plan', {})),
+                    json.dumps(item.get('scoring_breakdown', {}))
                 ))
                 self.conn.commit()
         else:
