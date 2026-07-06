@@ -1,13 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { ActionCase } from "@/lib/types";
 import { Clock, FileCheck2, Send } from "lucide-react";
 import clsx from "clsx";
 
+const ASSIGNMENT_DEPARTMENTS = [
+  { id: "dept-safety", label: "Safety" },
+  { id: "dept-pwd", label: "PWD" },
+  { id: "dept-water", label: "Water Board" },
+  { id: "dept-electricity", label: "Power" },
+  { id: "dept-solid-waste", label: "SWM" },
+];
+
 interface Props {
   cases: ActionCase[];
   updatingCaseId?: string | null;
-  onUpdateStatus: (caseId: string, status: string) => void | Promise<void>;
+  onUpdateStatus: (caseId: string, status: string, departmentId?: string) => void | Promise<void>;
 }
 
 export default function CaseQueue({ cases, updatingCaseId, onUpdateStatus }: Props) {
@@ -42,13 +51,17 @@ function CaseQueueItem({
 }: {
   item: ActionCase;
   isUpdating: boolean;
-  onUpdateStatus: (caseId: string, status: string) => void | Promise<void>;
+  onUpdateStatus: (caseId: string, status: string, departmentId?: string) => void | Promise<void>;
 }) {
+  const [isChoosingDepartment, setIsChoosingDepartment] = useState(false);
   const isAssigned = item.status === "Assigned";
   const isResolved = item.status === "Resolved";
 
   return (
-    <article className="rounded-md bg-white p-3 border border-ink-900/10">
+    <article
+      data-testid={`case-card-${item.case_id}`}
+      className="rounded-md bg-white p-3 border border-ink-900/10"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -100,9 +113,10 @@ function CaseQueueItem({
 
       <div className="mt-3 flex gap-2">
         <button
+          data-testid={`assign-case-${item.case_id}`}
           type="button"
           disabled={isUpdating || isAssigned || isResolved}
-          onClick={() => onUpdateStatus(item.case_id, "Assigned")}
+          onClick={() => setIsChoosingDepartment(true)}
           className={clsx(
             "inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-semibold text-white transition-colors disabled:cursor-not-allowed",
             isAssigned
@@ -121,6 +135,38 @@ function CaseQueueItem({
           <FileCheck2 size={12} /> {isUpdating ? "Updating" : isResolved ? "Resolved" : "Resolve"}
         </button>
       </div>
+
+      {isChoosingDepartment && !isAssigned && !isResolved && (
+        <div className="mt-3 rounded-md border border-civic-100 bg-civic-50 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold text-ink-900">Assign to which department?</p>
+            <button
+              type="button"
+              onClick={() => setIsChoosingDepartment(false)}
+              className="text-xs font-semibold text-ink-800/55 hover:text-ink-900"
+            >
+              Cancel
+            </button>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {ASSIGNMENT_DEPARTMENTS.map((department) => (
+              <button
+                data-testid={`assign-${item.case_id}-${department.id}`}
+                key={department.id}
+                type="button"
+                disabled={isUpdating}
+                onClick={() => {
+                  setIsChoosingDepartment(false);
+                  onUpdateStatus(item.case_id, "Assigned", department.id);
+                }}
+                className="rounded-md border border-civic-200 bg-white px-2 py-1.5 text-xs font-semibold text-civic-700 transition-colors hover:border-civic-500 hover:bg-civic-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {department.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </article>
   );
 }
