@@ -13,6 +13,7 @@ export default function DashboardShell() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [constituency, setConstituency] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -21,7 +22,7 @@ export default function DashboardShell() {
       setIsLoading(true);
       setError(null);
       try {
-        const [p, h] = await Promise.all([getPriorities(), getHotspots()]);
+        const [p, h] = await Promise.all([getPriorities(constituency), getHotspots(constituency)]);
         if (!cancelled) {
           setPriorities(p);
           setHotspots(h);
@@ -45,7 +46,7 @@ export default function DashboardShell() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, []);
+  }, [constituency]);
 
   const selectedItem = priorities.find((p) => p.work_id === selectedId) || null;
 
@@ -64,9 +65,23 @@ export default function DashboardShell() {
             Constituency Dashboard
           </h1>
         </div>
-        <span className="text-xs text-white/40">
-          {priorities.length} ranked priorities
-        </span>
+        <div className="flex items-center gap-4">
+          <select 
+            className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
+            value={constituency}
+            onChange={(e) => setConstituency(e.target.value)}
+          >
+            <option value="">All Constituencies</option>
+            <option value="Bengaluru South">Bengaluru South</option>
+            <option value="Lucknow">Lucknow</option>
+            <option value="Wayanad">Wayanad</option>
+            <option value="New Delhi">New Delhi</option>
+            <option value="Mumbai South">Mumbai South</option>
+          </select>
+          <span className="text-xs text-white/40">
+            {priorities.length} ranked priorities
+          </span>
+        </div>
       </header>
 
       {error && (
