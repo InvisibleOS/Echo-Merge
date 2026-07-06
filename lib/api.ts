@@ -124,11 +124,11 @@ export async function getGovernanceInsights(
 export async function updateCaseStatus(
   caseId: string,
   status: string,
-  note?: string
+  note?: string,
+  departmentId?: string
 ): Promise<ActionCase | null> {
   return safeFetch<ActionCase | null>(`/cases/${encodeURIComponent(caseId)}`, {
     method: "PATCH",
-    body: JSON.stringify({ status, note }),
+    body: JSON.stringify({ status, note, department_id: departmentId }),
   });
 }
-

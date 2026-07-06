@@ -122,11 +122,16 @@ export default function DashboardShell() {
     );
   }
 
-  async function handleUpdateCaseStatus(caseId: string, status: string) {
+  async function handleUpdateCaseStatus(caseId: string, status: string, departmentId?: string) {
     setUpdatingCaseId(caseId);
     setError(null);
     try {
-      const updated = await updateCaseStatus(caseId, status, `MP dashboard marked ${status}.`);
+      const updated = await updateCaseStatus(
+        caseId,
+        status,
+        `MP dashboard marked ${status}.`,
+        departmentId
+      );
       if (!updated) {
         setError("Couldn't update that case. Please refresh and try again.");
         return;
