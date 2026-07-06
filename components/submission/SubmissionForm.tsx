@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mic, Camera, Type } from "lucide-react";
 import clsx from "clsx";
 import LanguageSelector from "./LanguageSelector";
@@ -34,16 +34,30 @@ export default function SubmissionForm() {
   const [error, setError] = useState<string | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
 
+  const [locationError, setLocationError] = useState<boolean>(false);
+
   function requestLocation() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        setGeo({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {
-        /* silently ignore — location is optional, never block submission */
-      }
-    );
+    setLocationError(false);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setGeo({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setLocationError(false);
+        },
+        () => {
+          setLocationError(true);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setLocationError(true);
+    }
   }
+
+  useEffect(() => {
+    // Automatically request location when the component mounts
+    requestLocation();
+  }, []);
 
   const canSubmit = (text.trim().length > 0 || audioBase64 || photoBase64);
 
@@ -90,7 +104,7 @@ export default function SubmissionForm() {
       case "voice":
         return audioBase64 !== null;
       case "photo":
-        return photoBase64 !== null;
+        return photoBase64 !== null || text.trim().length > 0;
     }
   }
 
@@ -157,18 +171,45 @@ export default function SubmissionForm() {
             <VoiceRecorder onAudioReady={setAudioBase64} />
           )}
           {activeMode === "photo" && (
-            <PhotoUpload onPhotoReady={setPhotoBase64} />
+            <div className="space-y-4">
+              <PhotoUpload onPhotoReady={setPhotoBase64} />
+              <TextInput 
+                value={text} 
+                onChange={setText} 
+                placeholder="Add a description of the issue... (optional)" 
+              />
+            </div>
           )}
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={requestLocation}
-        className="text-xs text-civic-600 underline underline-offset-2"
-      >
-        {geo ? "✓ Location attached" : "Attach my current location (optional)"}
-      </button>
+      <div className="flex items-center gap-2 text-xs font-medium">
+        {geo ? (
+          <div className="text-civic-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-signal-green animate-pulse" />
+            Live location automatically attached
+          </div>
+        ) : locationError ? (
+          <div className="text-signal-amber flex flex-col gap-1 items-start">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-signal-red" />
+              Location access denied or unavailable.
+            </div>
+            <button 
+              type="button"
+              onClick={requestLocation}
+              className="underline underline-offset-2 ml-4 text-civic-600 hover:text-civic-700 transition-colors"
+            >
+              Click here to retry (ensure permissions are enabled)
+            </button>
+          </div>
+        ) : (
+          <div className="text-civic-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-signal-amber animate-pulse" />
+            Fetching location...
+          </div>
+        )}
+      </div>
 
       {error && (
         <p className="text-signal-red text-sm bg-red-50 border border-red-200 rounded-md px-4 py-3">
