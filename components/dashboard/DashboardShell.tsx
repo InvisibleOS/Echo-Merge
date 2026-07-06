@@ -139,6 +139,15 @@ export default function DashboardShell() {
       setCases((current) =>
         current.map((item) => (item.case_id === caseId ? { ...item, ...updated } : item))
       );
+      const activeConstituency = constituency || "Bengaluru South";
+      const [deptData, healthData, insightData] = await Promise.all([
+        getDepartmentAnalytics(activeConstituency),
+        getConstituencyHealth(activeConstituency),
+        getGovernanceInsights(activeConstituency),
+      ]);
+      setDepartments(deptData);
+      setHealth(healthData);
+      setInsights(insightData);
     } catch {
       setError("Couldn't update that case. Please refresh and try again.");
     } finally {
