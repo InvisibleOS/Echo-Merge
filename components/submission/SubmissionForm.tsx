@@ -27,6 +27,7 @@ export default function SubmissionForm() {
   const [text, setText] = useState("");
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [photoDescription, setPhotoDescription] = useState("");
   const [geo, setGeo] = useState<GeoPoint | undefined>(undefined);
   const [constituency, setConstituency] = useState<string>("");
 
@@ -55,8 +56,9 @@ export default function SubmissionForm() {
     setError(null);
 
     try {
+      const combinedText = [text.trim(), photoDescription.trim()].filter(Boolean).join("\n\n") || undefined;
       const res = await submitComplaint({
-        raw_text: text.trim() || undefined,
+        raw_text: combinedText,
         audio_base64: audioBase64 || undefined,
         photo_base64: photoBase64 || undefined,
         language,
@@ -75,6 +77,7 @@ export default function SubmissionForm() {
 
   function reset() {
     setText("");
+    setPhotoDescription("");
     setAudioBase64(null);
     setPhotoBase64(null);
     setSubmissionId(null);
@@ -157,7 +160,11 @@ export default function SubmissionForm() {
             <VoiceRecorder onAudioReady={setAudioBase64} />
           )}
           {activeMode === "photo" && (
-            <PhotoUpload onPhotoReady={setPhotoBase64} />
+            <PhotoUpload
+              onPhotoReady={setPhotoBase64}
+              description={photoDescription}
+              onDescriptionChange={setPhotoDescription}
+            />
           )}
         </div>
       )}

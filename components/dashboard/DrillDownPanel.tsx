@@ -1,15 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import { PriorityItem } from "@/lib/types";
+import { resolvePriority } from "@/lib/api";
 import { CategoryBadge } from "@/components/ui/Badge";
-import { X, Users, MapPin } from "lucide-react";
+import { X, Users, MapPin, CheckCircle2 } from "lucide-react";
+import clsx from "clsx";
 
 interface Props {
   item: PriorityItem;
   onClose: () => void;
+  onResolve: (workId: string) => void;
 }
 
-export default function DrillDownPanel({ item, onClose }: Props) {
+export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
+  const [isResolving, setIsResolving] = useState(false);
+  const isResolved = item.status === "Resolved";
+
+  async function handleResolve() {
+    if (isResolving || isResolved) return;
+    setIsResolving(true);
+    try {
+      await resolvePriority(item.work_id);
+      onResolve(item.work_id);
+    } catch {
+      // Silently fail — the button stays enabled so the user can retry
+    } finally {
+      setIsResolving(false);
+    }
+  }
+
   return (
     <div className="bg-white border border-ink-900/10 rounded-lg p-6 h-full overflow-y-auto">
       <div className="flex items-start justify-between gap-4">
@@ -32,6 +52,25 @@ export default function DrillDownPanel({ item, onClose }: Props) {
 
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <CategoryBadge category={item.category} />
+
+        {/* Status badge */}
+        <span
+          className={clsx(
+            "inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full",
+            isResolved
+              ? "bg-signal-green/15 text-signal-green"
+              : "bg-signal-amber/15 text-amber-700"
+          )}
+        >
+          {isResolved ? (
+            <>
+              <CheckCircle2 size={12} /> Resolved
+            </>
+          ) : (
+            "Open"
+          )}
+        </span>
+
         <span className="inline-flex items-center gap-1 text-xs text-ink-800/60">
           <Users size={13} /> {item.demand_count} citizens
         </span>
@@ -40,6 +79,31 @@ export default function DrillDownPanel({ item, onClose }: Props) {
           {item.hotspot_geo.lat.toFixed(4)}, {item.hotspot_geo.lng.toFixed(4)}
         </span>
       </div>
+
+      {/* ── Mark as Resolved button ── */}
+      {!isResolved && (
+        <button
+          type="button"
+          onClick={handleResolve}
+          disabled={isResolving}
+          className={clsx(
+            "mt-5 w-full flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-display font-semibold transition-all",
+            "bg-signal-green text-white hover:bg-green-700",
+            "disabled:opacity-60 disabled:cursor-not-allowed"
+          )}
+          id="btn-mark-resolved"
+        >
+          <CheckCircle2 size={16} />
+          {isResolving ? "Updating…" : "Mark as Resolved"}
+        </button>
+      )}
+
+      {isResolved && (
+        <div className="mt-5 flex items-center justify-center gap-2 rounded-md bg-signal-green/10 border border-signal-green/25 px-4 py-2.5 text-sm font-semibold text-signal-green">
+          <CheckCircle2 size={16} />
+          This issue has been resolved
+        </div>
+      )}
 
       <div className="mt-6">
         <h3 className="text-xs font-semibold text-ink-800/60 uppercase tracking-wide mb-3 flex items-center justify-between">
@@ -133,7 +197,7 @@ export default function DrillDownPanel({ item, onClose }: Props) {
           
           <div className="pt-3 border-t border-amber-900/10">
             <span className="block text-[10px] uppercase text-amber-800/60 font-semibold mb-1">Strategic Rationale</span>
-            <p className="text-xs text-amber-900/80 italic leading-relaxed">"{item.solution_plan.strategic_rationale}"</p>
+            <p className="text-xs text-amber-900/80 italic leading-relaxed">&ldquo;{item.solution_plan.strategic_rationale}&rdquo;</p>
           </div>
         </div>
       )}
