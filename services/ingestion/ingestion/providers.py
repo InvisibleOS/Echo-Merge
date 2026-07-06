@@ -9,6 +9,7 @@ from typing import Any, Protocol
 from ingestion.config import DEFAULT_LANGUAGE_CODES, Settings
 from ingestion.models import PhotoAnalysis, TranscriptResult
 from ingestion.prompts import ENRICHMENT_SYSTEM_PROMPT, build_text_prompt
+from ingestion.tools import search_nearby_places, search_local_news
 
 
 class TextEnrichmentProvider(Protocol):
@@ -191,6 +192,20 @@ class OfflineHeuristicEnrichmentProvider:
         issues = [category] + photo_tags
 
         entities = self._entities_for(category, text, photo_tags, canonical_location)
+        
+        # AI Validation
+        validation_context = None
+        if category == "PWD":
+            if "school" in text.lower():
+                results = search_nearby_places("high school", canonical_location or "Bengaluru")
+                validation_context = f"Validation Agent ran Places API: {results}"
+            elif "hospital" in text.lower() or "clinic" in text.lower():
+                results = search_nearby_places("hospital", canonical_location or "Bengaluru")
+                validation_context = f"Validation Agent ran Places API: {results}"
+        elif category in ["Mobility - Roads, Footpaths and Infrastructure", "Water Supply and Services"]:
+            results = search_local_news(f"{category} issue in {canonical_location or 'Bengaluru'}")
+            validation_context = f"Validation Agent ran Tavily Search: {results}"
+
         return {
             "normalized_text_en": self._normalized_summary(text, normalized, canonical_location, photo),
             "detected_language": language_hint or self._guess_language(text),
@@ -200,6 +215,7 @@ class OfflineHeuristicEnrichmentProvider:
             "sentiment": "Concerned" if need_type != "Unknown" else "Neutral",
             "canonical_location": canonical_location,
             "extracted_entities": entities,
+            "validation_context": validation_context,
             "confidence": 0.72 if need_type != "Unknown" else 0.42,
             "quality_flags": [] if need_type != "Unknown" else ["needs_human_review"],
         }

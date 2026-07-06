@@ -56,6 +56,9 @@ export default function DashboardShell() {
 
   const filteredPriorities = useMemo(() => {
     let filtered = priorities;
+    if (constituency) {
+      filtered = filtered.filter(p => p.constituency === constituency);
+    }
     if (category) {
       filtered = filtered.filter(p => p.category === category);
     }
@@ -64,14 +67,15 @@ export default function DashboardShell() {
       ...p,
       rank: index + 1
     }));
-  }, [priorities, category]);
+  }, [priorities, category, constituency]);
 
   const filteredHotspots = useMemo(() => {
-    if (!category) return hotspots;
-    // We only want hotspots for priorities in the selected category
-    const validWorkIds = new Set(filteredPriorities.map(p => p.work_id));
-    return hotspots.filter(h => validWorkIds.has(h.work_id));
-  }, [hotspots, category, filteredPriorities]);
+    let filtered = hotspots;
+    if (category) {
+      filtered = filtered.filter(h => h.category === category);
+    }
+    return filtered;
+  }, [hotspots, category]);
 
   const selectedItem = filteredPriorities.find((p) => p.work_id === selectedId) || null;
 
@@ -153,6 +157,7 @@ export default function DashboardShell() {
               <DrillDownPanel
                 item={selectedItem}
                 onClose={() => setSelectedId(null)}
+                onResolve={() => {}}
               />
             </div>
           )}
