@@ -2,7 +2,7 @@
 
 import { PriorityItem } from "@/lib/types";
 import { CategoryBadge } from "@/components/ui/Badge";
-import { Users, ChevronRight, Activity } from "lucide-react";
+import { Users, ChevronRight, Activity, Building2, Clock } from "lucide-react";
 import clsx from "clsx";
 
 interface Props {
@@ -67,6 +67,16 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
             <span className="inline-flex items-center gap-1 text-xs font-medium text-signal-amber bg-signal-amber/10 px-2 py-0.5 rounded-full">
               <Activity size={12} /> {breakdown.final_score.toFixed(1)} AI Score
             </span>
+            {item.department && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-civic-700 bg-civic-50 px-2 py-0.5 rounded-full">
+                <Building2 size={12} /> {item.department.short_name}
+              </span>
+            )}
+            {item.sla_status && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-ink-800/70 bg-ink-900/5 px-2 py-0.5 rounded-full">
+                <Clock size={12} /> {item.sla_status}
+              </span>
+            )}
           </div>
           
           {/* Micro-visualization of AI Scoring Math */}

@@ -1,20 +1,40 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { PriorityItem, Hotspot } from "@/lib/types";
-import { getPriorities, getHotspots } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
+import {
+  PriorityItem,
+  ActionCase,
+  ConstituencyHealth,
+  DepartmentAnalytics,
+  GovernanceInsights,
+} from "@/lib/types";
+import {
+  getPriorities,
+  getCases,
+  getConstituencyHealth,
+  getDepartmentAnalytics,
+  getGovernanceInsights,
+  updateCaseStatus,
+} from "@/lib/api";
 import PriorityList from "./PriorityList";
-import HotspotMap from "./HotspotMap";
 import DrillDownPanel from "./DrillDownPanel";
+import HealthOverview from "./HealthOverview";
+import CaseQueue from "./CaseQueue";
+import DepartmentAnalyticsPanel from "./DepartmentAnalyticsPanel";
+import GovernanceInsightsPanel from "./GovernanceInsightsPanel";
 
 export default function DashboardShell() {
   const [priorities, setPriorities] = useState<PriorityItem[]>([]);
-  const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+  const [cases, setCases] = useState<ActionCase[]>([]);
+  const [health, setHealth] = useState<ConstituencyHealth | null>(null);
+  const [departments, setDepartments] = useState<DepartmentAnalytics[]>([]);
+  const [insights, setInsights] = useState<GovernanceInsights | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [constituency, setConstituency] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [updatingCaseId, setUpdatingCaseId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,12 +43,22 @@ export default function DashboardShell() {
       setIsLoading(true);
       setError(null);
       try {
-        const [p, h] = await Promise.all([getPriorities(constituency), getHotspots(constituency)]);
+        const activeConstituency = constituency || "Bengaluru South";
+        const [p, c, healthData, deptData, insightData] = await Promise.all([
+          getPriorities(constituency),
+          getCases({ constituency }),
+          getConstituencyHealth(activeConstituency),
+          getDepartmentAnalytics(activeConstituency),
+          getGovernanceInsights(activeConstituency),
+        ]);
         if (!cancelled) {
           setPriorities(p);
-          setHotspots(h);
+          setCases(c);
+          setHealth(healthData);
+          setDepartments(deptData);
+          setInsights(insightData);
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setError(
             "Couldn't load priorities. Check the API connection and try refreshing."
@@ -40,7 +70,6 @@ export default function DashboardShell() {
     }
 
     load();
-    // Refresh every 30s so new submissions surface without a manual reload
     const interval = setInterval(load, 30000);
 
     return () => {
@@ -50,48 +79,85 @@ export default function DashboardShell() {
   }, [constituency]);
 
   const uniqueCategories = useMemo(() => {
-    const cats = new Set(priorities.map(p => p.category));
+    const cats = new Set(priorities.map((p) => p.category));
     return Array.from(cats).sort();
   }, [priorities]);
 
   const filteredPriorities = useMemo(() => {
-    let filtered = priorities;
-    if (category) {
-      filtered = filtered.filter(p => p.category === category);
-    }
-    // Re-rank from 1 to N within this filtered list (assuming they are already sorted by demand_score desc)
+    const filtered = category
+      ? priorities.filter((p) => p.category === category)
+      : priorities;
     return filtered.map((p, index) => ({
       ...p,
-      rank: index + 1
+      rank: index + 1,
     }));
   }, [priorities, category]);
 
-  const filteredHotspots = useMemo(() => {
-    if (!category) return hotspots;
-    // We only want hotspots for priorities in the selected category
-    const validWorkIds = new Set(filteredPriorities.map(p => p.work_id));
-    return hotspots.filter(h => validWorkIds.has(h.work_id));
-  }, [hotspots, category, filteredPriorities]);
-
-  const selectedItem = filteredPriorities.find((p) => p.work_id === selectedId) || null;
+  const selectedItem =
+    filteredPriorities.find((p) => p.work_id === selectedId) || null;
+  const activeItem = selectedItem || filteredPriorities[0] || null;
 
   function handleSelect(workId: string) {
     setSelectedId((current) => (current === workId ? null : workId));
   }
 
+  function handleResolvePriority(workId: string) {
+    setPriorities((current) =>
+      current.map((item) =>
+        item.work_id === workId ? { ...item, status: "Resolved" } : item
+      )
+    );
+  }
+
+  async function handleUpdateCaseStatus(caseId: string, status: string, departmentId?: string) {
+    setUpdatingCaseId(caseId);
+    setError(null);
+    try {
+      const updated = await updateCaseStatus(
+        caseId,
+        status,
+        `MP dashboard marked ${status}.`,
+        departmentId
+      );
+      if (!updated) {
+        setError("Couldn't update that case. Please refresh and try again.");
+        return;
+      }
+      setCases((current) =>
+        current.map((item) => (item.case_id === caseId ? { ...item, ...updated } : item))
+      );
+      const activeConstituency = constituency || "Bengaluru South";
+      const [deptData, healthData, insightData] = await Promise.all([
+        getDepartmentAnalytics(activeConstituency),
+        getConstituencyHealth(activeConstituency),
+        getGovernanceInsights(activeConstituency),
+      ]);
+      setDepartments(deptData);
+      setHealth(healthData);
+      setInsights(insightData);
+    } catch {
+      setError("Couldn't update that case. Please refresh and try again.");
+    } finally {
+      setUpdatingCaseId(null);
+    }
+  }
+
   return (
-    <div className="h-screen flex flex-col bg-ink-950">
+    <div className="min-h-screen flex flex-col bg-ink-950">
       <header className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between shrink-0 gap-4">
         <div>
           <span className="text-signal-amber font-display font-semibold text-xs uppercase tracking-wide">
-            People&rsquo;s Priorities
+            Constituency Intelligence & Action OS
           </span>
-          <h1 className="font-display font-bold text-lg text-white">
-            Constituency Dashboard
+          <h1 className="font-display font-bold text-xl text-white">
+            MP Command Center
           </h1>
+          <p className="text-xs text-white/45 mt-1">
+            Detect, prioritize, assign, resolve, and monitor constituency issues.
+          </p>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
-          <select 
+          <select
             className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
             value={constituency}
             onChange={(e) => setConstituency(e.target.value)}
@@ -104,17 +170,19 @@ export default function DashboardShell() {
             <option value="Mumbai South">Mumbai South</option>
           </select>
 
-          <select 
+          <select
             className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
             value={category}
             onChange={(e) => {
               setCategory(e.target.value);
-              setSelectedId(null); // Reset selection when changing category
+              setSelectedId(null);
             }}
           >
             <option value="">All Categories</option>
-            {uniqueCategories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {uniqueCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
 
@@ -130,32 +198,46 @@ export default function DashboardShell() {
         </div>
       )}
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 p-4 min-h-0">
-        <div className="overflow-y-auto bg-ink-900/60 rounded-lg p-4 border border-white/5">
-          <PriorityList
-            items={filteredPriorities}
-            isLoading={isLoading}
-            selectedId={selectedId}
-            onSelect={handleSelect}
+      <div className="p-4 space-y-4">
+        <HealthOverview health={health} isLoading={isLoading} />
+
+        <div className="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)_380px] gap-4 min-h-[620px]">
+          <div className="overflow-y-auto bg-ink-900/60 rounded-lg p-4 border border-white/5 max-h-[620px]">
+            <PriorityList
+              items={filteredPriorities}
+              isLoading={isLoading}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+            />
+          </div>
+
+          <div className="min-h-[520px]">
+            {activeItem ? (
+              <DrillDownPanel
+                item={activeItem}
+                onClose={() => setSelectedId(null)}
+                onResolve={handleResolvePriority}
+              />
+            ) : (
+              <section className="h-full rounded-lg border border-white/10 bg-ink-900/70 p-6 text-white">
+                <h2 className="font-display font-bold text-lg">Priority Brief</h2>
+                <p className="mt-2 text-sm text-white/55">
+                  Ranked cases will appear here as constituency signals arrive.
+                </p>
+              </section>
+            )}
+          </div>
+
+          <CaseQueue
+            cases={cases}
+            updatingCaseId={updatingCaseId}
+            onUpdateStatus={handleUpdateCaseStatus}
           />
         </div>
 
-        <div className="relative min-h-[320px]">
-          <HotspotMap
-            hotspots={filteredHotspots}
-            priorities={filteredPriorities}
-            selectedId={selectedId}
-            onSelectMarker={handleSelect}
-          />
-
-          {selectedItem && (
-            <div className="absolute top-0 right-0 w-full max-w-md h-full p-2">
-              <DrillDownPanel
-                item={selectedItem}
-                onClose={() => setSelectedId(null)}
-              />
-            </div>
-          )}
+        <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-4">
+          <DepartmentAnalyticsPanel departments={departments} />
+          <GovernanceInsightsPanel insights={insights} />
         </div>
       </div>
     </div>
