@@ -158,6 +158,13 @@ export default function DrillDownPanel({ item, onClose }: Props) {
                 &ldquo;{ev.normalized_text_en}&rdquo;
               </p>
             )}
+            
+            {(ev.geo || ev.canonical_location) && (
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-civic-600 font-medium bg-civic-50 px-2 py-1 rounded-md w-fit">
+                <MapPin size={12} />
+                {ev.canonical_location || (ev.geo && ev.geo.lat ? `${ev.geo.lat.toFixed(4)}, ${ev.geo.lng.toFixed(4)}` : "Location Attached")}
+              </div>
+            )}
           </div>
         ))}
       </div>

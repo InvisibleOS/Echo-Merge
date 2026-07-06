@@ -14,9 +14,9 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 
 ---
 
-### Priority 1: Address disaster management gap in Bengaluru South
+### Priority 1: Address disaster management gap in Vythiri
 - **Category**: Disaster Management
-- **Resolved Location**: Bengaluru South (Hotspot density: 6 reports)
+- **Resolved Location**: Vythiri (Hotspot density: 6 reports)
 - **Scoring Priority Index**: 54.81/100
 - **Summary Action Plan**:
 
@@ -27,7 +27,7 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Deploy municipal officers to survey Bengaluru South and outline custom repairs backed by community-level funds.
+Deploy municipal officers to survey Vythiri and outline custom repairs backed by community-level funds.
 
 **Immediate Actions Recommended**:
 1. [ ] Direct ward officers to conduct a physical survey of the citizen complaint hotspot.
@@ -36,10 +36,10 @@ Deploy municipal officers to survey Bengaluru South and outline custom repairs b
 
 ---
 
-### Priority 2: Address animal husbandry gap in Bengaluru South
+### Priority 2: Address animal husbandry gap in Mananthavady
 - **Category**: Animal Husbandry
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
-- **Scoring Priority Index**: 32.57/100
+- **Resolved Location**: Mananthavady (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 33.05/100
 - **Summary Action Plan**:
 
 | Attribute | Plan Blueprint |
@@ -49,7 +49,7 @@ Deploy municipal officers to survey Bengaluru South and outline custom repairs b
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Deploy municipal officers to survey Bengaluru South and outline custom repairs backed by community-level funds.
+Deploy municipal officers to survey Mananthavady and outline custom repairs backed by community-level funds.
 
 **Immediate Actions Recommended**:
 1. [ ] Direct ward officers to conduct a physical survey of the citizen complaint hotspot.
@@ -58,9 +58,9 @@ Deploy municipal officers to survey Bengaluru South and outline custom repairs b
 
 ---
 
-### Priority 3: Address mobility - roads, footpaths and infrastructure gap in Bengaluru South
+### Priority 3: Address mobility - roads, footpaths and infrastructure gap in Meenangadi
 - **Category**: Mobility - Roads, Footpaths and Infrastructure
-- **Resolved Location**: Bengaluru South (Hotspot density: 1 reports)
+- **Resolved Location**: Meenangadi (Hotspot density: 1 reports)
 - **Scoring Priority Index**: 20.1/100
 - **Summary Action Plan**:
 
@@ -71,7 +71,7 @@ Deploy municipal officers to survey Bengaluru South and outline custom repairs b
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Reconstruct deteriorating roadways in Bengaluru South to improve public safety and ease heavy commercial/commuter traffic.
+Reconstruct deteriorating roadways in Meenangadi to improve public safety and ease heavy commercial/commuter traffic.
 
 **Immediate Actions Recommended**:
 1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.

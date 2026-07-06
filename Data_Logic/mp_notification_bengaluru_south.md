@@ -14,7 +14,29 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 
 ---
 
-### Priority 1: Address garbage and unsanitary practices gap in BTM Layout
+### Priority 1: Address mobility - roads, footpaths and infrastructure gap in HSR Layout
+- **Category**: Mobility - Roads, Footpaths and Infrastructure
+- **Resolved Location**: HSR Layout (Hotspot density: 3 reports)
+- **Scoring Priority Index**: 41.5/100
+- **Summary Action Plan**:
+
+| Attribute | Plan Blueprint |
+| :--- | :--- |
+| **Responsible Department** | BBMP Engineering / PWD |
+| **Budget Tier Estimate** | High (above 50L INR) |
+| **Remediation Timeline** | Mid-term (1-3 Months) |
+
+**Strategic Rationale**:  
+Reconstruct deteriorating roadways in HSR Layout to improve public safety and ease heavy commercial/commuter traffic.
+
+**Immediate Actions Recommended**:
+1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
+1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
+1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
+
+---
+
+### Priority 2: Address garbage and unsanitary practices gap in BTM Layout
 - **Category**: Garbage and Unsanitary Practices
 - **Resolved Location**: BTM Layout (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 34.0/100
@@ -33,28 +55,6 @@ Resolve accumulation points in BTM Layout through immediate cleanups paired with
 1. [ ] Initiate double-shift garbage collection rounds in the micro-neighborhood hotspot.
 1. [ ] Install local CCTV surveillance and post strict penalty notices for dumping in non-designated spots.
 1. [ ] Conduct community awareness workshops on waste segregation at source to reduce black spots.
-
----
-
-### Priority 2: Address mobility - roads, footpaths and infrastructure gap in HSR Layout
-- **Category**: Mobility - Roads, Footpaths and Infrastructure
-- **Resolved Location**: HSR Layout (Hotspot density: 2 reports)
-- **Scoring Priority Index**: 33.17/100
-- **Summary Action Plan**:
-
-| Attribute | Plan Blueprint |
-| :--- | :--- |
-| **Responsible Department** | BBMP Engineering / PWD |
-| **Budget Tier Estimate** | High (above 50L INR) |
-| **Remediation Timeline** | Mid-term (1-3 Months) |
-
-**Strategic Rationale**:  
-Reconstruct deteriorating roadways in HSR Layout to improve public safety and ease heavy commercial/commuter traffic.
-
-**Immediate Actions Recommended**:
-1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
-1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
-1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
 
 ---
 

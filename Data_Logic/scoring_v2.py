@@ -66,7 +66,14 @@ class ScoringPipelineV2:
         
         avg_lat = sum(lats) / len(lats) if lats else None
         avg_lng = sum(lngs) / len(lngs) if lngs else None
-        resolved_ward = resolve_ward_by_coords(avg_lat, avg_lng)
+        resolved_ward = None
+        for s in subs:
+            if s.get("geo") and s.get("geo").get("ward"):
+                resolved_ward = s["geo"]["ward"]
+                break
+        
+        if not resolved_ward:
+            resolved_ward = resolve_ward_by_coords(avg_lat, avg_lng)
         
         # 2. Demand Score (log-scaled count of unique citizen IDs)
         unique_citizens = set(s.get("citizen_id_hash") for s in subs if s.get("citizen_id_hash"))
@@ -141,7 +148,9 @@ class ScoringPipelineV2:
                 "submission_id": s["id"],
                 "language": s["language"],
                 "raw_text": s["raw_text"],
-                "normalized_text_en": s["normalized_text_en"]
+                "normalized_text_en": s["normalized_text_en"],
+                "geo": s.get("geo"),
+                "canonical_location": s.get("canonical_location")
             })
             
         # Explanation construction

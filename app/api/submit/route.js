@@ -6,11 +6,17 @@ import path from 'path';
 function triggerPythonPipeline(enrichedData) {
   const pythonScript = path.join(process.cwd(), 'Data_Logic', 'process_single_submission.py');
   
-  const payload = JSON.stringify(enrichedData).replace(/"/g, '\\"');
+  // Clone to avoid mutating original, then strip massive base64 strings
+  // so we don't hit bash ARG_MAX limits when executing the command!
+  const dataForPipeline = { ...enrichedData };
+  delete dataForPipeline.photo_url;
+  delete dataForPipeline.audio_url;
+
+  const payload = JSON.stringify(dataForPipeline).replace(/"/g, '\\"');
   const pythonExecutable = path.join(process.cwd(), '.venv', 'bin', 'python');
   const command = `echo "${payload}" | ${pythonExecutable} ${pythonScript}`;
   
-  console.log(`Triggering Python Pipeline for submission ${enrichedData.id}...`);
+  console.log(`Triggering Python Pipeline for submission ${dataForPipeline.id}...`);
   
   exec(command, (error, stdout, stderr) => {
     if (error) {

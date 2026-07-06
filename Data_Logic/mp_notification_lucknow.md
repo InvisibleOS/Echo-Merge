@@ -14,10 +14,10 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 
 ---
 
-### Priority 1: Address sanitation gap in Bengaluru South
+### Priority 1: Address sanitation gap in Chowk
 - **Category**: Sanitation
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
-- **Scoring Priority Index**: 34.59/100
+- **Resolved Location**: Chowk (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 36.02/100
 - **Summary Action Plan**:
 
 | Attribute | Plan Blueprint |
@@ -27,7 +27,7 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Address water issues in Bengaluru South by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
+Address water issues in Chowk by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
 
 **Immediate Actions Recommended**:
 1. [ ] Conduct immediate geo-spatial sensor mapping of the local supply lines and pipes to identify blocks.
@@ -36,31 +36,9 @@ Address water issues in Bengaluru South by clearing pipe blockages and expanding
 
 ---
 
-### Priority 2: Address traffic and road safety gap in Bengaluru South
-- **Category**: Traffic and Road Safety
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
-- **Scoring Priority Index**: 32.81/100
-- **Summary Action Plan**:
-
-| Attribute | Plan Blueprint |
-| :--- | :--- |
-| **Responsible Department** | BBMP Engineering / PWD |
-| **Budget Tier Estimate** | High (above 50L INR) |
-| **Remediation Timeline** | Mid-term (1-3 Months) |
-
-**Strategic Rationale**:  
-Reconstruct deteriorating roadways in Bengaluru South to improve public safety and ease heavy commercial/commuter traffic.
-
-**Immediate Actions Recommended**:
-1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
-1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
-1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
-
----
-
-### Priority 3: Address pollution gap in Bengaluru South
+### Priority 2: Address pollution gap in Gomti Nagar
 - **Category**: Pollution
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: Gomti Nagar (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 31.98/100
 - **Summary Action Plan**:
 
@@ -71,12 +49,34 @@ Reconstruct deteriorating roadways in Bengaluru South to improve public safety a
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Deploy municipal officers to survey Bengaluru South and outline custom repairs backed by community-level funds.
+Deploy municipal officers to survey Gomti Nagar and outline custom repairs backed by community-level funds.
 
 **Immediate Actions Recommended**:
 1. [ ] Direct ward officers to conduct a physical survey of the citizen complaint hotspot.
 1. [ ] Allocate ward-level development funds to resolve the immediate infrastructural bottleneck.
 1. [ ] Establish a periodic review meeting with local resident welfare associations (RWAs).
+
+---
+
+### Priority 3: Address traffic and road safety gap in Hazratganj
+- **Category**: Traffic and Road Safety
+- **Resolved Location**: Hazratganj (Hotspot density: 2 reports)
+- **Scoring Priority Index**: 31.86/100
+- **Summary Action Plan**:
+
+| Attribute | Plan Blueprint |
+| :--- | :--- |
+| **Responsible Department** | BBMP Engineering / PWD |
+| **Budget Tier Estimate** | High (above 50L INR) |
+| **Remediation Timeline** | Mid-term (1-3 Months) |
+
+**Strategic Rationale**:  
+Reconstruct deteriorating roadways in Hazratganj to improve public safety and ease heavy commercial/commuter traffic.
+
+**Immediate Actions Recommended**:
+1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
+1. [ ] Repave the broken road stretches using durable wet mix macadam sub-bases.
+1. [ ] Reconstruct elevated pedestrian footpaths with tactile tiles for accessibility.
 
 ---
 

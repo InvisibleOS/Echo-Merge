@@ -35,7 +35,7 @@ export default function VoiceRecorder({ onAudioReady }: Props) {
 
       recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
       recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/mp4" });
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
 
@@ -78,10 +78,16 @@ export default function VoiceRecorder({ onAudioReady }: Props) {
     if (!audioElRef.current) return;
     if (isPlaying) {
       audioElRef.current.pause();
+      setIsPlaying(false);
     } else {
-      audioElRef.current.play();
+      audioElRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.error("Playback error:", err);
+        setError("Your browser does not support previewing this audio format.");
+        setIsPlaying(false);
+      });
     }
-    setIsPlaying(!isPlaying);
   }
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0");

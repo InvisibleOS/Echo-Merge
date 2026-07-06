@@ -14,9 +14,9 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 
 ---
 
-### Priority 1: Address traffic and road safety gap in Bengaluru South
+### Priority 1: Address traffic and road safety gap in Karol Bagh
 - **Category**: Traffic and Road Safety
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: Karol Bagh (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 33.14/100
 - **Summary Action Plan**:
 
@@ -27,7 +27,7 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Reconstruct deteriorating roadways in Bengaluru South to improve public safety and ease heavy commercial/commuter traffic.
+Reconstruct deteriorating roadways in Karol Bagh to improve public safety and ease heavy commercial/commuter traffic.
 
 **Immediate Actions Recommended**:
 1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
@@ -36,9 +36,9 @@ Reconstruct deteriorating roadways in Bengaluru South to improve public safety a
 
 ---
 
-### Priority 2: Address pollution gap in Bengaluru South
+### Priority 2: Address pollution gap in Connaught Place
 - **Category**: Pollution
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: Connaught Place (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 31.6/100
 - **Summary Action Plan**:
 
@@ -49,7 +49,7 @@ Reconstruct deteriorating roadways in Bengaluru South to improve public safety a
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Deploy municipal officers to survey Bengaluru South and outline custom repairs backed by community-level funds.
+Deploy municipal officers to survey Connaught Place and outline custom repairs backed by community-level funds.
 
 **Immediate Actions Recommended**:
 1. [ ] Direct ward officers to conduct a physical survey of the citizen complaint hotspot.
@@ -58,9 +58,9 @@ Deploy municipal officers to survey Bengaluru South and outline custom repairs b
 
 ---
 
-### Priority 3: Address crime and safety gap in Bengaluru South
+### Priority 3: Address crime and safety gap in R K Puram
 - **Category**: Crime and Safety
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: R K Puram (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 31.6/100
 - **Summary Action Plan**:
 
@@ -71,7 +71,7 @@ Deploy municipal officers to survey Bengaluru South and outline custom repairs b
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Deploy municipal officers to survey Bengaluru South and outline custom repairs backed by community-level funds.
+Deploy municipal officers to survey R K Puram and outline custom repairs backed by community-level funds.
 
 **Immediate Actions Recommended**:
 1. [ ] Direct ward officers to conduct a physical survey of the citizen complaint hotspot.
