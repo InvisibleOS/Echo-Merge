@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env*
+!.env.example
+npm-debug.log*
+Data_Logic/__pycache__
+**/__pycache__
+*.pyc
+.DS_Store
+frontend
+scratchpad

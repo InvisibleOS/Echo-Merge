@@ -1,60 +1,55 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../utils/supabase/server';
+import { hotspotFromSubmission, hotspotFromPriority } from '../../../lib/server/mappers';
+import { cached, CACHE_KEYS } from '../../../lib/server/cache';
 
+export const dynamic = 'force-dynamic';
+
+const TTL_MS = 20000;
+
+/**
+ * GET /hotspots  (Person 2 -> Person 1)
+ * Returns a bare Hotspot[] (contract §1) for the map heatmap. Prefers one point
+ * per enriched submission (denser, urgency-weighted); falls back to aggregated
+ * priority centroids when no enriched submissions exist yet. Cached ~20s.
+ */
 export async function GET() {
   try {
-    // 1. Fetch pre-calculated hotspots from the priorities table
-    const { data: priorities, error: pError } = await supabase
-      .from('priorities')
-      .select('work_id, title, category, hotspot_geo, demand_count, demand_score');
+    const hotspots = await cached(CACHE_KEYS.hotspots, TTL_MS, async () => {
+      // Per-submission points: submissions.geo + enriched (category, urgency).
+      const { data: subs, error: subErr } = await supabase
+        .from('submissions')
+        .select('geo, enriched_submissions ( category, urgency )');
+      if (subErr) throw new Error(subErr.message);
 
-    if (pError) {
-      return NextResponse.json({ error: pError.message }, { status: 400 });
-    }
+      const points = (subs || [])
+        .filter((s) => s.geo && s.geo.lat != null && s.geo.lng != null)
+        .map((s) => {
+          const e = Array.isArray(s.enriched_submissions)
+            ? s.enriched_submissions[0]
+            : s.enriched_submissions;
+          return hotspotFromSubmission({
+            geo: s.geo,
+            category: e?.category,
+            urgency: e?.urgency,
+          });
+        });
 
-    // Format priorities hotspot data. hotspot_geo contains { lat, lng, density }
-    const hotspots = priorities
-      .filter((p) => p.hotspot_geo && p.hotspot_geo.lat && p.hotspot_geo.lng)
-      .map((p) => ({
-        work_id: p.work_id,
-        title: p.title,
-        category: p.category,
-        lat: Number(p.hotspot_geo.lat),
-        lng: Number(p.hotspot_geo.lng),
-        density: Number(p.hotspot_geo.density || p.demand_count || 1),
-        demand_score: Number(p.demand_score),
-      }));
+      if (points.length > 0) return points;
 
-    // 2. Fetch raw submission coordinates for detailed heatmap aggregation if frontend wants it
-    const { data: rawSubmissions, error: sError } = await supabase
-      .from('submissions')
-      .select('id, geo, channel, timestamp');
+      // Fallback: aggregate centroids from priorities.
+      const { data: priorities, error: pErr } = await supabase
+        .from('priorities')
+        .select('category, demand_score, demand_count, hotspot_geo');
+      if (pErr) throw new Error(pErr.message);
 
-    if (sError) {
-      return NextResponse.json({ error: sError.message }, { status: 400 });
-    }
+      return (priorities || [])
+        .filter((p) => p.hotspot_geo && p.hotspot_geo.lat != null && p.hotspot_geo.lng != null)
+        .map(hotspotFromPriority);
+    });
 
-    const rawGeoPoints = rawSubmissions
-      .filter((s) => s.geo && s.geo.lat && s.geo.lng)
-      .map((s) => ({
-        id: s.id,
-        lat: Number(s.geo.lat),
-        lng: Number(s.geo.lng),
-        channel: s.channel,
-        timestamp: s.timestamp,
-      }));
-
-    return NextResponse.json(
-      {
-        hotspots,
-        rawGeoPoints,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json(hotspots, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Server error: ' + error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 });
   }
 }
