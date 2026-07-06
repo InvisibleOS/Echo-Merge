@@ -6,13 +6,13 @@ export default function SubmitPage() {
       <div className="max-w-lg mx-auto">
         <div className="text-center mb-8">
           <span className="text-signal-amber font-display font-semibold tracking-wide text-xs uppercase">
-            People&rsquo;s Priorities
+            Citizen Intake
           </span>
           <h1 className="font-display font-800 text-3xl text-ink-900 mt-2">
-            Report a development need
+            Report an issue to Civic CoPilot
           </h1>
           <p className="text-ink-800/60 text-sm mt-2">
-            Text, voice, or a photo — whatever&rsquo;s easiest for you.
+            Text, voice, or a photo in your language. We route it to the right department and create a tracking case.
           </p>
         </div>
 

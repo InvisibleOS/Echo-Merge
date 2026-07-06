@@ -2,7 +2,7 @@
 
 import { PriorityItem } from "@/lib/types";
 import { CategoryBadge } from "@/components/ui/Badge";
-import { X, Users, MapPin } from "lucide-react";
+import { X, Users, MapPin, Building2, Clock, WalletCards, Wand2 } from "lucide-react";
 
 interface Props {
   item: PriorityItem;
@@ -32,6 +32,16 @@ export default function DrillDownPanel({ item, onClose }: Props) {
 
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <CategoryBadge category={item.category} />
+        {item.department && (
+          <span className="inline-flex items-center gap-1 text-xs text-civic-700 bg-civic-50 px-2 py-0.5 rounded-full font-semibold">
+            <Building2 size={13} /> {item.department.short_name}
+          </span>
+        )}
+        {item.sla_status && (
+          <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-semibold">
+            <Clock size={13} /> {item.sla_status}
+          </span>
+        )}
         <span className="inline-flex items-center gap-1 text-xs text-ink-800/60">
           <Users size={13} /> {item.demand_count} citizens
         </span>
@@ -40,6 +50,78 @@ export default function DrillDownPanel({ item, onClose }: Props) {
           {item.hotspot_geo.lat.toFixed(4)}, {item.hotspot_geo.lng.toFixed(4)}
         </span>
       </div>
+
+      {item.resolution_brief && (
+        <div className="mt-5 p-4 rounded-md bg-civic-50 border border-civic-100">
+          <h3 className="text-xs font-semibold text-civic-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Wand2 size={14} /> AI Resolution Brief
+          </h3>
+          <p className="text-sm font-semibold text-ink-900 leading-snug">
+            {item.resolution_brief.summary}
+          </p>
+          <p className="text-xs text-ink-800/70 mt-2 leading-relaxed">
+            {item.resolution_brief.why_now}
+          </p>
+          <div className="mt-3 rounded bg-white/80 border border-civic-100 p-3">
+            <span className="block text-[10px] uppercase font-bold text-ink-800/45 mb-1">
+              First action
+            </span>
+            <p className="text-sm text-ink-900 leading-relaxed">{item.resolution_brief.first_action}</p>
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {item.resolution_brief.recommended_steps.slice(0, 3).map((step) => (
+              <div key={step} className="text-xs text-ink-800/75 flex gap-2">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-civic-500 shrink-0" />
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(item.scheme_matches?.length || item.budget_recommendation || item.impact_prediction) && (
+        <div className="mt-5 grid grid-cols-1 gap-3">
+          {item.scheme_matches && item.scheme_matches.length > 0 && (
+            <div className="rounded-md border border-ink-900/10 p-3">
+              <span className="text-[10px] uppercase font-bold text-ink-800/45">Scheme matches</span>
+              <div className="mt-2 space-y-2">
+                {item.scheme_matches.slice(0, 2).map((scheme) => (
+                  <div key={scheme.id}>
+                    <p className="text-sm font-semibold text-ink-900">{scheme.name}</p>
+                    <p className="text-xs text-ink-800/60">{scheme.guidance}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {item.budget_recommendation && (
+            <div className="rounded-md border border-ink-900/10 p-3">
+              <span className="text-[10px] uppercase font-bold text-ink-800/45 flex items-center gap-1">
+                <WalletCards size={12} /> Budget fit
+              </span>
+              <p className="text-sm font-semibold text-ink-900 mt-2">
+                {item.budget_recommendation.recommended_budget_tier} priority
+              </p>
+              <p className="text-xs text-ink-800/60 mt-1">
+                {item.budget_recommendation.recommendation || item.budget_recommendation.rationale}
+              </p>
+            </div>
+          )}
+
+          {item.impact_prediction && (
+            <div className="rounded-md border border-ink-900/10 p-3">
+              <span className="text-[10px] uppercase font-bold text-ink-800/45">Impact prediction</span>
+              <p className="text-sm text-ink-900 mt-2">
+                Est. {item.impact_prediction.affected_citizens_estimate} citizens affected
+              </p>
+              <p className="text-xs text-ink-800/60 mt-1">
+                Trust gain: {item.impact_prediction.public_trust_gain}. {item.impact_prediction.risk_if_delayed}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-6">
         <h3 className="text-xs font-semibold text-ink-800/60 uppercase tracking-wide mb-3 flex items-center justify-between">
@@ -133,7 +215,9 @@ export default function DrillDownPanel({ item, onClose }: Props) {
           
           <div className="pt-3 border-t border-amber-900/10">
             <span className="block text-[10px] uppercase text-amber-800/60 font-semibold mb-1">Strategic Rationale</span>
-            <p className="text-xs text-amber-900/80 italic leading-relaxed">"{item.solution_plan.strategic_rationale}"</p>
+            <p className="text-xs text-amber-900/80 italic leading-relaxed">
+              &ldquo;{item.solution_plan.strategic_rationale}&rdquo;
+            </p>
           </div>
         </div>
       )}

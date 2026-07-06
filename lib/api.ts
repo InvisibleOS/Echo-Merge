@@ -4,10 +4,15 @@ import {
   SubmitPayload,
   SubmitResponse,
   EnrichedSubmission,
+  ActionCase,
+  ConstituencyHealth,
+  DepartmentAnalytics,
+  GovernanceInsights,
+  CopilotResponse,
 } from "./types";
 import { MOCK_PRIORITIES, MOCK_HOTSPOTS, mockSubmitResponse } from "./mockData";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
 /**
@@ -84,4 +89,59 @@ export async function getSubmissions(
 
   const query = workId ? `?work_id=${encodeURIComponent(workId)}` : "";
   return safeFetch<EnrichedSubmission[]>(`/submissions${query}`);
+}
+
+// ---------- Constituency Intelligence & Action OS ----------
+
+export async function getConstituencyHealth(
+  constituency?: string
+): Promise<ConstituencyHealth> {
+  const query = constituency ? `?constituency=${encodeURIComponent(constituency)}` : "";
+  return safeFetch<ConstituencyHealth>(`/dashboard/health${query}`);
+}
+
+export async function getCases(params?: {
+  constituency?: string;
+  status?: string;
+}): Promise<ActionCase[]> {
+  const query = new URLSearchParams();
+  if (params?.constituency) query.set("constituency", params.constituency);
+  if (params?.status) query.set("status", params.status);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return safeFetch<ActionCase[]>(`/cases${suffix}`);
+}
+
+export async function getDepartmentAnalytics(
+  constituency?: string
+): Promise<DepartmentAnalytics[]> {
+  const query = constituency ? `?constituency=${encodeURIComponent(constituency)}` : "";
+  return safeFetch<DepartmentAnalytics[]>(`/dashboard/departments${query}`);
+}
+
+export async function getGovernanceInsights(
+  constituency?: string
+): Promise<GovernanceInsights> {
+  const query = constituency ? `?constituency=${encodeURIComponent(constituency)}` : "";
+  return safeFetch<GovernanceInsights>(`/dashboard/insights${query}`);
+}
+
+export async function askCopilot(
+  question: string,
+  constituency?: string
+): Promise<CopilotResponse> {
+  return safeFetch<CopilotResponse>("/copilot", {
+    method: "POST",
+    body: JSON.stringify({ question, constituency }),
+  });
+}
+
+export async function updateCaseStatus(
+  caseId: string,
+  status: string,
+  note?: string
+): Promise<ActionCase | null> {
+  return safeFetch<ActionCase | null>(`/cases/${encodeURIComponent(caseId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status, note }),
+  });
 }
