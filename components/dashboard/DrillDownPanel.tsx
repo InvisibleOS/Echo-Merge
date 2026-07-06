@@ -25,7 +25,7 @@ interface Props {
 
 export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
   const [isResolving, setIsResolving] = useState(false);
-  const [activeReasoning, setActiveReasoning] = useState<keyof PriorityItem["scoring_breakdown"]["reasoning"] | null>(null);
+  const [activeReasoning, setActiveReasoning] = useState<'demand' | 'urgency' | 'equity' | 'validation' | null>(null);
   const isResolved = item.status === "Resolved";
 
   async function handleResolve() {
