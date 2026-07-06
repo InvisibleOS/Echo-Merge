@@ -1,95 +1,146 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import path from 'path';
+import { supabase } from '../../../utils/supabase/server';
+import { validateSubmitPayload, contentHash } from '../../../lib/server/validation';
+import { persistMedia } from '../../../lib/server/media';
+import { runPipeline } from '../../../lib/server/pipeline';
 
-// Helper to run the python pipeline asynchronously
-function triggerPythonPipeline(enrichedData) {
-  const pythonScript = path.join(process.cwd(), 'Data_Logic', 'process_single_submission.py');
-  
-  // Clone to avoid mutating original, then strip massive base64 strings
-  // so we don't hit bash ARG_MAX limits when executing the command!
-  const dataForPipeline = { ...enrichedData };
-  delete dataForPipeline.photo_url;
-  delete dataForPipeline.audio_url;
+// Route handlers are not cached by default in Next 16 — this is request-time.
+export const dynamic = 'force-dynamic';
 
-  const payload = JSON.stringify(dataForPipeline).replace(/"/g, '\\"');
-  const pythonExecutable = path.join(process.cwd(), '.venv', 'bin', 'python');
-  const command = `echo "${payload}" | ${pythonExecutable} ${pythonScript}`;
-  
-  console.log(`Triggering Python Pipeline for submission ${dataForPipeline.id}...`);
-  
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Python Pipeline Error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Python Pipeline stderr: ${stderr}`);
-    }
-    console.log(`Python Pipeline Output:\n${stdout}`);
-  });
-}
-
+/**
+ * POST /submit  (Person 1 -> Person 2)
+ * Accepts a citizen submission, stores it raw, then runs the ingestion pipeline
+ * (enrich -> embed -> rescore). Idempotent: identical content from the same
+ * citizen returns the original submission_id instead of duplicating.
+ * Response: SubmitResponse { success, submission_id, message } — contract §2.
+ */
 export async function POST(request) {
+  let body;
   try {
-    const body = await request.json();
-    const {
-      channel = 'web',
-      raw_text,
-      audio_base64,
-      photo_base64,
-      language,
-      geo,
-      citizen_id_hash = 'anon_' + Math.random().toString(36).substr(2, 9),
-    } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: 'Request body must be valid JSON.' },
+      { status: 400 }
+    );
+  }
 
+  const { ok, errors, value, geoWarning } = validateSubmitPayload(body);
+  if (!ok) {
+    return NextResponse.json(
+      { success: false, error: errors.join(' ') },
+      { status: 400 }
+    );
+  }
+  if (geoWarning) console.warn('[submit]', geoWarning);
 
-    // 1. Prepare payload for Ingestion Service
-    // The ingestion service expects `audio_url` and `photo_url`, but it natively 
-    // supports processing Base64 Data URIs as URLs!
-    const ingestionPayload = {
-      id: "live-" + Date.now().toString(),
-      channel,
-      raw_text,
-      audio_url: audio_base64, 
-      photo_url: photo_base64,
-      language,
-      geo,
-      citizen_id_hash,
-    };
+  const hash = contentHash(value);
 
-    // 2. Call the Python Ingestion Service (running on port 5001)
-    console.log("Calling Ingestion Service at :5001/enrich...");
-    const ingestionRes = await fetch('http://127.0.0.1:5001/enrich', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ingestionPayload),
-    });
-
-    if (!ingestionRes.ok) {
-      const errorText = await ingestionRes.text();
-      console.error("Ingestion Service Failed:", errorText);
-      return NextResponse.json({ error: 'Ingestion Service Error: ' + errorText }, { status: 500 });
+  try {
+    // --- Idempotency: return the existing row for identical content ---------
+    const existing = await findByContentHash(hash);
+    if (existing) {
+      return NextResponse.json(
+        {
+          success: true,
+          submission_id: existing.id,
+          message: 'Duplicate submission; returning the original record.',
+        },
+        { status: 200 }
+      );
     }
 
-    const enrichedSubmission = await ingestionRes.json();
-    console.log("Received Enriched Submission:", enrichedSubmission.id);
+    // --- Persist any base64 media to durable URLs --------------------------
+    const media = await persistMedia(
+      supabase,
+      { audio_base64: value.audio_base64, photo_base64: value.photo_base64 },
+      hash
+    );
+    media.warnings.forEach((w) => console.warn('[submit] media:', w));
 
-    // 3. Trigger Data_Logic pipeline asynchronously
-    triggerPythonPipeline(enrichedSubmission);
+    // --- Store the raw submission (DB columns only; never the raw base64) ---
+    const insertRow = {
+      channel: value.channel,
+      raw_text: value.raw_text,
+      audio_url: value.audio_url || media.audio_url,
+      photo_url: value.photo_url || media.photo_url,
+      language: value.language,
+      geo: value.geo,
+      citizen_id_hash: value.citizen_id_hash,
+    };
+    if (contentHashColumnExists !== false) insertRow.content_hash = hash;
+
+    const { data: rawData, error: rawError } = await supabase
+      .from('submissions')
+      .insert(insertRow)
+      .select()
+      .single();
+
+    if (rawError) {
+      // Unique-violation race: another request stored the same content first.
+      if (isUniqueViolation(rawError)) {
+        const winner = await findByContentHash(hash);
+        if (winner) {
+          return NextResponse.json(
+            {
+              success: true,
+              submission_id: winner.id,
+              message: 'Duplicate submission; returning the original record.',
+            },
+            { status: 200 }
+          );
+        }
+      }
+      return NextResponse.json({ success: false, error: rawError.message }, { status: 400 });
+    }
+
+    // --- Run the pipeline (enrich -> embed -> rescore) ----------------------
+    // Best-effort: the raw submission is already durable; pipeline errors are
+    // logged inside runPipeline and never lose the citizen's report.
+    await runPipeline(supabase, rawData);
 
     return NextResponse.json(
       {
-        message: 'Submission received. AI processing has started in the background.',
-        submission_id: enrichedSubmission.id,
+        success: true,
+        submission_id: rawData.id,
+        message: 'Submission received and processed.',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json(
-      { error: 'Server error during orchestration: ' + error.message },
+      { success: false, error: 'Server error during ingestion: ' + error.message },
       { status: 500 }
     );
   }
+}
+
+// Cache whether the content_hash column exists so we don't repeatedly probe a
+// pre-migration database. undefined = unknown, true/false = known.
+let contentHashColumnExists;
+
+async function findByContentHash(hash) {
+  if (contentHashColumnExists === false) return null;
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('id')
+    .eq('content_hash', hash)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    // 42703 = undefined_column -> schema not migrated yet; disable dedup path.
+    if (error.code === '42703' || /content_hash/.test(error.message || '')) {
+      contentHashColumnExists = false;
+      console.warn('[submit] content_hash column missing; idempotency disabled until migrated.');
+      return null;
+    }
+    throw new Error(error.message);
+  }
+  contentHashColumnExists = true;
+  return data || null;
+}
+
+function isUniqueViolation(error) {
+  return error && (error.code === '23505' || /duplicate key|unique/i.test(error.message || ''));
 }

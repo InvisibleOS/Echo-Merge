@@ -1,42 +1,37 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { supabase } from '../../../utils/supabase/server';
+import { toPriorityItem } from '../../../lib/server/mappers';
+import { cached, CACHE_KEYS } from '../../../lib/server/cache';
 
+export const dynamic = 'force-dynamic';
+
+const TTL_MS = 20000;
+
+/**
+ * GET /priorities  (Person 2 -> Person 1)
+ * Returns a bare PriorityItem[] (contract §2), ranked. Cached ~20s and
+ * invalidated on each processed submission.
+ * Query: ?sortBy=rank (default) | demand_score
+ */
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const sortBy = searchParams.get('sortBy') || 'rank';
-    const constituency = searchParams.get('constituency');
+    const sortBy = searchParams.get('sortBy') === 'demand_score' ? 'demand_score' : 'rank';
 
-    const dbPath = path.join(process.cwd(), 'Data_Logic', 'local_db_backup.json');
-    
-    if (!fs.existsSync(dbPath)) {
-      return NextResponse.json([], { status: 200 });
-    }
+    const items = await cached(`${CACHE_KEYS.priorities}:${sortBy}`, TTL_MS, async () => {
+      let query = supabase.from('priorities').select('*');
+      query =
+        sortBy === 'demand_score'
+          ? query.order('demand_score', { ascending: false })
+          : query.order('rank', { ascending: true, nullsFirst: false });
 
-    const fileContent = fs.readFileSync(dbPath, 'utf-8');
-    const db = JSON.parse(fileContent);
-    let priorities = db.priorities || [];
+      const { data, error } = await query;
+      if (error) throw new Error(error.message);
+      return (data || []).map(toPriorityItem);
+    });
 
-    if (constituency) {
-      priorities = priorities.filter(p => p.constituency === constituency);
-    }
-
-    if (sortBy === 'demand_score') {
-      priorities.sort((a, b) => b.demand_score - a.demand_score);
-    } else {
-      priorities.sort((a, b) => (a.rank || 0) - (b.rank || 0));
-    }
-
-    // lib/api.ts expects an array returned directly, wait...
-    // Let me check lib/api.ts for getPriorities
-    // return safeFetch<PriorityItem[]>("/priorities");
-    // If it expects an array directly, we must return the array, not { data: priorities }
-    return NextResponse.json(priorities, { status: 200 });
+    return NextResponse.json(items, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Server error: ' + error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 });
   }
 }

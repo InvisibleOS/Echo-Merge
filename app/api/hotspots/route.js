@@ -1,48 +1,55 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { supabase } from '../../../utils/supabase/server';
+import { hotspotFromSubmission, hotspotFromPriority } from '../../../lib/server/mappers';
+import { cached, CACHE_KEYS } from '../../../lib/server/cache';
 
-export async function GET(request) {
+export const dynamic = 'force-dynamic';
+
+const TTL_MS = 20000;
+
+/**
+ * GET /hotspots  (Person 2 -> Person 1)
+ * Returns a bare Hotspot[] (contract §1) for the map heatmap. Prefers one point
+ * per enriched submission (denser, urgency-weighted); falls back to aggregated
+ * priority centroids when no enriched submissions exist yet. Cached ~20s.
+ */
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const constituency = searchParams.get('constituency');
+    const hotspots = await cached(CACHE_KEYS.hotspots, TTL_MS, async () => {
+      // Per-submission points: submissions.geo + enriched (category, urgency).
+      const { data: subs, error: subErr } = await supabase
+        .from('submissions')
+        .select('geo, enriched_submissions ( category, urgency )');
+      if (subErr) throw new Error(subErr.message);
 
-    const dbPath = path.join(process.cwd(), 'Data_Logic', 'local_db_backup.json');
-    
-    if (!fs.existsSync(dbPath)) {
-      return NextResponse.json([], { status: 200 });
-    }
+      const points = (subs || [])
+        .filter((s) => s.geo && s.geo.lat != null && s.geo.lng != null)
+        .map((s) => {
+          const e = Array.isArray(s.enriched_submissions)
+            ? s.enriched_submissions[0]
+            : s.enriched_submissions;
+          return hotspotFromSubmission({
+            geo: s.geo,
+            category: e?.category,
+            urgency: e?.urgency,
+          });
+        });
 
-    const fileContent = fs.readFileSync(dbPath, 'utf-8');
-    const db = JSON.parse(fileContent);
-    let priorities = db.priorities || [];
+      if (points.length > 0) return points;
 
-    if (constituency) {
-      priorities = priorities.filter(p => p.constituency === constituency);
-    }
+      // Fallback: aggregate centroids from priorities.
+      const { data: priorities, error: pErr } = await supabase
+        .from('priorities')
+        .select('category, demand_score, demand_count, hotspot_geo');
+      if (pErr) throw new Error(pErr.message);
 
-    // Format priorities into hotspots
-    const hotspots = priorities
-      .filter((p) => p.hotspot_geo && p.hotspot_geo.lat && p.hotspot_geo.lng)
-      .map((p) => ({
-        work_id: p.work_id,
-        title: p.title,
-        category: p.category,
-        geo: {
-          lat: Number(p.hotspot_geo.lat),
-          lng: Number(p.hotspot_geo.lng),
-        },
-        intensity: Math.min(1, (Number(p.hotspot_geo.density || p.demand_count || 1) / 10)),
-        demand_count: Number(p.demand_count || p.hotspot_geo.density || 1),
-        demand_score: Number(p.demand_score),
-      }));
+      return (priorities || [])
+        .filter((p) => p.hotspot_geo && p.hotspot_geo.lat != null && p.hotspot_geo.lng != null)
+        .map(hotspotFromPriority);
+    });
 
-    // lib/api.ts expects an array of Hotspot objects directly.
     return NextResponse.json(hotspots, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Server error: ' + error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 });
   }
 }
