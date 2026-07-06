@@ -11,7 +11,7 @@ import SubmissionSuccess from "./SubmissionSuccess";
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { submitComplaint } from "@/lib/api";
-import { GeoPoint } from "@/lib/types";
+import { DepartmentSummary, GeoPoint, SchemeMatch } from "@/lib/types";
 
 type InputMode = "text" | "voice" | "photo";
 
@@ -28,11 +28,13 @@ export default function SubmissionForm() {
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoPoint | undefined>(undefined);
-  const [constituency, setConstituency] = useState<string>("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [caseId, setCaseId] = useState<string | undefined>(undefined);
+  const [department, setDepartment] = useState<DepartmentSummary | undefined>(undefined);
+  const [schemeMatches, setSchemeMatches] = useState<SchemeMatch[]>([]);
 
   function requestLocation() {
     if (!navigator.geolocation) return;
@@ -64,7 +66,10 @@ export default function SubmissionForm() {
         channel: "web",
       });
       setSubmissionId(res.submission_id);
-    } catch (err) {
+      setCaseId(res.case_id);
+      setDepartment(res.department);
+      setSchemeMatches(res.scheme_matches || []);
+    } catch {
       setError(
         "Something went wrong sending your report. Please check your connection and try again."
       );
@@ -78,6 +83,9 @@ export default function SubmissionForm() {
     setAudioBase64(null);
     setPhotoBase64(null);
     setSubmissionId(null);
+    setCaseId(undefined);
+    setDepartment(undefined);
+    setSchemeMatches([]);
     setError(null);
     setActiveMode(null);
   }
@@ -98,6 +106,9 @@ export default function SubmissionForm() {
     return (
       <SubmissionSuccess
         submissionId={submissionId}
+        caseId={caseId}
+        department={department}
+        schemeMatches={schemeMatches}
         onSubmitAnother={reset}
       />
     );

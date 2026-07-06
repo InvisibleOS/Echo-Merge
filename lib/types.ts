@@ -124,6 +124,13 @@ export interface PriorityItem {
   constituency?: string;
   solution_plan?: SolutionPlan;
   scoring_breakdown?: ScoringBreakdown;
+  department?: DepartmentSummary;
+  scheme_matches?: SchemeMatch[];
+  priority_band?: string;
+  sla_status?: string;
+  resolution_brief?: ResolutionBrief;
+  budget_recommendation?: BudgetRecommendation;
+  impact_prediction?: ImpactPrediction;
 }
 
 // ---------- Hotspot (map aggregation) ----------
@@ -150,4 +157,131 @@ export interface SubmitResponse {
   success: boolean;
   submission_id: string;
   message: string;
+  case_id?: string;
+  department?: DepartmentSummary;
+  scheme_matches?: SchemeMatch[];
+  tracking_url?: string;
+}
+
+// ---------- Constituency Intelligence & Action OS ----------
+
+export interface DepartmentSummary {
+  id: string;
+  name: string;
+  short_name: string;
+  officer?: string;
+  contact?: string;
+  sla_hours?: number;
+}
+
+export interface SchemeMatch {
+  id: string;
+  name: string;
+  department: string;
+  guidance: string;
+}
+
+export interface ResolutionBrief {
+  summary: string;
+  primary_department: string;
+  officer: string;
+  why_now: string;
+  first_action: string;
+  recommended_steps: string[];
+  schemes: string[];
+  citizen_message: string;
+}
+
+export interface BudgetRecommendation {
+  category: string;
+  recommended_budget_tier: string;
+  fund_source?: string;
+  recommendation?: string;
+  rationale?: string;
+  expected_impact?: string;
+  demand_count?: number;
+}
+
+export interface ImpactPrediction {
+  affected_citizens_estimate: number;
+  public_trust_gain: string;
+  risk_if_delayed: string;
+}
+
+export interface ActionCase {
+  case_id: string;
+  work_id: string;
+  title: string;
+  category: IssueCategory;
+  department: DepartmentSummary;
+  status: "New" | "Assigned" | "In Progress" | "Resolved" | string;
+  priority_score: number;
+  priority_band: "Critical" | "High" | "Medium" | "Watch" | string;
+  sla_deadline: string;
+  sla_status: "On Track" | "At Risk" | "Breached" | "Met" | string;
+  citizen_count: number;
+  ward: string;
+  geo?: GeoPoint;
+  resolution_brief: ResolutionBrief;
+  scheme_matches: SchemeMatch[];
+  evidence: SupportingEvidence[];
+  created_at: string;
+  updated_at: string;
+  latest_update: string;
+}
+
+export interface ConstituencyHealth {
+  constituency: string;
+  health_index: number;
+  open_cases: number;
+  critical_cases: number;
+  sla_breaches: number;
+  resolved_this_week: number;
+  active_hotspots: number;
+  citizen_trust_score: number;
+  top_issue: string;
+  fastest_department?: string;
+  slowest_department?: string;
+  trend_label: string;
+}
+
+export interface DepartmentAnalytics extends DepartmentSummary {
+  active_cases: number;
+  total_cases: number;
+  sla_breaches: number;
+  sla_compliance: number;
+  workload_score: number;
+  recommended_action: string;
+}
+
+export interface GovernanceInsights {
+  weekly_brief: string[];
+  emerging_issues: {
+    title: string;
+    severity: string;
+    evidence: string;
+  }[];
+  budget_recommendations: BudgetRecommendation[];
+  manifesto_tracking: {
+    promise: string;
+    linked_category: string;
+    progress: number;
+    risk: string;
+  }[];
+  disaster_mode: {
+    enabled: boolean;
+    trigger: string;
+    playbook: string[];
+  };
+}
+
+export interface CopilotResponse {
+  question: string;
+  answer: string;
+  citations: {
+    work_id: string;
+    title: string;
+    score: number;
+  }[];
+  suggested_actions: string[];
 }
