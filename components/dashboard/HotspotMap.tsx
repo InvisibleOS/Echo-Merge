@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Hotspot, PriorityItem } from "@/lib/types";
@@ -16,12 +16,6 @@ interface Props {
 // day1_enriched_submissions.json (Person 4's Day 1 data drop).
 // Update if the team locks a different demo constituency.
 const DEFAULT_CENTER: [number, number] = [77.5952, 12.9071];
-const INDIA_BOUNDS = {
-  minLat: 6,
-  maxLat: 36,
-  minLng: 68,
-  maxLng: 90,
-};
 
 export default function HotspotMap({
   hotspots,
@@ -32,15 +26,18 @@ export default function HotspotMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
-  const hasMapboxToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
-  const fallbackClusters = useMemo(() => getConstituencyClusters(hotspots), [hotspots]);
 
   // Initialize map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) return;
+    if (!token) {
+      console.error(
+        "Missing NEXT_PUBLIC_MAPBOX_TOKEN — get one free at account.mapbox.com"
+      );
+      return;
+    }
     mapboxgl.accessToken = token;
 
     const map = new mapboxgl.Map({
@@ -154,135 +151,6 @@ export default function HotspotMap({
     });
   }, [selectedId, priorities]);
 
-  if (!hasMapboxToken) {
-    return (
-      <div className="w-full h-full min-h-[520px] rounded-lg overflow-hidden border border-white/10 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.16),transparent_32%),linear-gradient(135deg,#101827,#020617)] p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="font-display font-bold text-white">India Hotspot Heatmap</h2>
-            <p className="text-xs text-white/50 mt-1">
-              Nationwide demo signals from Bengaluru, Lucknow, Wayanad, New Delhi, and Mumbai South.
-            </p>
-          </div>
-          <span className="rounded-full bg-signal-amber/15 px-3 py-1 text-xs font-semibold text-signal-amber">
-            {hotspots.length} signals
-          </span>
-        </div>
-
-        <div className="relative mt-4 h-[calc(100%-76px)] min-h-[420px] rounded-md border border-white/10 bg-white/[0.04] overflow-hidden">
-          <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.14)_1px,transparent_1px)] [background-size:44px_44px]" />
-          <svg
-            className="absolute inset-0 h-full w-full"
-            viewBox="0 0 100 120"
-            preserveAspectRatio="xMidYMid meet"
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient id="indiaFallbackFill" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#1E293B" />
-                <stop offset="100%" stopColor="#0F172A" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M43 5 57 8 70 20 73 33 67 45 66 56 74 66 68 78 59 83 55 98 48 114 42 99 34 86 27 80 23 68 17 58 21 47 18 35 26 23 34 16Z"
-              fill="url(#indiaFallbackFill)"
-              stroke="rgba(255,255,255,.18)"
-              strokeWidth="1.2"
-            />
-            <path
-              d="M70 31 84 27 91 32 85 39 73 38Z"
-              fill="#172033"
-              stroke="rgba(255,255,255,.16)"
-              strokeWidth="1"
-            />
-          </svg>
-
-          {hotspots.slice(0, 90).map((item, index) => {
-            const point = projectIndiaPoint(item.geo.lat, item.geo.lng);
-            const size = Math.max(18, Math.min(44, 16 + item.intensity * 18));
-            const opacity = Math.max(0.28, Math.min(0.78, 0.22 + item.intensity * 0.5));
-            return (
-              <span
-                key={`${item.geo.lat}-${item.geo.lng}-${index}`}
-                className="absolute rounded-full blur-md"
-                style={{
-                  left: `${point.x}%`,
-                  top: `${point.y}%`,
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  opacity,
-                  transform: "translate(-50%, -50%)",
-                  background:
-                    "radial-gradient(circle, rgba(245,158,11,.96) 0%, rgba(79,70,229,.56) 46%, rgba(79,70,229,0) 72%)",
-                }}
-              />
-            );
-          })}
-
-          {priorities.slice(0, 18).map((item) => {
-            const point = projectIndiaPoint(item.hotspot_geo.lat, item.hotspot_geo.lng);
-            return (
-              <button
-                key={item.work_id}
-                type="button"
-                onClick={() => onSelectMarker(item.work_id)}
-                className={
-                  item.work_id === selectedId
-                    ? "absolute z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-signal-amber text-xs font-bold text-white shadow-lg"
-                    : "absolute z-20 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-civic-500 text-xs font-bold text-white shadow-lg hover:bg-signal-amber"
-                }
-                style={{
-                  left: `${point.x}%`,
-                  top: `${point.y}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-                aria-label={item.title}
-              >
-                {item.rank}
-              </button>
-            );
-          })}
-
-          <div className="absolute right-3 top-3 w-48 rounded-md border border-white/10 bg-ink-950/78 p-3 backdrop-blur">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-white/40">Constituency Signals</p>
-            <div className="mt-2 space-y-2">
-              {fallbackClusters.map((cluster) => (
-                <div key={cluster.name} className="flex items-center justify-between gap-3 text-xs">
-                  <span className="truncate text-white/75">{cluster.name}</span>
-                  <span className="rounded bg-white/10 px-2 py-0.5 font-semibold text-white">
-                    {cluster.count}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-ink-950/82 p-3 backdrop-blur">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-white/40">
-                Top National Priorities
-              </p>
-              <span className="text-[10px] font-semibold text-white/40">Mapbox optional</span>
-            </div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-              {priorities.slice(0, 4).map((item) => (
-                <button
-                  key={item.work_id}
-                  type="button"
-                  onClick={() => onSelectMarker(item.work_id)}
-                  className="rounded bg-white/[0.06] px-3 py-2 text-left text-xs text-white/80 hover:bg-white/[0.1]"
-                >
-                  <span className="font-semibold text-white">#{item.rank}</span>{" "}
-                  {item.constituency || item.hotspot_geo.ward}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       ref={containerRef}
@@ -304,34 +172,4 @@ function hotspotsToGeoJSON(hotspots: Hotspot[]): GeoJSON.FeatureCollection {
       },
     })),
   };
-}
-
-function projectIndiaPoint(lat: number, lng: number) {
-  const x =
-    ((Number(lng) - INDIA_BOUNDS.minLng) /
-      (INDIA_BOUNDS.maxLng - INDIA_BOUNDS.minLng)) *
-    100;
-  const y =
-    (1 -
-      (Number(lat) - INDIA_BOUNDS.minLat) /
-        (INDIA_BOUNDS.maxLat - INDIA_BOUNDS.minLat)) *
-    100;
-
-  return {
-    x: Math.max(7, Math.min(93, x)),
-    y: Math.max(5, Math.min(96, y)),
-  };
-}
-
-function getConstituencyClusters(hotspots: Hotspot[]) {
-  const counts = new Map<string, number>();
-  hotspots.forEach((item) => {
-    const name = item.constituency || item.geo.ward || "Unknown";
-    counts.set(name, (counts.get(name) || 0) + Math.max(1, item.demand_count || 1));
-  });
-
-  return Array.from(counts.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
 }

@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '../../../utils/supabase/server';
+import { supabase } from '../../../utils/supabase/server';
 import { hotspotFromSubmission, hotspotFromPriority } from '../../../lib/server/mappers';
 import { cached, CACHE_KEYS } from '../../../lib/server/cache';
-import { getActionHotspots } from '../../../lib/server/action-os';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,15 +13,8 @@ const TTL_MS = 20000;
  * per enriched submission (denser, urgency-weighted); falls back to aggregated
  * priority centroids when no enriched submissions exist yet. Cached ~20s.
  */
-export async function GET(request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const constituency = searchParams.get('constituency') || '';
-
-    if (!isSupabaseConfigured) {
-      return NextResponse.json(getActionHotspots({ constituency }), { status: 200 });
-    }
-
     const hotspots = await cached(CACHE_KEYS.hotspots, TTL_MS, async () => {
       // Per-submission points: submissions.geo + enriched (category, urgency).
       const { data: subs, error: subErr } = await supabase

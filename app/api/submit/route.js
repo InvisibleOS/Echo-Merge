@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '../../../utils/supabase/server';
+import { supabase } from '../../../utils/supabase/server';
 import { validateSubmitPayload, contentHash } from '../../../lib/server/validation';
 import { persistMedia } from '../../../lib/server/media';
 import { runPipeline } from '../../../lib/server/pipeline';
-import { processOfflineSubmission } from '../../../lib/server/action-os';
 
 // Route handlers are not cached by default in Next 16 — this is request-time.
 export const dynamic = 'force-dynamic';
@@ -38,22 +37,6 @@ export async function POST(request) {
   const hash = contentHash(value);
 
   try {
-    if (!isSupabaseConfigured) {
-      const processed = await processOfflineSubmission(value, hash);
-      return NextResponse.json(
-        {
-          success: true,
-          submission_id: processed.submission.id,
-          case_id: processed.case.case_id,
-          message: 'Submission received, AI-routed, and queued in offline demo mode.',
-          department: processed.department,
-          scheme_matches: processed.schemes,
-          tracking_url: `/dashboard`,
-        },
-        { status: 201 }
-      );
-    }
-
     // --- Idempotency: return the existing row for identical content ---------
     const existing = await findByContentHash(hash);
     if (existing) {
