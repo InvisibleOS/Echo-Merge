@@ -14,7 +14,7 @@ export default function LandingPage() {
         evidence your representative can act on.
       </p>
 
-      <div className="mt-10 flex flex-col sm:flex-row gap-4">
+      <div className="mt-10 flex flex-col items-center gap-4">
         <Link
           href="/submit"
           className="px-8 py-4 rounded-md bg-civic-500 text-white font-display font-semibold hover:bg-civic-600 transition-colors"
@@ -23,9 +23,9 @@ export default function LandingPage() {
         </Link>
         <Link
           href="/dashboard"
-          className="px-8 py-4 rounded-md border border-ink-900/15 text-ink-900 font-display font-semibold hover:bg-ink-900/5 transition-colors"
+          className="text-sm text-ink-800/50 hover:text-civic-600 transition-colors underline underline-offset-2"
         >
-          MP dashboard →
+          Go to MP dashboard
         </Link>
       </div>
     </main>
