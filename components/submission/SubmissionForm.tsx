@@ -28,6 +28,7 @@ export default function SubmissionForm() {
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoPoint | undefined>(undefined);
+  const [constituency, setConstituency] = useState<string>("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +45,7 @@ export default function SubmissionForm() {
     );
   }
 
-  const canSubmit = text.trim().length > 0 || audioBase64 || photoBase64;
+  const canSubmit = (text.trim().length > 0 || audioBase64 || photoBase64);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,7 +60,7 @@ export default function SubmissionForm() {
         audio_base64: audioBase64 || undefined,
         photo_base64: photoBase64 || undefined,
         language,
-        geo,
+        geo: geo ? { ...geo, ward: undefined } : undefined, // frontend doesn't know ward
         channel: "web",
       });
       setSubmissionId(res.submission_id);

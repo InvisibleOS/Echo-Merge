@@ -41,14 +41,102 @@ export default function DrillDownPanel({ item, onClose }: Props) {
         </span>
       </div>
 
-      <div className="mt-5 p-4 rounded-md bg-civic-50 border border-civic-100">
-        <h3 className="text-xs font-semibold text-civic-700 uppercase tracking-wide mb-1.5">
-          Why this ranking
+      <div className="mt-6">
+        <h3 className="text-xs font-semibold text-ink-800/60 uppercase tracking-wide mb-3 flex items-center justify-between">
+          <span>AI Scoring Breakdown</span>
+          <span className="text-civic-600 font-bold bg-civic-50 px-2 py-0.5 rounded-full">
+             {(item.scoring_breakdown?.final_score || item.demand_score).toFixed(1)} / 100
+          </span>
         </h3>
-        <p className="text-sm text-ink-900 leading-relaxed">
+        
+        <div className="bg-ink-900/5 rounded-lg p-1">
+          <div className="grid grid-cols-2 gap-1 mb-1">
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-civic-500 mb-1 block">Citizen Demand</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  {item.scoring_breakdown?.base_demand.toFixed(1) || item.demand_score.toFixed(1)}
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Base</span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-red-500 mb-1 block">Urgency</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.urgency_multiplier || 0.12).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-1">
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-purple-500 mb-1 block">Census Equity</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.equity_multiplier || 0.05).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+              <span className="text-[10px] uppercase font-bold text-signal-amber mb-1 block">UDISE / Health Gap</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.data_gap_multiplier || 0.05).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-ink-800/60 mt-3 italic px-1 leading-relaxed">
           {item.explanation}
         </p>
       </div>
+
+      {item.solution_plan && (
+        <div className="mt-5 p-4 rounded-md bg-signal-amber/10 border border-signal-amber/30">
+          <h3 className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-3 flex items-center gap-2">
+            ✨ AI Solution Plan
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-1">Primary Agency</span>
+              <span className="text-sm font-medium text-ink-900">{item.solution_plan.primary_department}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-1">Timeline</span>
+              <span className="text-sm font-medium text-ink-900">{item.solution_plan.remediation_timeline}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-1">Budget Tier</span>
+              <span className="text-sm font-medium text-ink-900">{item.solution_plan.estimated_budget_tier}</span>
+            </div>
+          </div>
+
+          <span className="block text-[10px] uppercase text-ink-800/60 font-semibold mb-2">Recommended Action Steps</span>
+          <ul className="space-y-2 mb-4">
+            {item.solution_plan.action_steps.map((step, idx) => (
+              <li key={idx} className="text-sm text-ink-900 flex items-start gap-2">
+                <span className="text-signal-amber font-bold mt-0.5">•</span>
+                <span className="leading-snug">{step}</span>
+              </li>
+            ))}
+          </ul>
+          
+          <div className="pt-3 border-t border-amber-900/10">
+            <span className="block text-[10px] uppercase text-amber-800/60 font-semibold mb-1">Strategic Rationale</span>
+            <p className="text-xs text-amber-900/80 italic leading-relaxed">"{item.solution_plan.strategic_rationale}"</p>
+          </div>
+        </div>
+      )}
 
       <h3 className="text-xs font-semibold text-ink-800/60 uppercase tracking-wide mt-6 mb-3">
         Supporting evidence ({item.supporting_evidence.length})
@@ -69,6 +157,13 @@ export default function DrillDownPanel({ item, onClose }: Props) {
               <p className="text-sm text-ink-800/60 mt-2 pt-2 border-t border-ink-900/5 italic">
                 &ldquo;{ev.normalized_text_en}&rdquo;
               </p>
+            )}
+            
+            {(ev.geo || ev.canonical_location) && (
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-civic-600 font-medium bg-civic-50 px-2 py-1 rounded-md w-fit">
+                <MapPin size={12} />
+                {ev.canonical_location || (ev.geo && ev.geo.lat ? `${ev.geo.lat.toFixed(4)}, ${ev.geo.lng.toFixed(4)}` : "Location Attached")}
+              </div>
             )}
           </div>
         ))}
