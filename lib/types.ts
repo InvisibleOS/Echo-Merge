@@ -162,6 +162,8 @@ export interface Hotspot {
   category: IssueCategory;
   demand_count: number;
   work_id?: string;
+  state?: string;
+  constituency?: string;
 }
 
 // ---------- API request/response shapes ----------
@@ -253,4 +255,3 @@ export interface GovernanceInsights {
     playbook: string[];
   };
 }
-
