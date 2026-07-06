@@ -48,15 +48,18 @@ class OfflineSpeechProvider:
     }
 
     def transcribe(self, audio_url: str, language_hint: str | None = None) -> TranscriptResult:
+        is_base64 = len(audio_url) > 200
+        safe_url = "<base64_audio_data>" if is_base64 else audio_url
+        
         language, text = self._TRANSCRIPTS.get(
-            audio_url,
-            (language_hint or "en-IN", f"Demo transcript for audio file {audio_url}"),
+            safe_url,
+            (language_hint or "en-IN", f"Demo transcript for audio file"),
         )
         return TranscriptResult(
             text=text,
             detected_language=language,
             confidence=0.91,
-            provider_metadata={"audio_url": audio_url},
+            provider_metadata={"audio_url": safe_url},
         )
 
 
@@ -75,7 +78,10 @@ class OfflinePhotoProvider:
     }
 
     def analyze_photo(self, photo_url: str, language_hint: str | None = None) -> PhotoAnalysis:
-        haystack = photo_url.lower()
+        is_base64 = len(photo_url) > 200
+        safe_url = "<base64_photo_data>" if is_base64 else photo_url
+        
+        haystack = safe_url.lower()
         tags: list[str] = []
         descriptions: list[str] = []
         for keyword, (tag, description) in self._TAG_RULES.items():
@@ -91,7 +97,7 @@ class OfflinePhotoProvider:
             tags=tags,
             description=" ".join(descriptions),
             confidence=0.72 if tags != ["civic_issue_photo"] else 0.45,
-            provider_metadata={"photo_url": photo_url},
+            provider_metadata={"photo_url": safe_url},
         )
 
 

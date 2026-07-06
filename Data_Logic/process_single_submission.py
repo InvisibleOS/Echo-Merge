@@ -27,23 +27,53 @@ def process_submission(payload_json: str):
         print("❌ Submission missing ID.")
         sys.exit(1)
         
-    # Attempt to derive constituency from ward if not provided
+    # Attempt to derive constituency
     constituency = submission.get("constituency")
     ward = submission.get("geo", {}).get("ward") if submission.get("geo") else None
+    lat = submission.get("geo", {}).get("lat") if submission.get("geo") else None
+    lng = submission.get("geo", {}).get("lng") if submission.get("geo") else None
+    canonical_loc = submission.get("canonical_location", "").lower()
     
+    if not constituency:
+        if lat is not None and lng is not None:
+            # Snap to closest demo constituency using simple Euclidean distance
+            centers = {
+                "Bengaluru South": (12.93, 77.58),
+                "Lucknow": (26.84, 80.94),
+                "Wayanad": (11.68, 76.13),
+                "New Delhi": (28.61, 77.20),
+                "Mumbai South": (18.93, 72.82)
+            }
+            closest_c = min(centers.keys(), key=lambda c: (centers[c][0]-lat)**2 + (centers[c][1]-lng)**2)
+            # Only snap if reasonably close (e.g., within ~2 degrees), else leave empty to fallback
+            if (centers[closest_c][0]-lat)**2 + (centers[closest_c][1]-lng)**2 < 4.0:
+                constituency = closest_c
+
+        if not constituency and canonical_loc:
+            # Fallback to keyword matching in canonical location or entities
+            text_haystack = canonical_loc + " " + " ".join(submission.get("extracted_entities", []))
+            if "lucknow" in text_haystack or "chowk" in text_haystack or "gomti" in text_haystack:
+                constituency = "Lucknow"
+            elif "wayanad" in text_haystack or "kalpetta" in text_haystack:
+                constituency = "Wayanad"
+            elif "delhi" in text_haystack or "connaught" in text_haystack:
+                constituency = "New Delhi"
+            elif "mumbai" in text_haystack or "colaba" in text_haystack:
+                constituency = "Mumbai South"
+            elif "bengaluru" in text_haystack or "hsr" in text_haystack or "koramangala" in text_haystack:
+                constituency = "Bengaluru South"
+
     if not constituency and ward:
-        # Search demographics for a matching ward
         for (c_name, w_name) in db.demographics.keys():
             if w_name == ward:
                 constituency = c_name
-                submission["constituency"] = constituency
                 break
                 
     if not constituency:
-        # Default fallback for demo purposes
         print("⚠️ No constituency provided or found. Defaulting to 'Bengaluru South' for Demo.")
         constituency = "Bengaluru South"
-        submission["constituency"] = constituency
+        
+    submission["constituency"] = constituency
         
     # 2. Embedding & Saving Raw Submission
     print("🧬 Generating Embeddings...", flush=True)
@@ -58,6 +88,10 @@ def process_submission(payload_json: str):
     # 4. Solution Planning for top priorities
     print(f"🧠 Generating Solution Plans for prioritized items...", flush=True)
     planner = SolutionPlanner()
+    
+    # Clear old priorities for this constituency before inserting new ones
+    db.clear_priorities(constituency=constituency)
+    
     for item in priorities:
         category = item["category"]
         need_type = item["title"]

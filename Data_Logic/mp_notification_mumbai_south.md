@@ -14,9 +14,9 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 
 ---
 
-### Priority 1: Address mobility - roads, footpaths and infrastructure gap in Bengaluru South
+### Priority 1: Address mobility - roads, footpaths and infrastructure gap in Colaba
 - **Category**: Mobility - Roads, Footpaths and Infrastructure
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: Colaba (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 33.14/100
 - **Summary Action Plan**:
 
@@ -27,7 +27,7 @@ Below are the prioritized issues along with structured, AI-generated solution pl
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Reconstruct deteriorating roadways in Bengaluru South to improve public safety and ease heavy commercial/commuter traffic.
+Reconstruct deteriorating roadways in Colaba to improve public safety and ease heavy commercial/commuter traffic.
 
 **Immediate Actions Recommended**:
 1. [ ] Fill dangerous potholes with hot-mix asphalt for immediate traffic safety.
@@ -36,9 +36,9 @@ Reconstruct deteriorating roadways in Bengaluru South to improve public safety a
 
 ---
 
-### Priority 2: Address sanitation gap in Bengaluru South
+### Priority 2: Address sanitation gap in Hindmata
 - **Category**: Sanitation
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: Hindmata (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 31.72/100
 - **Summary Action Plan**:
 
@@ -49,7 +49,7 @@ Reconstruct deteriorating roadways in Bengaluru South to improve public safety a
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Address water issues in Bengaluru South by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
+Address water issues in Hindmata by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
 
 **Immediate Actions Recommended**:
 1. [ ] Conduct immediate geo-spatial sensor mapping of the local supply lines and pipes to identify blocks.
@@ -58,9 +58,9 @@ Address water issues in Bengaluru South by clearing pipe blockages and expanding
 
 ---
 
-### Priority 3: Address water supply and services gap in Bengaluru South
+### Priority 3: Address water supply and services gap in Worli
 - **Category**: Water Supply and Services
-- **Resolved Location**: Bengaluru South (Hotspot density: 2 reports)
+- **Resolved Location**: Worli (Hotspot density: 2 reports)
 - **Scoring Priority Index**: 31.6/100
 - **Summary Action Plan**:
 
@@ -71,7 +71,7 @@ Address water issues in Bengaluru South by clearing pipe blockages and expanding
 | **Remediation Timeline** | Mid-term (1-3 Months) |
 
 **Strategic Rationale**:  
-Address water issues in Bengaluru South by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
+Address water issues in Worli by clearing pipe blockages and expanding drainage capacity to prevent water stagnation.
 
 **Immediate Actions Recommended**:
 1. [ ] Conduct immediate geo-spatial sensor mapping of the local supply lines and pipes to identify blocks.
