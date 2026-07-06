@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { PriorityItem, Hotspot, KNOWN_CATEGORIES } from "@/lib/types";
+import { PriorityItem, Hotspot } from "@/lib/types";
 import { getPriorities, getHotspots } from "@/lib/api";
-import { categoryLabel } from "@/lib/categories";
 import PriorityList from "./PriorityList";
 import HotspotMap from "./HotspotMap";
 import DrillDownPanel from "./DrillDownPanel";
@@ -50,18 +49,29 @@ export default function DashboardShell() {
     };
   }, [constituency]);
 
-  // ── Combined filtering: Location (constituency) is already handled by
-  //    the API fetch above. Category filtering is applied client-side so
-  //    the full dataset stays cached for instant filter toggling. ──
+  const uniqueCategories = useMemo(() => {
+    const cats = new Set(priorities.map(p => p.category));
+    return Array.from(cats).sort();
+  }, [priorities]);
+
   const filteredPriorities = useMemo(() => {
-    if (!category) return priorities;
-    return priorities.filter((p) => p.category === category);
+    let filtered = priorities;
+    if (category) {
+      filtered = filtered.filter(p => p.category === category);
+    }
+    // Re-rank from 1 to N within this filtered list (assuming they are already sorted by demand_score desc)
+    return filtered.map((p, index) => ({
+      ...p,
+      rank: index + 1
+    }));
   }, [priorities, category]);
 
   const filteredHotspots = useMemo(() => {
     if (!category) return hotspots;
-    return hotspots.filter((h) => h.category === category);
-  }, [hotspots, category]);
+    // We only want hotspots for priorities in the selected category
+    const validWorkIds = new Set(filteredPriorities.map(p => p.work_id));
+    return hotspots.filter(h => validWorkIds.has(h.work_id));
+  }, [hotspots, category, filteredPriorities]);
 
   const selectedItem = filteredPriorities.find((p) => p.work_id === selectedId) || null;
 
@@ -69,23 +79,9 @@ export default function DashboardShell() {
     setSelectedId((current) => (current === workId ? null : workId));
   }
 
-  /** Mark a priority as resolved — updates local state immediately for
-   *  visual feedback and persists to the backend via the API. */
-  function handleResolve(workId: string) {
-    setPriorities((prev) =>
-      prev.map((p) =>
-        p.work_id === workId ? { ...p, status: "Resolved" as const } : p
-      )
-    );
-  }
-
-  // Dropdown styling — shared between Location and Category selects
-  const selectClass =
-    "bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber";
-
   return (
     <div className="h-screen flex flex-col bg-ink-950">
-      <header className="px-6 py-4 border-b border-white/10 flex items-center justify-between shrink-0">
+      <header className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between shrink-0 gap-4">
         <div>
           <span className="text-signal-amber font-display font-semibold text-xs uppercase tracking-wide">
             People&rsquo;s Priorities
@@ -94,13 +90,11 @@ export default function DashboardShell() {
             Constituency Dashboard
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Location filter */}
-          <select
-            className={selectClass}
+        <div className="flex items-center gap-4 flex-wrap">
+          <select 
+            className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
             value={constituency}
-            onChange={(e) => { setConstituency(e.target.value); setSelectedId(null); }}
-            id="filter-location"
+            onChange={(e) => setConstituency(e.target.value)}
           >
             <option value="">All Constituencies</option>
             <option value="Bengaluru South">Bengaluru South</option>
@@ -110,18 +104,17 @@ export default function DashboardShell() {
             <option value="Mumbai South">Mumbai South</option>
           </select>
 
-          {/* Category filter */}
-          <select
-            className={selectClass}
+          <select 
+            className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
             value={category}
-            onChange={(e) => { setCategory(e.target.value); setSelectedId(null); }}
-            id="filter-category"
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setSelectedId(null); // Reset selection when changing category
+            }}
           >
             <option value="">All Categories</option>
-            {KNOWN_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {categoryLabel(cat)}
-              </option>
+            {uniqueCategories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
 
@@ -160,7 +153,6 @@ export default function DashboardShell() {
               <DrillDownPanel
                 item={selectedItem}
                 onClose={() => setSelectedId(null)}
-                onResolve={handleResolve}
               />
             </div>
           )}

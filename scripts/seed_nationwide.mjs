@@ -1,0 +1,124 @@
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { createClient } from '@supabase/supabase-js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = resolve(__dirname, '..');
+
+try {
+  process.loadEnvFile(resolve(root, '.env.local'));
+} catch {}
+
+const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+const supabase = createClient(url, key, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+const readJson = (p) => JSON.parse(readFileSync(resolve(root, p), 'utf-8'));
+
+function contentHash(s) {
+  return createHash('sha256')
+    .update(
+      [s.citizen_id_hash || '', (s.raw_text || '').trim(), s.audio_url || '', s.photo_url || '', s.language || ''].join('|')
+    )
+    .digest('hex');
+}
+
+function mockEmbed(text) {
+  const seed = createHash('sha256').update(text || '').digest();
+  let state = seed.readUInt32BE(0) || 1;
+  const rand = () => {
+    state ^= state << 13;
+    state ^= state >>> 17;
+    state ^= state << 5;
+    return ((state >>> 0) / 0xffffffff) * 2 - 1;
+  };
+  const v = new Array(768);
+  let norm = 0;
+  for (let i = 0; i < 768; i++) {
+    v[i] = rand();
+    norm += v[i] * v[i];
+  }
+  norm = Math.sqrt(norm) || 1;
+  return v.map((x) => Number((x / norm).toFixed(6)));
+}
+
+async function upsert(table, rows, onConflict) {
+  if (!rows.length) return;
+  const { error } = await supabase.from(table).upsert(rows, { onConflict });
+  if (error) {
+    console.error(`✗ ${table}: ${error.message}`);
+    process.exitCode = 1;
+  } else {
+    console.log(`✓ ${table}: ${rows.length} rows`);
+  }
+}
+
+async function main() {
+  const data = readJson('Data_Logic/local_db_backup.json');
+  const enriched = Object.values(data.submissions || {});
+  const priorities = data.priorities || [];
+
+  const submissions = enriched.map((s) => ({
+    id: s.id,
+    timestamp: s.timestamp,
+    channel: s.channel || 'web',
+    raw_text: s.raw_text ?? null,
+    audio_url: s.audio_url ?? null,
+    photo_url: s.photo_url ?? null,
+    language: s.language,
+    geo: s.geo ?? null,
+    citizen_id_hash: s.citizen_id_hash || 'seed',
+    content_hash: contentHash(s),
+  }));
+  await upsert('submissions', submissions, 'id');
+
+  const enrichedRows = enriched.map((s) => ({
+    id: s.id,
+    normalized_text_en: s.normalized_text_en || s.raw_text || '',
+    category: s.category || 'Sanitation',
+    need_type: s.need_type || 'General',
+    urgency: s.urgency || 'Medium',
+    sentiment: s.sentiment || 'Neutral',
+    canonical_location: s.canonical_location ?? null,
+    extracted_entities: Array.isArray(s.extracted_entities) ? s.extracted_entities : [],
+  }));
+  await upsert('enriched_submissions', enrichedRows, 'id');
+
+  const embeddings = enriched.map((s) => ({
+    submission_id: s.id,
+    vector: mockEmbed(s.normalized_text_en || s.raw_text || ''),
+  }));
+  await upsert('embeddings', embeddings, 'submission_id');
+
+  const priorityRows = priorities.map((p) => ({
+    work_id: p.work_id,
+    title: p.title,
+    category: p.category,
+    demand_score: p.demand_score ?? 0,
+    demand_count: p.demand_count ?? 0,
+    hotspot_geo: p.hotspot_geo ?? {},
+    supporting_evidence: p.supporting_evidence ?? [],
+    rank: p.rank ?? null,
+    explanation: p.explanation || '',
+    solution_plan: p.solution_plan || null,
+  }));
+  await upsert('priorities', priorityRows, 'work_id');
+
+  console.log(
+    process.exitCode ? '\nSeed finished with errors.' : '\n✅ Nationwide Seed complete.'
+  );
+}
+
+main().catch((e) => {
+  console.error('Seed failed:', e.message);
+  process.exit(1);
+});
