@@ -8,3 +8,4 @@ export async function GET(request) {
   const constituency = searchParams.get('constituency') || 'Bengaluru South';
   return NextResponse.json(getDepartmentAnalytics({ constituency }), { status: 200 });
 }
+

@@ -66,3 +66,4 @@ export default function GovernanceInsightsPanel({ insights }: Props) {
     </section>
   );
 }
+

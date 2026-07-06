@@ -73,3 +73,4 @@ export default function HealthOverview({ health, isLoading }: Props) {
     </section>
   );
 }
+

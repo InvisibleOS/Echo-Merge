@@ -24,8 +24,7 @@ export async function GET(request) {
       return NextResponse.json(getActionPriorities({ constituency, sortBy }), { status: 200 });
     }
 
-    const cacheKey = `${CACHE_KEYS.priorities}:${sortBy}:${constituency || 'all'}`;
-    const items = await cached(cacheKey, TTL_MS, async () => {
+    const items = await cached(`${CACHE_KEYS.priorities}:${sortBy}`, TTL_MS, async () => {
       let query = supabase.from('priorities').select('*');
       query =
         sortBy === 'demand_score'

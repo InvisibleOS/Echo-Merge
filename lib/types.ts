@@ -68,6 +68,7 @@ export interface SupportingEvidence {
   language: string;
   geo?: GeoPoint;
   canonical_location?: string;
+  validation_context?: string | null;
 }
 
 export interface SolutionPlan {
@@ -82,9 +83,15 @@ export interface ScoringBreakdown {
   base_demand: number;
   urgency_multiplier: number;
   equity_multiplier: number;
-  data_gap_multiplier: number;
+  validation_multiplier: number;
   feasibility_multiplier: number;
   final_score: number;
+  reasoning?: {
+    demand: string;
+    urgency: string;
+    equity: string;
+    validation: string;
+  };
 }
 
 export interface DepartmentSummary {
@@ -161,9 +168,8 @@ export interface Hotspot {
   intensity: number;
   category: IssueCategory;
   demand_count: number;
-  work_id?: string;
-  state?: string;
   constituency?: string;
+  work_id?: string;
 }
 
 // ---------- API request/response shapes ----------
@@ -255,3 +261,4 @@ export interface GovernanceInsights {
     playbook: string[];
   };
 }
+

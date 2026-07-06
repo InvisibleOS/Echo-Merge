@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   PriorityItem,
+  Hotspot,
   ActionCase,
   ConstituencyHealth,
   DepartmentAnalytics,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/types";
 import {
   getPriorities,
+  getHotspots,
   getCases,
   getConstituencyHealth,
   getDepartmentAnalytics,
@@ -17,6 +19,7 @@ import {
   updateCaseStatus,
 } from "@/lib/api";
 import PriorityList from "./PriorityList";
+import HotspotMap from "./HotspotMap";
 import DrillDownPanel from "./DrillDownPanel";
 import HealthOverview from "./HealthOverview";
 import CaseQueue from "./CaseQueue";
@@ -25,6 +28,7 @@ import GovernanceInsightsPanel from "./GovernanceInsightsPanel";
 
 export default function DashboardShell() {
   const [priorities, setPriorities] = useState<PriorityItem[]>([]);
+  const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [cases, setCases] = useState<ActionCase[]>([]);
   const [health, setHealth] = useState<ConstituencyHealth | null>(null);
   const [departments, setDepartments] = useState<DepartmentAnalytics[]>([]);
@@ -44,8 +48,9 @@ export default function DashboardShell() {
       setError(null);
       try {
         const activeConstituency = constituency || "Bengaluru South";
-        const [p, c, healthData, deptData, insightData] = await Promise.all([
+        const [p, h, c, healthData, deptData, insightData] = await Promise.all([
           getPriorities(constituency),
+          getHotspots(constituency),
           getCases({ constituency }),
           getConstituencyHealth(activeConstituency),
           getDepartmentAnalytics(activeConstituency),
@@ -53,6 +58,7 @@ export default function DashboardShell() {
         ]);
         if (!cancelled) {
           setPriorities(p);
+          setHotspots(h);
           setCases(c);
           setHealth(healthData);
           setDepartments(deptData);
@@ -84,18 +90,30 @@ export default function DashboardShell() {
   }, [priorities]);
 
   const filteredPriorities = useMemo(() => {
-    const filtered = category
-      ? priorities.filter((p) => p.category === category)
-      : priorities;
+    let filtered = priorities;
+    if (constituency) {
+      filtered = filtered.filter(p => p.constituency === constituency);
+    }
+    if (category) {
+      filtered = filtered.filter(p => p.category === category);
+    }
+    // Re-rank from 1 to N within this filtered list (assuming they are already sorted by demand_score desc)
     return filtered.map((p, index) => ({
       ...p,
       rank: index + 1,
     }));
-  }, [priorities, category]);
+  }, [priorities, category, constituency]);
+
+  const filteredHotspots = useMemo(() => {
+    let filtered = hotspots;
+    if (category) {
+      filtered = filtered.filter(h => h.category === category);
+    }
+    return filtered;
+  }, [hotspots, category]);
 
   const selectedItem =
     filteredPriorities.find((p) => p.work_id === selectedId) || null;
-  const activeItem = selectedItem || filteredPriorities[0] || null;
 
   function handleSelect(workId: string) {
     setSelectedId((current) => (current === workId ? null : workId));
@@ -126,15 +144,6 @@ export default function DashboardShell() {
       setCases((current) =>
         current.map((item) => (item.case_id === caseId ? { ...item, ...updated } : item))
       );
-      const activeConstituency = constituency || "Bengaluru South";
-      const [deptData, healthData, insightData] = await Promise.all([
-        getDepartmentAnalytics(activeConstituency),
-        getConstituencyHealth(activeConstituency),
-        getGovernanceInsights(activeConstituency),
-      ]);
-      setDepartments(deptData);
-      setHealth(healthData);
-      setInsights(insightData);
     } catch {
       setError("Couldn't update that case. Please refresh and try again.");
     } finally {
@@ -201,7 +210,7 @@ export default function DashboardShell() {
       <div className="p-4 space-y-4">
         <HealthOverview health={health} isLoading={isLoading} />
 
-        <div className="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)_380px] gap-4 min-h-[620px]">
+        <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr_380px] gap-4 min-h-[620px]">
           <div className="overflow-y-auto bg-ink-900/60 rounded-lg p-4 border border-white/5 max-h-[620px]">
             <PriorityList
               items={filteredPriorities}
@@ -211,20 +220,22 @@ export default function DashboardShell() {
             />
           </div>
 
-          <div className="min-h-[520px]">
-            {activeItem ? (
-              <DrillDownPanel
-                item={activeItem}
-                onClose={() => setSelectedId(null)}
-                onResolve={handleResolvePriority}
-              />
-            ) : (
-              <section className="h-full rounded-lg border border-white/10 bg-ink-900/70 p-6 text-white">
-                <h2 className="font-display font-bold text-lg">Priority Brief</h2>
-                <p className="mt-2 text-sm text-white/55">
-                  Ranked cases will appear here as constituency signals arrive.
-                </p>
-              </section>
+          <div className="relative min-h-[520px]">
+            <HotspotMap
+              hotspots={filteredHotspots}
+              priorities={filteredPriorities}
+              selectedId={selectedId}
+              onSelectMarker={handleSelect}
+            />
+
+            {selectedItem && (
+              <div className="absolute top-0 right-0 w-full max-w-md h-full p-2">
+                <DrillDownPanel
+                  item={selectedItem}
+                  onClose={() => setSelectedId(null)}
+                  onResolve={handleResolvePriority}
+                />
+              </div>
             )}
           </div>
 

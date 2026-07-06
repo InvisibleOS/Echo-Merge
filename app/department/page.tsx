@@ -1,11 +1,8 @@
 import Link from "next/link";
-import { connection } from "next/server";
 import { getCases, getDepartmentAnalytics } from "@/lib/server/action-os";
 import { Clock, FileCheck2, ShieldAlert } from "lucide-react";
 
-export default async function DepartmentPortalPage() {
-  await connection();
-
+export default function DepartmentPortalPage() {
   const departments = getDepartmentAnalytics({ constituency: "Bengaluru South" });
   const cases = getCases({ constituency: "Bengaluru South" }).slice(0, 18);
 
@@ -27,8 +24,8 @@ export default async function DepartmentPortalPage() {
           </Link>
         </header>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mt-6">
-          {departments.map((dept) => (
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          {departments.slice(0, 3).map((dept) => (
             <div key={dept.id} className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -37,9 +34,8 @@ export default async function DepartmentPortalPage() {
                 </div>
                 <span className="text-sm font-bold text-civic-300">{dept.sla_compliance}%</span>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                 <Metric label="Active" value={dept.active_cases} />
-                <Metric label="Total" value={dept.total_cases} />
                 <Metric label="Breaches" value={dept.sla_breaches} />
                 <Metric label="Workload" value={dept.workload_score} />
               </div>
@@ -98,3 +94,4 @@ function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
     </span>
   );
 }
+
