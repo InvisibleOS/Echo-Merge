@@ -124,6 +124,7 @@ export interface PriorityItem {
   constituency?: string;
   solution_plan?: SolutionPlan;
   scoring_breakdown?: ScoringBreakdown;
+  status?: "Open" | "Resolved"; // resolution tracking — defaults to "Open"
 }
 
 // ---------- Hotspot (map aggregation) ----------
