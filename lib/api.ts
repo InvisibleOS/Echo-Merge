@@ -85,3 +85,18 @@ export async function getSubmissions(
   const query = workId ? `?work_id=${encodeURIComponent(workId)}` : "";
   return safeFetch<EnrichedSubmission[]>(`/submissions${query}`);
 }
+
+// ---------- PATCH /priorities/:id/resolve ----------
+
+export async function resolvePriority(
+  workId: string
+): Promise<{ success: boolean }> {
+  if (USE_MOCK) {
+    await new Promise((r) => setTimeout(r, 300));
+    return { success: true };
+  }
+
+  return safeFetch<{ success: boolean }>(`/priorities/${encodeURIComponent(workId)}/resolve`, {
+    method: "PATCH",
+  });
+}
