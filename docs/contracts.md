@@ -1,134 +1,100 @@
-# API and Data Contracts
+# API & Data Contracts (FROZEN — Day 1)
 
-These contracts freeze the Person 3 handoff so frontend, backend, and data logic can work in parallel.
+> This is the single source of truth for the seams between all four roles.
+> Person 2 (Backend) owns this file. The frontend's TypeScript mirror lives in
+> [`lib/types.ts`](../lib/types.ts) and **must stay in sync** — if the backend
+> response ever diverges from this doc, it's a contract break: flag it in
+> standup, don't silently patch around it.
+>
+> **Constituency:** Bengaluru South.  **Demo languages:** Hindi, Kannada,
+> Tamil, English (+ Telugu/Bengali/Marathi supported by the same pipeline).
 
-## Raw Submission
+---
 
-```json
-{
-  "id": "sub_001",
-  "timestamp": "2026-07-05T15:30:00Z",
-  "channel": "web",
-  "raw_text": "हमारे वार्ड में सड़क टूट गई है",
-  "audio_url": "gs://bucket/audio/sub_001.webm",
-  "photo_url": "gs://bucket/photos/sub_001.jpg",
-  "language": "hi-IN",
-  "geo": {
-    "lat": 28.6139,
-    "lng": 77.209,
-    "ward": "Ward 12"
-  },
-  "citizen_id_hash": "sha256:..."
-}
-```
+## 1. Data schemas
 
-Only one of `raw_text`, `audio_url`, or `photo_url` is required, but multiple modalities may be present.
+### `Submission` (raw — what the citizen app sends)
+| field | type | notes |
+|---|---|---|
+| `id` | uuid | server-generated |
+| `timestamp` | ISO-8601 string | server-generated |
+| `channel` | `"web" \| "whatsapp"` | defaults `"web"`; `whatsapp` reserved, not built |
+| `raw_text` | string? | original-language text |
+| `audio_url` | string? | stored voice note |
+| `photo_url` | string? | stored photo |
+| `language` | string | BCP-47 code from the form (`hi`,`kn`,`ta`,`en`) |
+| `geo` | `{lat,lng}` or `{ward}` | may be absent |
+| `citizen_id_hash` | string | anonymised citizen id |
 
-## Enriched Submission
+### `EnrichedSubmission` (post-AI — Person 3's output, `Submission` + …)
+| field | type | notes |
+|---|---|---|
+| `normalized_text_en` | string | English canonical (original always preserved) |
+| `category` | string | free-text; 12 known values, see `KNOWN_CATEGORIES` |
+| `need_type` | string | |
+| `urgency` | `"Critical"\|"High"\|"Medium"\|"Low"` | capitalised |
+| `sentiment` | string? | |
+| `canonical_location` | string? | may be the literal `"nan"` → treat as absent |
+| `extracted_entities` | string[] | |
 
-Person 3 returns the raw submission plus:
+> Note: Person 3's pipeline emits `language` as a full word ("Hindi", "Tamil")
+> by the enriched stage, while the intake form sends BCP-47 codes. Both stages
+> are valid; don't assume one format across the whole pipeline.
 
-```json
-{
-  "normalized_text_en": "The road in Ward 12 is broken and needs urgent repair.",
-  "transcript": "हमारे वार्ड में सड़क टूट गई है",
-  "detected_language": "hi-IN",
-  "category": "Mobility - Roads, Footpaths and Infrastructure",
-  "need_type": "Public Maintenance",
-  "urgency": "High",
-  "sentiment": "Concerned",
-  "canonical_location": "Ward 12",
-  "extracted_entities": ["Ward 12", "broken_road", "infrastructure"],
-  "confidence": 0.84,
-  "quality_flags": [],
-  "source_modalities": ["text", "photo"],
-  "provider_metadata": {
-    "text_provider": "gemini",
-    "speech_provider": "cloud_speech_v2"
-  }
-}
-```
+### `Embedding` (pgvector)
+`{ submission_id: uuid, vector: float[768] }` — embedding is generated on
+`normalized_text_en` (NOT `raw_text`), so cross-language duplicates cluster.
 
-Allowed categories, matching the current frontend and Data_Logic code:
+### `PriorityItem` (dashboard-facing — Person 4's scoring output)
+| field | type | notes |
+|---|---|---|
+| `work_id` | string | |
+| `title` | string | |
+| `category` | string | |
+| `demand_score` | number | **0–100 scale** (revised from 0–1 on 2026-07-03) |
+| `demand_count` | number | # citizens/submissions behind it |
+| `hotspot_geo` | `{lat,lng}` (+ optional `ward`) | centroid |
+| `supporting_evidence` | `SupportingEvidence[]` | see below |
+| `rank` | number | 1 = highest |
+| `explanation` | string | human-readable "why this rank" |
 
-- `Mobility - Roads, Footpaths and Infrastructure`
-- `Water Supply and Services`
-- `Garbage and Unsanitary Practices`
-- `Pollution`
-- `Traffic and Road Safety`
-- `PWD`
-- `Streetlights`
-- `Sanitation`
-- `Electricity and Power Supply`
-- `Crime and Safety`
-- `Animal Husbandry`
-- `Yellow Spot`
+`SupportingEvidence` = `{ submission_id, raw_text, normalized_text_en, language }`.
 
-Allowed urgency values:
+### `Hotspot` (map aggregation)
+`{ geo: {lat,lng}, intensity: number /*0–1*/, category: string, demand_count: number }`
 
-- `Low`
-- `Medium`
-- `High`
-- `Critical`
+---
 
-Common sentiment values:
+## 2. HTTP API
 
-- `Positive`
-- `Neutral`
-- `Anxious`
-- `Frustrated`
-- `Angry`
-- `Concerned`
-- `Mixed`
+**Served under `/api/*`.** Set `NEXT_PUBLIC_API_BASE_URL` to `<origin>/api`
+(e.g. `http://localhost:3000/api`), so the frontend's logical paths below
+resolve to the real handlers. We do **not** serve the API at bare `/submit`
+because that route is the citizen submission *page* (`app/submit/page.tsx`) —
+serving JSON there would collide with the page. Logical `/submit` ⇒ `/api/submit`.
 
-## Person 3 Service Endpoints
+| method | logical path | served at | owner→caller | request | response |
+|---|---|---|---|---|---|
+| `POST` | `/submit` | `/api/submit` | Person 1 → 2 | `SubmitPayload` | `SubmitResponse` |
+| `GET` | `/submissions` | `/api/submissions` | 2 → 1 | `?work_id=` optional | `EnrichedSubmission[]` |
+| `GET` | `/priorities` | `/api/priorities` | 2 → 1 | `?sortBy=rank\|demand_score` | `PriorityItem[]` |
+| `GET` | `/hotspots` | `/api/hotspots` | 2 → 1 | — | `Hotspot[]` |
+| `POST` | `/api/internal/similar` | `/api/internal/similar` | 2 → 4 (RAG) | `{ text? , vector?, k?, threshold? }` | `{ matches: {submission_id, similarity}[] }` |
 
-### `POST /enrich`
+`SubmitPayload` = `{ raw_text?, audio_base64?, photo_base64?, audio_url?, photo_url?, language, geo?, channel?, citizen_id_hash? }`
+— at least one of text/audio/photo is required. The citizen form sends media as
+**raw base64** (`audio_base64`/`photo_base64`); the backend persists it to a URL
+(Supabase Storage if `SUPABASE_MEDIA_BUCKET` is set, else an inline `data:` URI)
+and stores `audio_url`/`photo_url`. `channel` defaults to `"web"`;
+`citizen_id_hash` falls back to an anonymous derived id.
 
-Input: `RawSubmission`
+`SubmitResponse` = `{ success: boolean, submission_id: string, message: string }`.
 
-Output: `EnrichedSubmission`
-
-Used by Person 2 immediately after `POST /submit` persists the raw submission.
-
-### `POST /batch-enrich`
-
-Input:
-
-```json
-{
-  "submissions": []
-}
-```
-
-Output:
-
-```json
-{
-  "items": []
-}
-```
-
-Used for seed data, demo resets, and backfills.
-
-### `GET /health`
-
-Output:
-
-```json
-{
-  "status": "ok",
-  "provider": "offline",
-  "version": "0.1.0"
-}
-```
-
-Used by Cloud Run health checks and Person 2 integration tests.
-
-## Backend Pipeline Handoff
-
-1. Person 2 stores `RawSubmission`.
-2. Person 2 calls `POST /enrich`.
-3. Person 2 stores the returned `EnrichedSubmission`.
-4. Person 4 embeds `normalized_text_en` into pgvector.
-5. Person 4 uses `category`, `need_type`, `canonical_location`, and `extracted_entities` for clustering and scoring.
+**Conventions**
+- All list endpoints return a **bare JSON array** (not `{data:[…]}`).
+- Errors return `{ error: string }` with an appropriate 4xx/5xx status.
+- `GET /priorities` and `GET /hotspots` are cached ~20s server-side and
+  invalidated when a new submission is processed.
+- `POST /submit` is **idempotent**: re-posting identical content from the same
+  citizen returns the original `submission_id` (`success:true`, deduped message)
+  instead of creating a duplicate.

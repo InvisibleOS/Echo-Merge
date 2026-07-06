@@ -13,6 +13,9 @@ export type Channel = "web" | "whatsapp"; // "whatsapp" reserved for future, not
 export interface GeoPoint {
   lat: number;
   lng: number;
+  // Optional ward label; real geo data (submissions, hotspot centroids) often
+  // carries it alongside coordinates. Kept optional so a bare {lat,lng} is valid.
+  ward?: string;
 }
 
 export interface Submission {
@@ -81,6 +84,11 @@ export interface SupportingEvidence {
   // Real data provides full language names directly ("Hindi", "Tamil"),
   // not BCP-47 codes — stored and displayed as-is, no lookup needed.
   language: string;
+  // Optional per-evidence location, shown as a pin in the drill-down panel.
+  // Present when the backend carries it through (see lib/server/mappers.ts);
+  // absent for older seed data — the UI guards for both.
+  geo?: GeoPoint;
+  canonical_location?: string;
 }
 
 export interface SolutionPlan {
