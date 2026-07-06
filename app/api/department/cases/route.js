@@ -12,3 +12,4 @@ export async function GET(request) {
   }).filter((item) => (department ? item.department.id === department : true));
   return NextResponse.json(cases, { status: 200 });
 }
+

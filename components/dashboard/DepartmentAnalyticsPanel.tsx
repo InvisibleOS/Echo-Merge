@@ -41,3 +41,4 @@ export default function DepartmentAnalyticsPanel({ departments }: Props) {
     </section>
   );
 }
+

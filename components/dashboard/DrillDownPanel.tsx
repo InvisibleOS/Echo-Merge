@@ -9,6 +9,7 @@ import {
   Users,
   MapPin,
   CheckCircle2,
+  ShieldCheck,
   Building2,
   Clock,
   WalletCards,
@@ -24,6 +25,7 @@ interface Props {
 
 export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
   const [isResolving, setIsResolving] = useState(false);
+  const [activeReasoning, setActiveReasoning] = useState<'demand' | 'urgency' | 'equity' | 'validation' | null>(null);
   const isResolved = item.status === "Resolved";
 
   async function handleResolve() {
@@ -31,8 +33,6 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
     setIsResolving(true);
     try {
       await resolvePriority(item.work_id);
-      onResolve(item.work_id);
-    } catch {
       onResolve(item.work_id);
     } finally {
       setIsResolving(false);
@@ -145,36 +145,96 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
 
         <div className="bg-ink-900/5 rounded-lg p-1">
           <div className="grid grid-cols-2 gap-1 mb-1">
-            <ScoreCell
-              label="Citizen Demand"
-              value={item.scoring_breakdown?.base_demand.toFixed(1) || item.demand_score.toFixed(1)}
-              tone="text-civic-500"
-              suffix="Base"
-            />
-            <ScoreCell
-              label="Urgency"
-              value={`+${(item.scoring_breakdown?.urgency_multiplier || 0.12).toFixed(2)}x`}
-              tone="text-red-500"
-              suffix="Boost"
-            />
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'demand' ? null : 'demand')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-civic-50/30",
+                activeReasoning === 'demand' ? "border-civic-400 bg-civic-50/30" : "border-ink-900/5"
+              )}
+            >
+              <span className="text-[10px] uppercase font-bold text-civic-500 mb-1 block">Citizen Demand</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  {item.scoring_breakdown?.base_demand.toFixed(1) || item.demand_score.toFixed(1)}
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Base</span>
+              </div>
+            </button>
+            
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'urgency' ? null : 'urgency')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-red-50/30",
+                activeReasoning === 'urgency' ? "border-red-400 bg-red-50/30" : "border-ink-900/5"
+              )}
+            >
+              <span className="text-[10px] uppercase font-bold text-red-500 mb-1 block">Urgency</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.urgency_multiplier || 0.12).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </button>
           </div>
           <div className="grid grid-cols-2 gap-1">
-            <ScoreCell
-              label="Census Equity"
-              value={`+${(item.scoring_breakdown?.equity_multiplier || 0.05).toFixed(2)}x`}
-              tone="text-purple-500"
-              suffix="Boost"
-            />
-            <ScoreCell
-              label="UDISE / Health Gap"
-              value={`+${(item.scoring_breakdown?.data_gap_multiplier || 0.05).toFixed(2)}x`}
-              tone="text-signal-amber"
-              suffix="Boost"
-            />
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'equity' ? null : 'equity')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-purple-50/30",
+                activeReasoning === 'equity' ? "border-purple-400 bg-purple-50/30" : "border-ink-900/5"
+              )}
+            >
+              <span className="text-[10px] uppercase font-bold text-purple-500 mb-1 block">Census Equity</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.equity_multiplier || 0.05).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </button>
+            
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'validation' ? null : 'validation')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-signal-amber/10",
+                activeReasoning === 'validation' ? "border-signal-amber bg-signal-amber/10" : "border-ink-900/5"
+              )}
+            >
+              <span className="text-[10px] uppercase font-bold text-signal-amber mb-1 block">AI Validation</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-display font-bold text-ink-900 leading-none">
+                  +{(item.scoring_breakdown?.validation_multiplier || 0.05).toFixed(2)}x
+                </span>
+                <span className="text-xs text-ink-800/60 font-medium">Boost</span>
+              </div>
+            </button>
+          </div>
+          
+          {/* Animated expansion box for reasoning text */}
+          <div 
+            className={clsx(
+              "overflow-hidden transition-all duration-300 ease-in-out",
+              activeReasoning ? "max-h-40 opacity-100 mt-2" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="bg-ink-900 text-white rounded-md p-3 text-xs font-medium leading-relaxed border border-ink-800 shadow-inner">
+              <div className="text-civic-400 font-bold mb-1 flex items-center gap-1.5 uppercase text-[10px]">
+                {activeReasoning === 'demand' && "📊 Citizen Demand Math"}
+                {activeReasoning === 'urgency' && "🚨 Urgency Multiplier"}
+                {activeReasoning === 'equity' && "⚖️ Census Equity Boost"}
+                {activeReasoning === 'validation' && "🛡️ AI Fact-Check"}
+              </div>
+              {activeReasoning && item.scoring_breakdown?.reasoning?.[activeReasoning]}
+            </div>
           </div>
         </div>
 
-        <p className="text-xs text-ink-800/60 mt-3 italic px-1 leading-relaxed">
+        <p className="text-xs text-ink-800/60 mt-4 italic px-1 leading-relaxed border-t border-ink-900/5 pt-3">
           {item.explanation}
         </p>
       </div>
@@ -257,6 +317,17 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                     : "Location Attached")}
               </div>
             )}
+            
+            {ev.validation_context && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                <div className="flex items-center gap-1.5 text-blue-700 font-semibold text-[11px] uppercase mb-1">
+                  <ShieldCheck size={14} /> AI Validation Agent
+                </div>
+                <p className="text-sm text-blue-900 whitespace-pre-line">
+                  {ev.validation_context}
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -300,3 +371,4 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

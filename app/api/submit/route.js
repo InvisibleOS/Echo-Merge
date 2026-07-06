@@ -45,10 +45,10 @@ export async function POST(request) {
           success: true,
           submission_id: processed.submission.id,
           case_id: processed.case.case_id,
-          message: 'Submission received, routed, and queued in offline demo mode.',
+          message: 'Submission received, AI-routed, and queued in offline demo mode.',
           department: processed.department,
           scheme_matches: processed.schemes,
-          tracking_url: '/dashboard',
+          tracking_url: `/dashboard`,
         },
         { status: 201 }
       );

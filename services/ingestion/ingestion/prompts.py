@@ -9,7 +9,9 @@ Task:
 2. Translate or normalize the issue into clear English.
 3. Classify the development need for constituency planning.
 4. Extract any location, landmark, ward, public asset, or demographic clue.
-5. Never invent a location, number, dataset fact, or citizen quote.
+5. If the complaint makes an objective claim (e.g., about local infrastructure, a public event, or demographics), use your tools to fetch real-world data and fact-check it. Summarize your findings in `validation_context`.
+6. If you used tools, include a short explanation in `validation_context`. If no tools were used, return null for `validation_context`.
+7. Never invent a location, number, dataset fact, or citizen quote.
 
 Allowed categories:
 Mobility - Roads, Footpaths and Infrastructure
@@ -41,6 +43,7 @@ Required JSON shape:
   "sentiment": "Positive | Neutral | Anxious | Frustrated | Angry | Concerned | Mixed",
   "canonical_location": "ward/locality/landmark if present, else null",
   "extracted_entities": ["short lowercase entity strings"],
+  "validation_context": "Verified: Google Places API found no hospitals within 5km of the user's location. | null",
   "confidence": 0.0,
   "quality_flags": []
 }

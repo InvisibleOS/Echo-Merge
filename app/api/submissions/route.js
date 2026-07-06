@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../utils/supabase/server';
+import { supabase, isSupabaseConfigured } from '../../../utils/supabase/server';
 import { toEnrichedSubmission } from '../../../lib/server/mappers';
+import { getActionSubmissions } from '../../../lib/server/action-os';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,15 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const workId = searchParams.get('work_id');
+
+    if (!isSupabaseConfigured) {
+      const submissions = getActionSubmissions();
+      if (!workId) return NextResponse.json(submissions, { status: 200 });
+      return NextResponse.json(
+        submissions.filter((item) => item.work_id === workId || item.id === workId),
+        { status: 200 }
+      );
+    }
 
     if (workId) {
       const ids = await evidenceSubmissionIds(workId);
