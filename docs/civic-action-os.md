@@ -1,26 +1,68 @@
-# Constituency Intelligence & Action OS
+# MP Command Center and Department Portal
 
-This branch turns the app into a hackathon-ready operating system for constituency action, not just a complaint portal.
+This branch is intentionally scoped to the pieces requested on top of the latest
+`main` branch:
 
-## What It Does
+- MP Command Center dashboard enhancements
+- Department Portal
+- Case/action queue APIs needed by those two surfaces
+- Google AI support for enrichment and embeddings where credentials are present
+- Offline deterministic fallbacks so the demo still runs without secrets
 
-- Citizens submit issues through text, voice, or photo.
-- The backend enriches the report, routes it to a department, recommends schemes, and creates a case.
-- MPs/MLAs see a live command center with constituency health, hotspots, priorities, cases, SLA risk, department workload, budget recommendations, and an AI Copilot.
-- Department officials get an assigned work queue.
-- Citizens and the public can track case status through the transparency pages.
+## What Was Added
+
+### MP Command Center
+
+Route: `/dashboard`
+
+Adds:
+
+- Constituency health cards
+- Open case count
+- SLA risk
+- Trust score
+- Hotspot count
+- Ranked priorities
+- Department-routed action queue
+- Department workload analytics
+- Weekly governance brief
+- Priority drill-down with resolution brief, department routing, budget fit, and supporting evidence
+
+### Department Portal
+
+Route: `/department`
+
+Adds:
+
+- Department workload summary
+- SLA compliance
+- Active case queue
+- Case ownership
+- Recommended first action for officials
+
+## APIs Added
+
+- `GET /api/cases`
+- `PATCH /api/cases/:id`
+- `GET /api/dashboard/health`
+- `GET /api/dashboard/departments`
+- `GET /api/dashboard/insights`
+- `GET /api/department/cases`
+
+Existing latest-main APIs and behavior are preserved, including category filters
+and priority resolution.
 
 ## Google AI Usage
 
-The platform uses Gemini when keys are configured:
+When keys are configured, the platform uses Google AI for:
 
-- `lib/server/enrichment.js` uses Gemini for translation, entity extraction, department-ready issue classification, urgency, and location extraction.
-- `lib/server/embedding.js` uses Gemini embeddings for semantic clustering/search when available.
-- `lib/server/action-os.js` uses Gemini for the MP Copilot answers, grounded in live constituency data.
+- Gemini enrichment in `lib/server/enrichment.js`
+- Gemini embeddings in `lib/server/embedding.js`
 
-If keys are missing or calls fail, deterministic offline fallbacks keep the demo fully runnable.
+If keys are missing or calls fail, deterministic offline fallbacks keep the
+dashboard and department portal runnable.
 
-Required optional env vars:
+Relevant env vars:
 
 ```bash
 GEMINI_API_KEY=
@@ -38,37 +80,14 @@ npm run dev
 
 Open:
 
-- `/submit` for citizen reporting
-- `/dashboard` for MP command center
-- `/department` for department queue
-- `/transparency` for public tracker
+- `/dashboard`
+- `/department`
 
-Offline API smoke test:
+Optional offline submit test:
 
 ```bash
 curl -X POST http://localhost:3000/api/submit \
   -H "Content-Type: application/json" \
   -d '{"raw_text":"School ke paas streetlight nahi jal rahi hai","language":"hi","geo":{"ward":"Bengaluru South","lat":12.91,"lng":77.59},"channel":"web"}'
 ```
-
-Copilot:
-
-```bash
-curl -X POST http://localhost:3000/api/copilot \
-  -H "Content-Type: application/json" \
-  -d '{"question":"Which department has SLA risk?","constituency":"Bengaluru South"}'
-```
-
-## Demo Script
-
-1. Start at `/`.
-2. Open `/submit`.
-3. Submit a Hindi/Hinglish streetlight issue.
-4. Show instant tracking ID, routed department, SLA, and scheme guidance.
-5. Open `/dashboard`.
-6. Show constituency health, hotspot map, live priority, action queue, department workload, budget recommendations, and Copilot.
-7. Ask Copilot: "Which department has SLA risk?"
-8. Assign or resolve a case from the Action Queue.
-9. Open `/department` to show official work queue.
-10. Open `/transparency` to show public trust/status layer.
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PriorityItem,
   Hotspot,
@@ -25,7 +25,6 @@ import HealthOverview from "./HealthOverview";
 import CaseQueue from "./CaseQueue";
 import DepartmentAnalyticsPanel from "./DepartmentAnalyticsPanel";
 import GovernanceInsightsPanel from "./GovernanceInsightsPanel";
-import CopilotPanel from "./CopilotPanel";
 
 export default function DashboardShell() {
   const [priorities, setPriorities] = useState<PriorityItem[]>([]);
@@ -38,6 +37,7 @@ export default function DashboardShell() {
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [constituency, setConstituency] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -46,14 +46,15 @@ export default function DashboardShell() {
       setIsLoading(true);
       setError(null);
       try {
-          const [p, h, c, healthData, deptData, insightData] = await Promise.all([
-            getPriorities(constituency),
-            getHotspots(constituency),
-            getCases({ constituency }),
-            getConstituencyHealth(constituency || "Bengaluru South"),
-            getDepartmentAnalytics(constituency || "Bengaluru South"),
-            getGovernanceInsights(constituency || "Bengaluru South"),
-          ]);
+        const activeConstituency = constituency || "Bengaluru South";
+        const [p, h, c, healthData, deptData, insightData] = await Promise.all([
+          getPriorities(constituency),
+          getHotspots(constituency),
+          getCases({ constituency }),
+          getConstituencyHealth(activeConstituency),
+          getDepartmentAnalytics(activeConstituency),
+          getGovernanceInsights(activeConstituency),
+        ]);
         if (!cancelled) {
           setPriorities(p);
           setHotspots(h);
@@ -74,7 +75,6 @@ export default function DashboardShell() {
     }
 
     load();
-    // Refresh every 30s so new submissions surface without a manual reload
     const interval = setInterval(load, 30000);
 
     return () => {
@@ -83,10 +83,42 @@ export default function DashboardShell() {
     };
   }, [constituency]);
 
-  const selectedItem = priorities.find((p) => p.work_id === selectedId) || null;
+  const uniqueCategories = useMemo(() => {
+    const cats = new Set(priorities.map((p) => p.category));
+    return Array.from(cats).sort();
+  }, [priorities]);
+
+  const filteredPriorities = useMemo(() => {
+    const filtered = category
+      ? priorities.filter((p) => p.category === category)
+      : priorities;
+    return filtered.map((p, index) => ({
+      ...p,
+      rank: index + 1,
+    }));
+  }, [priorities, category]);
+
+  const filteredHotspots = useMemo(() => {
+    if (!category) return hotspots;
+    const validWorkIds = new Set(filteredPriorities.map((p) => p.work_id));
+    return hotspots.filter(
+      (h) => h.category === category || validWorkIds.has(h.work_id || "")
+    );
+  }, [hotspots, category, filteredPriorities]);
+
+  const selectedItem =
+    filteredPriorities.find((p) => p.work_id === selectedId) || null;
 
   function handleSelect(workId: string) {
     setSelectedId((current) => (current === workId ? null : workId));
+  }
+
+  function handleResolvePriority(workId: string) {
+    setPriorities((current) =>
+      current.map((item) =>
+        item.work_id === workId ? { ...item, status: "Resolved" } : item
+      )
+    );
   }
 
   async function handleUpdateCaseStatus(caseId: string, status: string) {
@@ -99,7 +131,7 @@ export default function DashboardShell() {
 
   return (
     <div className="min-h-screen flex flex-col bg-ink-950">
-      <header className="px-6 py-4 border-b border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
+      <header className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between shrink-0 gap-4">
         <div>
           <span className="text-signal-amber font-display font-semibold text-xs uppercase tracking-wide">
             Constituency Intelligence & Action OS
@@ -111,8 +143,8 @@ export default function DashboardShell() {
             Detect, prioritize, assign, resolve, and monitor constituency issues.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <select 
+        <div className="flex items-center gap-4 flex-wrap">
+          <select
             className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
             value={constituency}
             onChange={(e) => setConstituency(e.target.value)}
@@ -124,8 +156,25 @@ export default function DashboardShell() {
             <option value="New Delhi">New Delhi</option>
             <option value="Mumbai South">Mumbai South</option>
           </select>
+
+          <select
+            className="bg-ink-900 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-signal-amber"
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setSelectedId(null);
+            }}
+          >
+            <option value="">All Categories</option>
+            {uniqueCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
           <span className="text-xs text-white/40">
-            {priorities.length} ranked priorities
+            {filteredPriorities.length} ranked priorities
           </span>
         </div>
       </header>
@@ -139,22 +188,20 @@ export default function DashboardShell() {
       <div className="p-4 space-y-4">
         <HealthOverview health={health} isLoading={isLoading} />
 
-        <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr_380px] gap-4 min-h-[620px]">
-          <div className="space-y-4 min-w-0">
-            <div className="overflow-y-auto bg-ink-900/60 rounded-lg p-4 border border-white/5 max-h-[620px]">
-              <PriorityList
-                items={priorities}
-                isLoading={isLoading}
-                selectedId={selectedId}
-                onSelect={handleSelect}
-              />
-            </div>
+        <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr_380px] gap-4 min-h-[620px]">
+          <div className="overflow-y-auto bg-ink-900/60 rounded-lg p-4 border border-white/5 max-h-[620px]">
+            <PriorityList
+              items={filteredPriorities}
+              isLoading={isLoading}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+            />
           </div>
 
           <div className="relative min-h-[520px]">
             <HotspotMap
-              hotspots={hotspots}
-              priorities={priorities}
+              hotspots={filteredHotspots}
+              priorities={filteredPriorities}
               selectedId={selectedId}
               onSelectMarker={handleSelect}
             />
@@ -164,22 +211,21 @@ export default function DashboardShell() {
                 <DrillDownPanel
                   item={selectedItem}
                   onClose={() => setSelectedId(null)}
+                  onResolve={handleResolvePriority}
                 />
               </div>
             )}
           </div>
 
-          <div className="space-y-4 min-w-0">
-            <CaseQueue cases={cases} onUpdateStatus={handleUpdateCaseStatus} />
-          </div>
+          <CaseQueue cases={cases} onUpdateStatus={handleUpdateCaseStatus} />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr_380px] gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-4">
           <DepartmentAnalyticsPanel departments={departments} />
           <GovernanceInsightsPanel insights={insights} />
-          <CopilotPanel constituency={constituency || "Bengaluru South"} />
         </div>
       </div>
     </div>
   );
 }
+
