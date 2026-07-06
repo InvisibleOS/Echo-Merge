@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PriorityItem } from "@/lib/types";
 import { resolvePriority } from "@/lib/api";
 import { CategoryBadge } from "@/components/ui/Badge";
-import { X, Users, MapPin, CheckCircle2 } from "lucide-react";
+import { X, Users, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
 import clsx from "clsx";
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
 
 export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
   const [isResolving, setIsResolving] = useState(false);
+  const [activeReasoning, setActiveReasoning] = useState<keyof PriorityItem["scoring_breakdown"]["reasoning"] | null>(null);
   const isResolved = item.status === "Resolved";
 
   async function handleResolve() {
@@ -115,7 +116,14 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
         
         <div className="bg-ink-900/5 rounded-lg p-1">
           <div className="grid grid-cols-2 gap-1 mb-1">
-            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'demand' ? null : 'demand')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-civic-50/30",
+                activeReasoning === 'demand' ? "border-civic-400 bg-civic-50/30" : "border-ink-900/5"
+              )}
+            >
               <span className="text-[10px] uppercase font-bold text-civic-500 mb-1 block">Citizen Demand</span>
               <div className="flex items-end justify-between">
                 <span className="text-xl font-display font-bold text-ink-900 leading-none">
@@ -123,9 +131,16 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                 </span>
                 <span className="text-xs text-ink-800/60 font-medium">Base</span>
               </div>
-            </div>
+            </button>
             
-            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'urgency' ? null : 'urgency')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-red-50/30",
+                activeReasoning === 'urgency' ? "border-red-400 bg-red-50/30" : "border-ink-900/5"
+              )}
+            >
               <span className="text-[10px] uppercase font-bold text-red-500 mb-1 block">Urgency</span>
               <div className="flex items-end justify-between">
                 <span className="text-xl font-display font-bold text-ink-900 leading-none">
@@ -133,11 +148,18 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                 </span>
                 <span className="text-xs text-ink-800/60 font-medium">Boost</span>
               </div>
-            </div>
+            </button>
           </div>
           
           <div className="grid grid-cols-2 gap-1">
-            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'equity' ? null : 'equity')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-purple-50/30",
+                activeReasoning === 'equity' ? "border-purple-400 bg-purple-50/30" : "border-ink-900/5"
+              )}
+            >
               <span className="text-[10px] uppercase font-bold text-purple-500 mb-1 block">Census Equity</span>
               <div className="flex items-end justify-between">
                 <span className="text-xl font-display font-bold text-ink-900 leading-none">
@@ -145,21 +167,46 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                 </span>
                 <span className="text-xs text-ink-800/60 font-medium">Boost</span>
               </div>
-            </div>
+            </button>
             
-            <div className="bg-white rounded p-3 shadow-sm border border-ink-900/5">
-              <span className="text-[10px] uppercase font-bold text-signal-amber mb-1 block">UDISE / Health Gap</span>
+            <button 
+              type="button"
+              onClick={() => setActiveReasoning(activeReasoning === 'validation' ? null : 'validation')}
+              className={clsx(
+                "text-left bg-white rounded p-3 shadow-sm border transition-colors hover:bg-signal-amber/10",
+                activeReasoning === 'validation' ? "border-signal-amber bg-signal-amber/10" : "border-ink-900/5"
+              )}
+            >
+              <span className="text-[10px] uppercase font-bold text-signal-amber mb-1 block">AI Validation</span>
               <div className="flex items-end justify-between">
                 <span className="text-xl font-display font-bold text-ink-900 leading-none">
-                  +{(item.scoring_breakdown?.data_gap_multiplier || 0.05).toFixed(2)}x
+                  +{(item.scoring_breakdown?.validation_multiplier || 0.05).toFixed(2)}x
                 </span>
                 <span className="text-xs text-ink-800/60 font-medium">Boost</span>
               </div>
+            </button>
+          </div>
+          
+          {/* Animated expansion box for reasoning text */}
+          <div 
+            className={clsx(
+              "overflow-hidden transition-all duration-300 ease-in-out",
+              activeReasoning ? "max-h-40 opacity-100 mt-2" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="bg-ink-900 text-white rounded-md p-3 text-xs font-medium leading-relaxed border border-ink-800 shadow-inner">
+              <div className="text-civic-400 font-bold mb-1 flex items-center gap-1.5 uppercase text-[10px]">
+                {activeReasoning === 'demand' && "📊 Citizen Demand Math"}
+                {activeReasoning === 'urgency' && "🚨 Urgency Multiplier"}
+                {activeReasoning === 'equity' && "⚖️ Census Equity Boost"}
+                {activeReasoning === 'validation' && "🛡️ AI Fact-Check"}
+              </div>
+              {activeReasoning && item.scoring_breakdown?.reasoning?.[activeReasoning]}
             </div>
           </div>
         </div>
 
-        <p className="text-xs text-ink-800/60 mt-3 italic px-1 leading-relaxed">
+        <p className="text-xs text-ink-800/60 mt-4 italic px-1 leading-relaxed border-t border-ink-900/5 pt-3">
           {item.explanation}
         </p>
       </div>
@@ -227,6 +274,17 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
               <div className="mt-3 flex items-center gap-1.5 text-xs text-civic-600 font-medium bg-civic-50 px-2 py-1 rounded-md w-fit">
                 <MapPin size={12} />
                 {ev.canonical_location || (ev.geo && ev.geo.lat ? `${ev.geo.lat.toFixed(4)}, ${ev.geo.lng.toFixed(4)}` : "Location Attached")}
+              </div>
+            )}
+            
+            {ev.validation_context && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                <div className="flex items-center gap-1.5 text-blue-700 font-semibold text-[11px] uppercase mb-1">
+                  <ShieldCheck size={14} /> AI Validation Agent
+                </div>
+                <p className="text-sm text-blue-900 whitespace-pre-line">
+                  {ev.validation_context}
+                </p>
               </div>
             )}
           </div>

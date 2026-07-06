@@ -152,6 +152,7 @@ class EnrichedSubmission(RawSubmission):
     confidence: float = 0.0
     quality_flags: list[str] = field(default_factory=list)
     source_modalities: list[str] = field(default_factory=list)
+    validation_context: str | None = None
     provider_metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -170,6 +171,7 @@ class EnrichedSubmission(RawSubmission):
                 "confidence": self.confidence,
                 "quality_flags": self.quality_flags,
                 "source_modalities": self.source_modalities,
+                "validation_context": self.validation_context,
                 "provider_metadata": self.provider_metadata,
             }
         )

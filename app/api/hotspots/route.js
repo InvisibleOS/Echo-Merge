@@ -16,7 +16,6 @@ const TTL_MS = 20000;
 export async function GET() {
   try {
     const hotspots = await cached(CACHE_KEYS.hotspots, TTL_MS, async () => {
-      // Per-submission points: submissions.geo + enriched (category, urgency).
       const { data: subs, error: subErr } = await supabase
         .from('submissions')
         .select('geo, enriched_submissions ( category, urgency )');
@@ -32,6 +31,7 @@ export async function GET() {
             geo: s.geo,
             category: e?.category,
             urgency: e?.urgency,
+            constituency: s.constituency,
           });
         });
 

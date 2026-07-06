@@ -89,6 +89,7 @@ export interface SupportingEvidence {
   // absent for older seed data — the UI guards for both.
   geo?: GeoPoint;
   canonical_location?: string;
+  validation_context?: string | null;
 }
 
 export interface SolutionPlan {
@@ -103,9 +104,15 @@ export interface ScoringBreakdown {
   base_demand: number;
   urgency_multiplier: number;
   equity_multiplier: number;
-  data_gap_multiplier: number;
+  validation_multiplier: number;
   feasibility_multiplier: number;
   final_score: number;
+  reasoning?: {
+    demand: string;
+    urgency: string;
+    equity: string;
+    validation: string;
+  };
 }
 
 export interface PriorityItem {
@@ -134,6 +141,7 @@ export interface Hotspot {
   intensity: number; // 0–1, drives heatmap weight
   category: IssueCategory;
   demand_count: number;
+  constituency?: string;
 }
 
 // ---------- API request/response shapes ----------
