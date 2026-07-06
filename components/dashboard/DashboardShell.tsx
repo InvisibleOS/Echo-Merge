@@ -38,6 +38,7 @@ export default function DashboardShell() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [constituency, setConstituency] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [updatingCaseId, setUpdatingCaseId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,11 +123,22 @@ export default function DashboardShell() {
   }
 
   async function handleUpdateCaseStatus(caseId: string, status: string) {
-    const updated = await updateCaseStatus(caseId, status, `MP dashboard marked ${status}.`);
-    if (!updated) return;
-    setCases((current) =>
-      current.map((item) => (item.case_id === caseId ? { ...item, ...updated } : item))
-    );
+    setUpdatingCaseId(caseId);
+    setError(null);
+    try {
+      const updated = await updateCaseStatus(caseId, status, `MP dashboard marked ${status}.`);
+      if (!updated) {
+        setError("Couldn't update that case. Please refresh and try again.");
+        return;
+      }
+      setCases((current) =>
+        current.map((item) => (item.case_id === caseId ? { ...item, ...updated } : item))
+      );
+    } catch {
+      setError("Couldn't update that case. Please refresh and try again.");
+    } finally {
+      setUpdatingCaseId(null);
+    }
   }
 
   return (
@@ -217,7 +229,11 @@ export default function DashboardShell() {
             )}
           </div>
 
-          <CaseQueue cases={cases} onUpdateStatus={handleUpdateCaseStatus} />
+          <CaseQueue
+            cases={cases}
+            updatingCaseId={updatingCaseId}
+            onUpdateStatus={handleUpdateCaseStatus}
+          />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-4">
@@ -228,4 +244,3 @@ export default function DashboardShell() {
     </div>
   );
 }
-
