@@ -28,7 +28,6 @@ export default function SubmissionForm() {
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoPoint | undefined>(undefined);
-  const [constituency, setConstituency] = useState<string>("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,8 +54,11 @@ export default function SubmissionForm() {
   }
 
   useEffect(() => {
-    // Automatically request location when the component mounts
-    requestLocation();
+    const timer = window.setTimeout(() => {
+      requestLocation();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const canSubmit = (text.trim().length > 0 || audioBase64 || photoBase64);
@@ -78,7 +80,7 @@ export default function SubmissionForm() {
         channel: "web",
       });
       setSubmissionId(res.submission_id);
-    } catch (err) {
+    } catch {
       setError(
         "Something went wrong sending your report. Please check your connection and try again."
       );
