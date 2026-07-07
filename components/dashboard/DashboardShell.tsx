@@ -92,7 +92,7 @@ export default function DashboardShell() {
   }, [priorities]);
 
   const filteredPriorities = useMemo(() => {
-    let filtered = priorities;
+    let filtered = priorities.filter(p => p.status !== "Resolved");
     if (constituency) {
       filtered = filtered.filter((p) => p.constituency === constituency);
     }
