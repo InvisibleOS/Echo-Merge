@@ -200,7 +200,7 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
                     id={`assign-dept-${item.work_id}`}
                     value={currentSelect}
                     onChange={(e) => setSelectedDepts((prev) => ({ ...prev, [item.work_id]: e.target.value }))}
-                    disabled={item.status === "Resolved" || isAssigning}
+                    disabled={item.status === "Resolved" || isAssigning || !!assigned}
                     className="w-full sm:w-72 px-3 py-2 rounded-lg border border-surface-200 bg-white text-xs text-surface-900 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50 shadow-2xs"
                   >
                     {AGENCIES.map((agency) => (
@@ -214,19 +214,19 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
                 <button
                   type="button"
                   onClick={() => handleAssign(item)}
-                  disabled={item.status === "Resolved" || isAssigning || (assigned === currentSelect)}
+                  disabled={item.status === "Resolved" || isAssigning || !!assigned}
                   className={clsx(
                     "px-5 py-2.5 rounded-xl font-display font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-sm shrink-0",
                     item.status === "Resolved"
                       ? "bg-surface-100 text-surface-400 border border-surface-200 cursor-not-allowed"
-                      : assigned === currentSelect
+                      : assigned
                       ? "bg-purple-50 text-purple-700 border border-purple-200 cursor-default"
                       : "bg-purple-600 text-white hover:bg-purple-700 active:scale-95 shadow-sm"
                   )}
                 >
                   {isAssigning ? (
                     <span>Assigning...</span>
-                  ) : assigned === currentSelect ? (
+                  ) : assigned ? (
                     <>
                       <CheckCircle2 size={14} />
                       <span>Assigned to Agency</span>
@@ -234,7 +234,7 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
                   ) : (
                     <>
                       <Send size={14} />
-                      <span>{assigned ? "Re-assign Agency" : "Assign & Notify Department"}</span>
+                      <span>Assign & Notify Department</span>
                     </>
                   )}
                 </button>

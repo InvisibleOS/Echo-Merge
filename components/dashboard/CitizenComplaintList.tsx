@@ -11,8 +11,8 @@ export default function CitizenComplaintList() {
   const [complaints, setComplaints] = useState<CitizenComplaintRecord[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  async function load() {
-    setIsRefreshing(true);
+  async function syncWithServer(showSpinner = false) {
+    if (showSpinner) setIsRefreshing(true);
     let data = getCitizenComplaints();
     setComplaints(data);
 
@@ -51,21 +51,28 @@ export default function CitizenComplaintList() {
       console.warn("Failed to sync complaints with server:", e);
     }
 
-    setTimeout(() => setIsRefreshing(false), 300);
+    if (showSpinner) {
+      setTimeout(() => setIsRefreshing(false), 300);
+    }
+  }
+
+  function load() {
+    syncWithServer(true);
   }
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      load();
+      syncWithServer(false);
     }, 0);
+
     // Subscribe to real-time storage events from MP dashboard actions
     const unsubscribe = subscribeToSync(() => {
       setComplaints(getCitizenComplaints());
     });
     
-    // Fallback polling every 3s to guarantee cross-window sync
+    // Fallback polling every 3s to guarantee server and cross-window sync
     const interval = setInterval(() => {
-      setComplaints(getCitizenComplaints());
+      syncWithServer(false);
     }, 3000);
 
     return () => {
