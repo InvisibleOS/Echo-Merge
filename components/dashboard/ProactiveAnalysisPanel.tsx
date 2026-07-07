@@ -307,7 +307,7 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
             Proactive Area Infrastructure Analysis
           </h2>
           <p className="text-sm text-surface-700 leading-relaxed font-medium">
-            Continuously aggregating local news NLP feeds, BBMP drain camera computer vision (CV), and BWSSB SCADA telemetry to predictively identify and remediate infrastructure failures before citizen complaints occur.
+            Continuously aggregating local news NLP feeds, municipal drain camera computer vision (CV), and water-board SCADA telemetry to predictively identify and remediate infrastructure failures before citizen complaints occur.
           </p>
         </div>
       </div>

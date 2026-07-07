@@ -13,13 +13,14 @@ import {
   getDepartmentAnalytics,
 } from "@/lib/api";
 import { subscribeToSync } from "@/lib/storageSync";
+import { CITIES } from "@/lib/cities";
 import PriorityList from "./PriorityList";
 import HotspotMap from "./HotspotMap";
 import DrillDownPanel from "./DrillDownPanel";
 import ProactiveAnalysisPanel from "./ProactiveAnalysisPanel";
 import DelegationPanel from "./DelegationPanel";
 import DepartmentAnalyticsPanel from "./DepartmentAnalyticsPanel";
-import { Map, Cpu, Building2, Users, ArrowLeft, Landmark } from "lucide-react";
+import { Map, Cpu, Building2, Users, ArrowLeft, Landmark, ShieldCheck } from "lucide-react";
 import clsx from "clsx";
 
 export default function DashboardShell() {
@@ -30,6 +31,7 @@ export default function DashboardShell() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedCityId, setSelectedCityId] = useState<string>("bengaluru");
   const [constituency, setConstituency] = useState<string>("");
   const [category, setCategory] = useState<string>("");
 
@@ -153,24 +155,42 @@ export default function DashboardShell() {
     <div className="h-screen flex flex-col mesh-bg text-surface-900 font-body relative overflow-hidden">
       {/* ── Top Header Bar ── */}
       <header className="px-6 py-3.5 border-b border-white/40 flex flex-wrap items-center justify-between shrink-0 gap-4 glass-nav z-20 shadow-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="text-surface-700 hover:text-surface-900 transition-colors"
-            title="Back to Landing Gate"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            id="btn-return-home"
           >
-            <ArrowLeft size={18} />
+            <ShieldCheck size={26} className="text-civic-600" />
+            <div>
+              <h1 className="font-display font-bold text-[17px] leading-tight text-ink-950 tracking-tight">
+                Echo Merge
+              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-civic-600/80 -mt-0.5">
+                Proactive Governance
+              </p>
+            </div>
           </Link>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-sm">
-            <Landmark size={18} />
-          </div>
-          <div>
-            <span className="text-amber-600 font-display font-semibold text-[10px] uppercase tracking-wide block">
-              People&rsquo;s Priorities &bull; Representative Portal
-            </span>
-            <h1 className="font-display font-bold text-base sm:text-lg text-surface-900 leading-tight">
-              Constituency Executive Control Center
-            </h1>
+
+          <div className="h-8 w-px bg-surface-200 hidden sm:block" />
+
+          {/* City Selector Dropdown */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="city-select" className="text-xs font-semibold text-surface-700 uppercase tracking-wider">
+              City:
+            </label>
+            <select
+              id="city-select"
+              value={selectedCityId}
+              onChange={(e) => setSelectedCityId(e.target.value)}
+              className="text-sm font-medium bg-white/50 border border-surface-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-civic-500/50"
+            >
+              {CITIES.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name} ({city.corporation})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -321,12 +341,15 @@ export default function DashboardShell() {
                   </div>
                 </div>
               )}
-              <HotspotMap
-                hotspots={filteredHotspots}
-                priorities={filteredPriorities}
-                selectedId={selectedId}
-                onSelectMarker={handleSelect}
-              />
+              <div className="glass-panel rounded-3xl p-1 shadow-glass h-full">
+                <HotspotMap
+                  hotspots={filteredHotspots}
+                  priorities={filteredPriorities}
+                  selectedId={selectedId}
+                  onSelectMarker={handleSelect}
+                  selectedCityId={selectedCityId}
+                />
+              </div>
             </div>
           </div>
         )}

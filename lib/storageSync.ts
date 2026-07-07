@@ -243,7 +243,7 @@ export function getCitizenComplaints(): CitizenComplaintRecord[] {
       category: MOCK_PRIORITIES[1]?.category || KNOWN_CATEGORIES[1] || "Water Supply and Services",
       timestamp: new Date(Date.now() - 3600000 * 48).toISOString(),
       status: "Under Review",
-      assigned_department: "Bangalore Water Supply and Sewerage Board (BWSSB)",
+      assigned_department: "State Water Supply & Sewerage Board",
       constituency: "Bengaluru South",
       raw_text: "Irregular drinking water pressure in morning hours. Pipe valve seems damaged near the main junction.",
     },
@@ -265,9 +265,9 @@ export function getCitizenComplaints(): CitizenComplaintRecord[] {
       category: "Electricity and Power Supply",
       timestamp: new Date(Date.now() - 3600000 * 120).toISOString(),
       status: "Resolved",
-      assigned_department: "BESCOM",
+      assigned_department: "State Electricity Distribution Company (DISCOM)",
       constituency: "Bengaluru South",
-      raw_text: "3 street lights out on school access road. Resolved by BESCOM maintenance crew yesterday.",
+      raw_text: "3 street lights out on school access road. Resolved by the power distribution maintenance crew yesterday.",
     },
   ];
 

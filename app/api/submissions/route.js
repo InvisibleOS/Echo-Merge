@@ -88,13 +88,13 @@ export async function GET(request) {
       if (matchedCase) {
         item.status = matchedCase.status;
         
-        // Map department_id (e.g. dept-pwd -> PWD)
+        // Map department_id to generic city-agnostic names
         let deptName = matchedCase.department_id;
         if (deptName) {
-          if (deptName.includes('pwd')) deptName = 'PWD / Infrastructure';
-          else if (deptName.includes('water')) deptName = 'BWSSB / Water';
-          else if (deptName.includes('solid-waste')) deptName = 'BBMP / SWM';
-          else if (deptName.includes('electricity')) deptName = 'BESCOM / Power';
+          if (deptName.includes('pwd')) deptName = 'Roads & Infrastructure';
+          else if (deptName.includes('water')) deptName = 'Water & Sewerage Board';
+          else if (deptName.includes('solid-waste')) deptName = 'Solid Waste Management';
+          else if (deptName.includes('electricity')) deptName = 'Power & Electricity Discom';
         }
         item.assigned_department = deptName || undefined;
       } else if (item.solution_plan?.resolved) {

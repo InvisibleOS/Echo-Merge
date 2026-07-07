@@ -4,17 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Hotspot, PriorityItem } from "@/lib/types";
+import { CITIES } from "@/lib/cities";
 
 interface Props {
   hotspots: Hotspot[];
   priorities: PriorityItem[];
   selectedId: string | null;
   onSelectMarker: (workId: string) => void;
+  selectedCityId?: string;
 }
 
-// Bengaluru South — center of the real submissions in
-// day1_enriched_submissions.json (Person 4's Day 1 data drop).
-// Update if the team locks a different demo constituency.
+// Fallback center if no city is selected
 const DEFAULT_CENTER: [number, number] = [77.5952, 12.9071];
 const INDIA_BOUNDS = {
   minLat: 6,
@@ -28,6 +28,7 @@ export default function HotspotMap({
   priorities,
   selectedId,
   onSelectMarker,
+  selectedCityId,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -35,6 +36,21 @@ export default function HotspotMap({
   const [mapError, setMapError] = useState(false);
   const useFallback = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapError;
   const fallbackClusters = useMemo(() => getConstituencyClusters(hotspots), [hotspots]);
+
+  // Handle city teleportation
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selectedCityId) return;
+    const city = CITIES.find((c) => c.id === selectedCityId);
+    if (city) {
+      map.flyTo({
+        center: [city.lng, city.lat],
+        zoom: city.zoom,
+        duration: 1500,
+        essential: true
+      });
+    }
+  }, [selectedCityId]);
 
   // Initialize map once
   useEffect(() => {
