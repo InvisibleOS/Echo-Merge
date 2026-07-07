@@ -32,16 +32,18 @@ export async function GET(request) {
         .from('cases')
         .select('case_id, work_id, status, department_id');
 
-      const mapped = (data || []).map((row) => {
-        const item = toPriorityItem(row);
-        const matchedCase = (casesData || []).find((c) => c.work_id === item.work_id);
-        if (matchedCase) {
-          item.case_id = matchedCase.case_id;
-          item.status = matchedCase.status;
-          item.assigned_department = matchedCase.department_id;
-        }
-        return item;
-      });
+      const mapped = (data || [])
+        .map((row) => {
+          const item = toPriorityItem(row);
+          const matchedCase = (casesData || []).find((c) => c.work_id === item.work_id);
+          if (matchedCase) {
+            item.case_id = matchedCase.case_id;
+            item.status = matchedCase.status;
+            item.assigned_department = matchedCase.department_id;
+          }
+          return item;
+        })
+        .filter((item) => !item.title?.includes('[PROACTIVE'));
 
       // Rank by the AI rating (sum of the four 1–5 dimensions, out of 20). Ties
       // fall back to citizen demand so heavier clusters lead. `sortBy=demand_score`
