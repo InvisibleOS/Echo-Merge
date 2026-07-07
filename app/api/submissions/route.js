@@ -97,8 +97,15 @@ export async function GET(request) {
           else if (deptName.includes('electricity')) deptName = 'BESCOM / Power';
         }
         item.assigned_department = deptName || undefined;
+      } else if (item.solution_plan?.resolved) {
+        item.status = 'Resolved';
+      } else if (item.solution_plan?.assigned) {
+        // Assignment persisted on the priority (no case row yet) — reflect it so
+        // the citizen's status tracker shows "Assigned", not "Open · Pending".
+        item.status = 'Assigned';
+        item.assigned_department = item.solution_plan.assigned_department || undefined;
       } else {
-        item.status = item.solution_plan?.resolved ? 'Resolved' : 'Open';
+        item.status = 'Open';
       }
       return item;
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { PriorityItem, CitizenComplaintRecord, ComplaintStatus, KNOWN_CATEGORIES } from "./types";
+import { PriorityItem, CitizenComplaintRecord, ComplaintStatus, KNOWN_CATEGORIES, GeoPoint } from "./types";
 import { MOCK_PRIORITIES } from "./mockData";
 import { ProactiveAlert } from "./proactiveData";
 
@@ -289,15 +289,16 @@ export function addCitizenComplaint(
     raw_text?: string;
     photo_base64?: string;
     audio_base64?: string;
+    geo?: GeoPoint;
     constituency?: string;
   }
 ): CitizenComplaintRecord {
   const current = getCitizenComplaints();
   const newId = payload.id || `CIT_${Date.now()}`;
-  
+
   // Try to match category or assign a fallback
   const category = payload.category || KNOWN_CATEGORIES[0] || "General Civic Issue";
-  
+
   const record: CitizenComplaintRecord = {
     id: newId,
     title: payload.title || (payload.raw_text ? payload.raw_text.slice(0, 60) + "..." : "New Civic Submission"),
@@ -307,7 +308,10 @@ export function addCitizenComplaint(
     raw_text: payload.raw_text,
     photo_base64: payload.photo_base64,
     audio_base64: payload.audio_base64,
-    constituency: payload.constituency || "Bengaluru South",
+    // Store the citizen's actual captured location; only tag a constituency when
+    // one is genuinely known (no hardcoded "Bengaluru South" for every report).
+    geo: payload.geo,
+    constituency: payload.constituency,
   };
 
   const next = [record, ...current];
