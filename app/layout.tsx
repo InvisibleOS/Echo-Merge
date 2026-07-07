@@ -28,7 +28,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Manrope:wght@500;700;800&display=swap"
         />
       </head>
-      <body className={`${manrope.variable} font-body bg-paper text-ink-900 pb-20`}>
+      <body className={`${manrope.variable} font-body bg-paper text-ink-900`}>
         {children}
         <FloatingNav />
       </body>

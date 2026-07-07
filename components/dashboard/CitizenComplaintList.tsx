@@ -61,22 +61,33 @@ export default function CitizenComplaintList() {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      syncWithServer(false);
-    }, 0);
+    // Pull fresh status the instant the list mounts — i.e. every time the user
+    // switches to the "My Complaints" page/tab (it remounts on tab change).
+    syncWithServer(false);
 
-    // Subscribe to real-time storage events from MP dashboard actions
+    // Re-sync immediately when the tab/window regains focus, so returning from
+    // the MP dashboard reflects a just-made assignment without waiting for a poll.
+    const onFocus = () => syncWithServer(false);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") syncWithServer(false);
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // Cross-window storage events from MP dashboard actions — pull server state
+    // too (not just local) so assignments made in another tab show right away.
     const unsubscribe = subscribeToSync(() => {
-      setComplaints(getCitizenComplaints());
+      syncWithServer(false);
     });
-    
-    // Fallback polling every 3s to guarantee server and cross-window sync
+
+    // Lightweight fallback poll to guarantee eventual consistency.
     const interval = setInterval(() => {
       syncWithServer(false);
-    }, 3000);
+    }, 1500);
 
     return () => {
-      clearTimeout(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
       unsubscribe();
       clearInterval(interval);
     };

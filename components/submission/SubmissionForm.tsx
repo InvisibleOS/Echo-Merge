@@ -12,6 +12,7 @@ import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { submitComplaint } from "@/lib/api";
 import { GeoPoint } from "@/lib/types";
+import { CITIES } from "@/lib/cities";
 
 type InputMode = "text" | "voice" | "photo";
 
@@ -21,7 +22,7 @@ const INPUT_MODES: { id: InputMode; label: string; icon: typeof Mic }[] = [
   { id: "text", label: "Type Text", icon: Type },
 ];
 
-export default function SubmissionForm() {
+export default function SubmissionForm({ selectedCityId }: { selectedCityId?: string }) {
   const [language, setLanguage] = useState("hi");
   const [activeMode, setActiveMode] = useState<InputMode | null>(null);
   const [text, setText] = useState("");
@@ -70,13 +71,24 @@ export default function SubmissionForm() {
     setIsSubmitting(true);
     setError(null);
 
+    // Override GPS with selected city center + slight randomization for demo realism
+    let finalGeo = geo ? { ...geo, ward: undefined } : undefined;
+    if (selectedCityId) {
+      const city = CITIES.find(c => c.id === selectedCityId);
+      if (city) {
+        const latOffset = (Math.random() - 0.5) * 0.05;
+        const lngOffset = (Math.random() - 0.5) * 0.05;
+        finalGeo = { lat: city.lat + latOffset, lng: city.lng + lngOffset };
+      }
+    }
+
     try {
       const res = await submitComplaint({
         raw_text: text.trim() || undefined,
         audio_base64: audioBase64 || undefined,
         photo_base64: photoBase64 || undefined,
         language,
-        geo: geo ? { ...geo, ward: undefined } : undefined, // frontend doesn't know ward
+        geo: finalGeo,
         channel: "web",
       });
       setSubmissionId(res.submission_id);

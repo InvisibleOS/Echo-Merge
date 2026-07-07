@@ -23,9 +23,9 @@ interface Props {
 
 const DEPARTMENTS_LIST = [
   { id: "dept-pwd", name: "Public Works Department (PWD)" },
-  { id: "dept-water", name: "Water Supply and Sewerage Board (BWSSB)" },
-  { id: "dept-solid-waste", name: "Solid Waste Management Cell (SWM)" },
-  { id: "dept-electricity", name: "Electricity and Streetlight (BESCOM)" },
+  { id: "dept-water", name: "State Water Supply & Sewerage Board" },
+  { id: "dept-solid-waste", name: "Municipal Solid Waste Management Department" },
+  { id: "dept-electricity", name: "State Electricity Distribution Company (DISCOM)" },
   { id: "dept-safety", name: "Public Safety and Police Liaison" },
 ];
 

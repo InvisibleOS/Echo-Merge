@@ -14,13 +14,13 @@ interface Props {
 
 const AGENCIES = [
   "Public Works Department (PWD)",
-  "Bruhat Bengaluru Mahanagara Palike (BBMP) Roads & Infrastructure",
-  "Bangalore Water Supply and Sewerage Board (BWSSB)",
-  "BESCOM (Bangalore Electricity Supply Company)",
-  "BBMP Solid Waste Management Wing",
-  "Bengaluru Traffic Police (BTP)",
+  "Municipal Corporation – Roads & Infrastructure",
+  "State Water Supply & Sewerage Board",
+  "State Electricity Distribution Company (DISCOM)",
+  "Municipal Solid Waste Management Department",
+  "State Traffic Police",
   "Municipal Health & Sanitation Department",
-  "Local Ward Contractor (MNC)",
+  "Local Ward Contractor",
 ];
 
 export default function DelegationPanel({ priorities, onDelegationUpdate }: Props) {

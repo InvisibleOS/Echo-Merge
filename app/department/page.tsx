@@ -7,7 +7,7 @@ export default function DepartmentPortalPage() {
   const cases = getCases({ constituency: "Bengaluru South" }).slice(0, 18);
 
   return (
-    <main className="min-h-screen bg-ink-950 text-white px-4 py-6">
+    <main className="min-h-screen bg-ink-950 text-white px-4 pt-6 pb-28">
       <div className="max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/10 pb-5">
           <div>
