@@ -52,13 +52,20 @@ export async function submitComplaint(
   // Always log to client local storage for real-time tracking in Citizen Dashboard
   if (typeof window !== "undefined" && res && res.submission_id) {
     try {
+      const ward =
+        payload.geo && "ward" in payload.geo
+          ? (payload.geo as { ward?: string }).ward
+          : undefined;
       addCitizenComplaint({
         id: res.submission_id,
         title: payload.raw_text ? payload.raw_text.split(".")[0].slice(0, 60) : "Media Submission",
         raw_text: payload.raw_text,
         photo_base64: payload.photo_base64,
         audio_base64: payload.audio_base64,
-        constituency: payload.geo && "ward" in payload.geo ? (payload.geo as { ward?: string }).ward : "Bengaluru South",
+        // Real captured location — no hardcoded constituency. `ward` is set only
+        // if the payload actually carried one.
+        geo: payload.geo,
+        constituency: ward,
       });
     } catch {
       // ignore storage errors

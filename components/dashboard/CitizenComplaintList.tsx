@@ -159,12 +159,20 @@ export default function CitizenComplaintList() {
                 <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <CategoryBadge category={item.category} />
-                    {item.constituency && (
+                    {item.geo && typeof item.geo.lat === "number" ? (
+                      <span
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200"
+                        title="Location captured at submission"
+                      >
+                        <MapPin size={11} />
+                        {item.geo.lat.toFixed(4)}, {item.geo.lng.toFixed(4)}
+                      </span>
+                    ) : item.constituency ? (
                       <span className="inline-flex items-center gap-1 text-[11px] font-medium text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200">
                         <MapPin size={11} />
                         {item.constituency}
                       </span>
-                    )}
+                    ) : null}
                     {rec.predictive_status && (
                       <span className={clsx(
                         "inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs",

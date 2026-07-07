@@ -35,8 +35,34 @@ export async function POST(
     const deptId = mapAgencyToDeptId(agencyName);
     const db = supabase as unknown as SupabaseClient;
 
-    // Update the cases table status to 'Assigned' and link department ID
-    const { error: updateError } = await db
+    // Persist the assignment on the PRIORITY itself (in its solution_plan jsonb,
+    // mirroring how /resolve stores `resolved`). This is the reliable source of
+    // truth: it reflects on the MP dashboard AND the citizen's status tracker
+    // even when no `cases` row exists yet for this work_id — which is the common
+    // case for citizen-submitted priorities. Without this the status stayed
+    // "Open · Pending Action" because the cases UPDATE below matched 0 rows.
+    const { data: existingPriority } = await db
+      .from('priorities')
+      .select('solution_plan')
+      .eq('work_id', workId)
+      .maybeSingle();
+    const mergedPlan = {
+      ...(existingPriority?.solution_plan || {}),
+      assigned: true,
+      assigned_department: agencyName,
+      assigned_department_id: deptId,
+    };
+    const { error: planError } = await db
+      .from('priorities')
+      .update({ solution_plan: mergedPlan })
+      .eq('work_id', workId);
+    if (planError) {
+      throw new Error(planError.message);
+    }
+
+    // Best-effort: also flip the cases row (powers the department/workload tabs).
+    // A 0-row match here is fine — the priority update above is authoritative.
+    await db
       .from('cases')
       .update({
         status: 'Assigned',
@@ -46,18 +72,8 @@ export async function POST(
       })
       .eq('work_id', workId);
 
-    if (updateError) {
-      throw new Error(updateError.message);
-    }
-
-    // Call the increment_active_cases RPC function for the department update
-    const { error: rpcError } = await db.rpc('increment_active_cases', {
-      p_dept_id: deptId
-    });
-
-    if (rpcError) {
-      throw new Error(rpcError.message);
-    }
+    // Best-effort department workload counter; never fail the assignment on it.
+    await db.rpc('increment_active_cases', { p_dept_id: deptId });
 
     invalidate(CACHE_KEYS.hotspots);
     invalidate(CACHE_KEYS.priorities);

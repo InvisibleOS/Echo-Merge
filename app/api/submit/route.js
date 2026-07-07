@@ -114,7 +114,10 @@ export async function POST(request) {
     // --- Run the pipeline (enrich -> embed -> rescore) ----------------------
     // Best-effort: the raw submission is already durable; pipeline errors are
     // logged inside runPipeline and never lose the citizen's report.
-    await runPipeline(supabase, rawData);
+    // We run this asynchronously so the citizen gets an immediate success response.
+    runPipeline(supabase, rawData).catch(err => {
+      console.error('[Pipeline Background Error]:', err);
+    });
 
     return NextResponse.json(
       {
