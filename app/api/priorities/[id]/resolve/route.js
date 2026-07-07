@@ -5,7 +5,7 @@ import { invalidate, CACHE_KEYS } from '../../../../../lib/server/cache';
 export const dynamic = 'force-dynamic';
 
 export async function PATCH(request, context) {
-  const { work_id } = await context.params;
+  const { id: work_id } = await context.params;
 
   if (!isSupabaseConfigured) {
     return NextResponse.json({ success: true }, { status: 200 });

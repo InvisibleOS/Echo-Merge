@@ -54,7 +54,7 @@ export default function VoiceRecorder({ onAudioReady }: Props) {
       setIsRecording(true);
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-    } catch (err) {
+    } catch {
       setError(
         "Couldn't access your microphone. Check your browser permissions and try again."
       );
