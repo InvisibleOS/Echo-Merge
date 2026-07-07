@@ -200,6 +200,31 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                 {item.resolution_brief.first_action}
               </p>
             </div>
+
+            {item.solution_plan && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2.5">
+                  <span className="block text-[9px] uppercase font-bold text-emerald-700/80 mb-0.5">
+                    Est. Govt. Budget
+                  </span>
+                  <p className="text-sm font-bold text-emerald-800 leading-none">
+                    {item.solution_plan.estimated_budget_inr || item.solution_plan.estimated_budget_tier}
+                  </p>
+                  <span className="text-[9px] font-semibold text-emerald-700/70">
+                    {item.solution_plan.estimated_budget_tier} tier
+                  </span>
+                </div>
+                <div className="rounded-lg bg-white border border-civic-200 p-2.5">
+                  <span className="block text-[9px] uppercase font-bold text-surface-500 mb-0.5">
+                    Target Timeline
+                  </span>
+                  <p className="text-sm font-bold text-surface-900 leading-none">
+                    {item.solution_plan.remediation_timeline}
+                  </p>
+                  <span className="text-[9px] font-semibold text-surface-500">to resolution</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

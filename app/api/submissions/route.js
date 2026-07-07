@@ -73,9 +73,13 @@ export async function GET(request) {
     if (pErr) throw new Error(pErr.message);
 
     // 2. Load cases to resolve their statuses and department assignments
-    const { data: casesData } = await supabase
+    const { data: casesData, error: casesErr } = await supabase
       .from('cases')
-      .select('work_id, status, department:departments(name)');
+      .select('work_id, status, department_id');
+      
+    if (casesErr) {
+      console.error('Failed to load cases:', casesErr);
+    }
     const cases = casesData || [];
 
     const priorities = (prioritiesData || []).map((row) => {
@@ -83,7 +87,16 @@ export async function GET(request) {
       const matchedCase = cases.find((c) => c.work_id === item.work_id);
       if (matchedCase) {
         item.status = matchedCase.status;
-        item.assigned_department = matchedCase.department?.name || undefined;
+        
+        // Map department_id (e.g. dept-pwd -> PWD)
+        let deptName = matchedCase.department_id;
+        if (deptName) {
+          if (deptName.includes('pwd')) deptName = 'PWD / Infrastructure';
+          else if (deptName.includes('water')) deptName = 'BWSSB / Water';
+          else if (deptName.includes('solid-waste')) deptName = 'BBMP / SWM';
+          else if (deptName.includes('electricity')) deptName = 'BESCOM / Power';
+        }
+        item.assigned_department = deptName || undefined;
       } else {
         item.status = item.solution_plan?.resolved ? 'Resolved' : 'Open';
       }
