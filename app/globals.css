@@ -6,10 +6,13 @@
   --font-body: "Noto Sans", "Noto Sans Devanagari", "Noto Sans Tamil",
     "Noto Sans Telugu", "Noto Sans Bengali", "Noto Sans Kannada",
     system-ui, sans-serif;
+  --font-display: "Manrope", "Noto Sans", system-ui, sans-serif;
 }
 
 * {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -18,7 +21,26 @@ body {
   font-family: var(--font-body);
 }
 
-/* Visible keyboard focus everywhere — accessibility floor */
+/* Custom Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Keyboard Accessibility */
 :focus-visible {
   outline: 2px solid #4f46e5;
   outline-offset: 2px;
@@ -34,6 +56,32 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(15px, -25px) scale(1.08);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate(-20px, 15px) scale(1);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 15s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 20s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
