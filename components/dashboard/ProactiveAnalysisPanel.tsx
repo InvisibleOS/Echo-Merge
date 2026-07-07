@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/types";
 import { getProactiveAlerts, convertProactiveAlert } from "@/lib/api";
+import { CITIES, CityConfig } from "@/lib/cities";
 import { CategoryBadge } from "@/components/ui/Badge";
 import {
   Radio,
@@ -23,22 +24,45 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 
-const DEFAULT_CENTER: [number, number] = [77.605, 12.915];
+// Alerts within this radius (km) of the selected city are shown on the panel.
+const CITY_ALERT_RADIUS_KM = 120;
 
-// Bengaluru South viewport for the token-free fallback projection.
-const LOCAL_BOUNDS = { minLat: 12.82, maxLat: 13.02, minLng: 77.48, maxLng: 77.74 };
-function projectLocalPoint(lat: number, lng: number) {
-  const x = ((Number(lng) - LOCAL_BOUNDS.minLng) / (LOCAL_BOUNDS.maxLng - LOCAL_BOUNDS.minLng)) * 100;
-  const y = (1 - (Number(lat) - LOCAL_BOUNDS.minLat) / (LOCAL_BOUNDS.maxLat - LOCAL_BOUNDS.minLat)) * 100;
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function nearCity(geo: { lat?: number; lng?: number } | undefined, city: CityConfig) {
+  if (!geo || !Number.isFinite(geo.lat) || !Number.isFinite(geo.lng)) return false;
+  return distanceKm(geo.lat as number, geo.lng as number, city.lat, city.lng) <= CITY_ALERT_RADIUS_KM;
+}
+
+// Project a point onto a ~0.44° window around the active city (token-free fallback).
+function projectLocalPoint(lat: number, lng: number, city: CityConfig) {
+  const pad = 0.22;
+  const x = ((Number(lng) - (city.lng - pad)) / (2 * pad)) * 100;
+  const y = (1 - (Number(lat) - (city.lat - pad)) / (2 * pad)) * 100;
   return { x: Math.max(4, Math.min(96, x)), y: Math.max(5, Math.min(95, y)) };
 }
 
 interface Props {
   /** Called after an alert is successfully converted into an actionable work order. */
   onConverted?: () => void;
+  /** Currently selected city (from the dashboard header) — scopes + flies the map. */
+  selectedCityId?: string;
 }
 
-export default function ProactiveAnalysisPanel({ onConverted }: Props) {
+export default function ProactiveAnalysisPanel({ onConverted, selectedCityId }: Props) {
+  const activeCity = useMemo(
+    () => CITIES.find((c) => c.id === selectedCityId) || CITIES[0],
+    [selectedCityId]
+  );
   const [alerts, setAlerts] = useState<ProactiveAlert[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [filterPriority, setFilterPriority] = useState<string>("All");
@@ -80,9 +104,10 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
     return ["All", ...Array.from(cats)];
   }, [alerts]);
 
-  // Filter alerts
+  // Filter alerts — scoped to the selected city, then by the on-panel controls.
   const filtered = useMemo(() => {
     return alerts.filter((item) => {
+      if (!nearCity(item.geo, activeCity)) return false;
       if (filterPriority !== "All" && item.priority !== filterPriority) return false;
       if (filterIngestion !== "All" && item.ingestion_type !== filterIngestion) return false;
       if (filterCategory !== "All" && item.category !== filterCategory) return false;
@@ -96,7 +121,7 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
       }
       return true;
     });
-  }, [alerts, filterPriority, filterIngestion, filterCategory, searchQuery]);
+  }, [alerts, activeCity, filterPriority, filterIngestion, filterCategory, searchQuery]);
 
   const selectedItem = useMemo(() => {
     return filtered.find((a) => a.id === selectedAlertId) || null;
@@ -139,12 +164,13 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
 
     let map: mapboxgl.Map;
     try {
+      const initCity = CITIES.find((c) => c.id === selectedCityId) || CITIES[0];
       mapboxgl.accessToken = token;
       map = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: "mapbox://styles/mapbox/light-v11",
-        center: DEFAULT_CENTER,
-        zoom: 12.2,
+        center: [initCity.lng, initCity.lat],
+        zoom: initCity.zoom,
       });
       map.addControl(new mapboxgl.NavigationControl(), "top-right");
       mapRef.current = map;
@@ -225,6 +251,20 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
       duration: 800,
     });
   }, [selectedAlertId, alerts]);
+
+  // Fly to the selected city (from the dashboard header) and reset any selection.
+  useEffect(() => {
+    setSelectedAlertId(null);
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo({
+      center: [activeCity.lng, activeCity.lat],
+      zoom: activeCity.zoom,
+      duration: 1200,
+      essential: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCity]);
 
   function getPriorityBadge(priority: ProactivePriorityLevel) {
     switch (priority) {
@@ -577,7 +617,7 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
             <div className="flex items-center gap-2">
               <MapPin size={16} className="text-civic-600" />
               <h3 className="font-display font-bold text-sm text-surface-900">
-                Bengaluru South Real-Time Telemetry Map
+                {activeCity.name} Real-Time Telemetry Map
               </h3>
             </div>
             <div className="flex items-center gap-4 text-[11px] font-bold text-surface-600">
@@ -601,7 +641,7 @@ export default function ProactiveAnalysisPanel({ onConverted }: Props) {
             <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-[radial-gradient(circle_at_30%_25%,rgba(79,70,229,0.10),transparent_35%),linear-gradient(135deg,#0F172A,#020617)]">
               <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:40px_40px]" />
               {filtered.map((item) => {
-                const p = projectLocalPoint(item.geo.lat, item.geo.lng);
+                const p = projectLocalPoint(item.geo.lat, item.geo.lng, activeCity);
                 const isSel = selectedAlertId === item.id;
                 const color =
                   item.priority === "Critical" ? "#DC2626" : item.priority === "Warning" ? "#D97706" : "#2563EB";
