@@ -1,0 +1,581 @@
+"use client";
+
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/types";
+import { getProactiveAlerts, convertProactiveAlert } from "@/lib/api";
+import { CategoryBadge } from "@/components/ui/Badge";
+import {
+  Radio,
+  AlertTriangle,
+  ShieldAlert,
+  Cpu,
+  MapPin,
+  ArrowUpRight,
+  Clock,
+  Filter,
+  Search,
+  Activity,
+  Zap,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
+import clsx from "clsx";
+
+const DEFAULT_CENTER: [number, number] = [77.605, 12.915];
+
+export default function ProactiveAnalysisPanel() {
+  const [alerts, setAlerts] = useState<ProactiveAlert[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
+  const [filterPriority, setFilterPriority] = useState<string>("All");
+  const [filterIngestion, setFilterIngestion] = useState<string>("All");
+  const [filterCategory, setFilterCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
+  const [isConvertingId, setIsConvertingId] = useState<string | null>(null);
+
+  const [convertedIds, setConvertedIds] = useState<Record<string, boolean>>({});
+
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
+
+  // Fetch proactive alerts from database API
+  const fetchAlerts = useCallback(async (showLoading = true) => {
+    if (showLoading) setIsFetching(true);
+    try {
+      const res = await getProactiveAlerts();
+      setAlerts(res || []);
+    } catch (err) {
+      console.error("Failed to load proactive alerts:", err);
+    } finally {
+      setIsFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAlerts(false);
+  }, [fetchAlerts]);
+
+  // Get unique categories
+  const categories = useMemo(() => {
+    const cats = new Set(alerts.map((a) => a.category));
+    return ["All", ...Array.from(cats)];
+  }, [alerts]);
+
+  // Filter alerts
+  const filtered = useMemo(() => {
+    return alerts.filter((item) => {
+      if (filterPriority !== "All" && item.priority !== filterPriority) return false;
+      if (filterIngestion !== "All" && item.ingestion_type !== filterIngestion) return false;
+      if (filterCategory !== "All" && item.category !== filterCategory) return false;
+      if (searchQuery.trim() !== "") {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = item.title.toLowerCase().includes(q);
+        const matchDetails = item.details.toLowerCase().includes(q);
+        const matchLocation = item.location_label.toLowerCase().includes(q);
+        const matchSource = item.source.toLowerCase().includes(q);
+        if (!matchTitle && !matchDetails && !matchLocation && !matchSource) return false;
+      }
+      return true;
+    });
+  }, [alerts, filterPriority, filterIngestion, filterCategory, searchQuery]);
+
+  const selectedItem = useMemo(() => {
+    return filtered.find((a) => a.id === selectedAlertId) || null;
+  }, [filtered, selectedAlertId]);
+
+  // Handle one-click conversion to work order using backend database transaction
+  async function handleConvert(alert: ProactiveAlert) {
+    if (convertedIds[alert.id] || isConvertingId) return;
+    setIsConvertingId(alert.id);
+    
+    try {
+      const res = await convertProactiveAlert(alert.id);
+      if (res && res.success) {
+        setConvertedIds((prev) => ({ ...prev, [alert.id]: true }));
+        // Re-fetch live data to update alerts list (converted alert is deleted from proactive table)
+        await fetchAlerts(false);
+        setSelectedAlertId(null);
+
+        // Dispatch sync event so Tab 1 map & list update instantly
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("echo-storage-sync"));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to convert alert:", err);
+    } finally {
+      setIsConvertingId(null);
+    }
+  }
+
+  // Initialize Mapbox map
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    if (!token) {
+      console.error("Missing NEXT_PUBLIC_MAPBOX_TOKEN");
+      return;
+    }
+    mapboxgl.accessToken = token;
+
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/light-v11",
+      center: DEFAULT_CENTER,
+      zoom: 12.2,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      markersRef.current = {};
+    };
+  }, []);
+
+  // Update map markers when filtered items change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Clear existing markers
+    Object.values(markersRef.current).forEach((m) => m.remove());
+    markersRef.current = {};
+
+    filtered.forEach((item) => {
+      const el = document.createElement("button");
+      el.setAttribute("aria-label", item.title);
+      const isSelected = selectedAlertId === item.id;
+      const isCritical = item.priority === "Critical";
+      const isWarning = item.priority === "Warning";
+      const bgColor = isCritical ? "#DC2626" : isWarning ? "#D97706" : "#2563EB";
+      const ringColor = isCritical ? "rgba(220, 38, 38, 0.4)" : isWarning ? "rgba(217, 119, 6, 0.4)" : "rgba(37, 99, 235, 0.4)";
+
+      el.style.width = isSelected ? "36px" : "30px";
+      el.style.height = isSelected ? "36px" : "30px";
+      el.style.borderRadius = "50%";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.fontFamily = "var(--font-display), sans-serif";
+      el.style.fontWeight = "800";
+      el.style.fontSize = isSelected ? "15px" : "13px";
+      el.style.color = "white";
+      el.style.border = isSelected ? "3px solid #FFF" : "2px solid white";
+      el.style.cursor = "pointer";
+      el.style.boxShadow = isSelected
+        ? `0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px ${ringColor}`
+        : "0 2px 6px rgba(0,0,0,0.25)";
+      el.style.transition = "all 0.2s ease";
+      el.style.backgroundColor = bgColor;
+      el.style.zIndex = isSelected ? "10" : "1";
+
+      el.textContent = isCritical ? "⚠" : isWarning ? "⚡" : "ℹ";
+
+      el.onclick = () => {
+        setSelectedAlertId(item.id);
+      };
+
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([item.geo.lng, item.geo.lat])
+        .addTo(map);
+
+      markersRef.current[item.id] = marker;
+    });
+  }, [filtered, selectedAlertId]);
+
+  // Fly to selected alert when clicked
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selectedAlertId) return;
+    const item = alerts.find((a) => a.id === selectedAlertId);
+    if (!item) return;
+
+    map.flyTo({
+      center: [item.geo.lng, item.geo.lat],
+      zoom: 14.5,
+      duration: 800,
+    });
+  }, [selectedAlertId, alerts]);
+
+  function getPriorityBadge(priority: ProactivePriorityLevel) {
+    switch (priority) {
+      case "Critical":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 shadow-2xs">
+            <AlertTriangle size={12} />
+            <span>CRITICAL</span>
+          </span>
+        );
+      case "Warning":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
+            <ShieldAlert size={12} />
+            <span>WARNING</span>
+          </span>
+        );
+      case "Monitor":
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+            <Clock size={12} />
+            <span>MONITOR</span>
+          </span>
+        );
+    }
+  }
+
+  function getIngestionBadge(type: IngestionType) {
+    switch (type) {
+      case "SCADA Telemetry":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+            <Activity size={12} className="text-emerald-600" />
+            SCADA Telemetry
+          </span>
+        );
+      case "Computer Vision (CV)":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+            <Zap size={12} className="text-purple-600" />
+            Computer Vision
+          </span>
+        );
+      case "News Feeds (NLP)":
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+            <Radio size={12} className="text-blue-600" />
+            News Feeds (NLP)
+          </span>
+        );
+    }
+  }
+
+  return (
+    <div className="space-y-6 animate-[fadeSlideIn_200ms_ease-out] relative">
+      {isFetching && (
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-xs flex items-center justify-center z-35">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-8 rounded-full border-3 border-civic-500 border-t-transparent animate-spin" />
+            <span className="text-xs font-semibold text-surface-700">Loading telemetry data...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Control Center Header & Telemetry Status Banner */}
+      <div className="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-3xl">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-mono font-bold shadow-2xs">
+              <Cpu size={14} className="animate-pulse text-emerald-600" />
+              <span>AI TELEMETRY &amp; INGESTION PIPELINES ACTIVE</span>
+            </div>
+            <span className="text-xs font-medium text-surface-500 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200">
+              {filtered.length} Proactive Alerts Detected
+            </span>
+          </div>
+          <h2 className="font-display font-bold text-2xl text-surface-900 tracking-tight">
+            Proactive Area Infrastructure Analysis
+          </h2>
+          <p className="text-sm text-surface-700 leading-relaxed font-medium">
+            Continuously aggregating local news NLP feeds, BBMP drain camera computer vision (CV), and BWSSB SCADA telemetry to predictively identify and remediate infrastructure failures before citizen complaints occur.
+          </p>
+        </div>
+      </div>
+
+      {/* Filter Controls Bar */}
+      <div className="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-surface-700 mr-1">
+            <Filter size={14} className="text-civic-600" />
+            <span>Filter Telemetry:</span>
+          </div>
+
+          {/* Priority filter */}
+          <div className="flex items-center gap-1 bg-surface-100 p-1 rounded-lg border border-surface-200">
+            <span className="text-[10px] font-bold uppercase px-2 text-surface-500">Priority:</span>
+            {["All", "Critical", "Warning", "Monitor"].map((p) => (
+              <button
+                key={p}
+                onClick={() => setFilterPriority(p)}
+                className={clsx(
+                  "px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                  filterPriority === p
+                    ? "bg-white text-surface-900 shadow-2xs border border-surface-200/80"
+                    : "text-surface-600 hover:text-surface-900"
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+
+          {/* Ingestion Type filter */}
+          <div className="flex items-center gap-1 bg-surface-100 p-1 rounded-lg border border-surface-200">
+            <span className="text-[10px] font-bold uppercase px-2 text-surface-500">Source Type:</span>
+            {["All", "SCADA Telemetry", "Computer Vision (CV)", "News Feeds (NLP)"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilterIngestion(type)}
+                className={clsx(
+                  "px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                  filterIngestion === type
+                    ? "bg-white text-surface-900 shadow-2xs border border-surface-200/80"
+                    : "text-surface-600 hover:text-surface-900"
+                )}
+              >
+                {type === "Computer Vision (CV)" ? "CV Feed" : type === "News Feeds (NLP)" ? "NLP News" : type === "SCADA Telemetry" ? "SCADA" : "All"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Category Dropdown */}
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="px-3 py-1.5 rounded-lg border border-surface-200 bg-surface-50 text-xs font-semibold text-surface-900 focus:outline-none focus:ring-2 focus:ring-civic-500"
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat === "All" ? "All Departments & Categories" : cat}
+              </option>
+            ))}
+          </select>
+
+          {/* Search box */}
+          <div className="relative min-w-[200px]">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search alert, sensor, location..."
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-surface-200 bg-surface-50 text-xs font-medium text-surface-900 placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-civic-500 focus:bg-white"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Side-by-Side Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-6 min-h-[660px]">
+        {/* Left Hand Side Panel */}
+        <div className="bg-white rounded-2xl border border-surface-200 shadow-sm flex flex-col overflow-hidden h-[660px]">
+          {selectedItem ? (
+            <div className="flex flex-col h-full animate-[fadeSlideIn_150ms_ease-out]">
+              {/* Header Navigation Bar */}
+              <div className="px-5 py-3.5 border-b border-surface-200 bg-surface-50/80 flex items-center justify-between shrink-0">
+                <button
+                  onClick={() => setSelectedAlertId(null)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-surface-700 hover:text-civic-600 transition-colors bg-white px-3 py-1 rounded-lg border border-surface-205 shadow-2xs"
+                >
+                  <ArrowLeft size={14} />
+                  <span>Back to all alerts ({filtered.length})</span>
+                </button>
+                <span className="text-xs font-mono font-bold text-surface-500 bg-surface-100 px-2 py-0.5 rounded border border-surface-200">
+                  ID: {selectedItem.id}
+                </span>
+              </div>
+
+              {/* Scrollable Detailed Description Area */}
+              <div className="overflow-y-auto p-6 space-y-5 flex-1 min-h-0">
+                <div className="space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {getPriorityBadge(selectedItem.priority)}
+                    {getIngestionBadge(selectedItem.ingestion_type)}
+                    <span
+                      title={selectedItem.source_tooltip}
+                      className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-surface-700 bg-surface-100 px-2 py-0.5 rounded border border-surface-200"
+                    >
+                      ℹ {selectedItem.source_tooltip}
+                    </span>
+                  </div>
+
+                  <h3 className="font-display font-bold text-xl text-surface-900 leading-snug">
+                    {selectedItem.title}
+                  </h3>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <CategoryBadge category={selectedItem.category} />
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200">
+                      <MapPin size={13} className="text-civic-600" />
+                      {selectedItem.location_label}
+                    </span>
+                    <span className="text-xs text-surface-400 font-medium ml-auto">
+                      {selectedItem.timestamp}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Scraped Telemetry Findings */}
+                <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 space-y-1.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-surface-500 block">
+                    Scraped Telemetry Findings:
+                  </span>
+                  <p className="text-xs sm:text-sm text-surface-800 leading-relaxed font-medium">
+                    {selectedItem.details}
+                  </p>
+                </div>
+
+                {/* Recommended AI Remediation Action */}
+                <div className="bg-civic-50/60 p-4 rounded-xl border border-civic-200 space-y-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-civic-900 flex items-center gap-1.5">
+                    <ArrowUpRight size={14} className="text-civic-600" />
+                    Recommended AI Remediation Action:
+                  </span>
+                  <p className="text-xs sm:text-sm text-civic-950 font-bold leading-relaxed">
+                    {selectedItem.suggested_action}
+                  </p>
+                  <p className="text-xs text-civic-800 pt-2 border-t border-civic-200/60">
+                    Target Municipal Agency: <span className="font-bold">{selectedItem.department}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Footer Action Area */}
+              <div className="p-5 border-t border-surface-200 bg-surface-50/60 shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div className="hidden sm:block">
+                  <span className="block text-[10px] font-bold uppercase text-surface-400">Status</span>
+                  <span className="text-xs font-bold text-surface-700">
+                    {convertedIds[selectedItem.id] ? "✓ Actionable Work Order" : "⚡ Unconverted Alert"}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleConvert(selectedItem)}
+                  disabled={convertedIds[selectedItem.id] || isConvertingId === selectedItem.id}
+                  className={clsx(
+                    "px-5 py-3 rounded-xl font-display font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 min-w-[200px]",
+                    convertedIds[selectedItem.id]
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default animate-none"
+                      : "bg-purple-600 text-white hover:bg-purple-705 active:scale-95 shadow-md"
+                  )}
+                >
+                  {isConvertingId === selectedItem.id ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : convertedIds[selectedItem.id] ? (
+                    <>
+                      <CheckCircle size={15} className="text-emerald-600" />
+                      <span>Converted to Work Order</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={15} />
+                      <span>Convert to Actionable Work Order</span>
+                      <ArrowUpRight size={14} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col h-full">
+              <div className="px-5 py-3.5 border-b border-surface-200 bg-surface-50/70 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                  <h3 className="font-display font-bold text-sm text-surface-900">
+                    Detected Infrastructure Alerts
+                  </h3>
+                  <span className="text-xs font-bold text-surface-600 bg-white px-2 py-0.5 rounded-full border border-surface-200">
+                    {filtered.length}
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-surface-500">
+                  Select to inspect
+                </span>
+              </div>
+
+              <div className="overflow-y-auto divide-y divide-surface-100 flex-1 min-h-0 animate-[fadeSlideIn_150ms_ease-out]">
+                {filtered.length === 0 ? (
+                  <div className="text-center py-16 px-4">
+                    <p className="text-surface-500 text-sm font-medium">
+                      No telemetry alerts match your current filter criteria.
+                    </p>
+                  </div>
+                ) : (
+                  filtered.map((item) => {
+                    const isConverted = convertedIds[item.id];
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => setSelectedAlertId(item.id)}
+                        className="p-5 transition-all cursor-pointer hover:bg-surface-50 group"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {getPriorityBadge(item.priority)}
+                            {getIngestionBadge(item.ingestion_type)}
+                          </div>
+                          <span className="text-[11px] font-mono font-semibold text-surface-400">
+                            {item.timestamp}
+                          </span>
+                        </div>
+
+                        <h4 className="font-display font-bold text-base text-surface-900 leading-snug group-hover:text-civic-600 transition-colors mb-2">
+                          {item.title}
+                        </h4>
+
+                        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-surface-100">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-surface-700 truncate max-w-[220px]">
+                            <MapPin size={13} className="text-civic-600 shrink-0" />
+                            <span className="truncate">{item.location_label}</span>
+                          </span>
+                          <span
+                            className={clsx(
+                              "text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0 border transition-all shadow-3xs",
+                              isConverted
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-250"
+                                : "text-civic-600 bg-civic-50 border-civic-200 group-hover:bg-civic-100"
+                            )}
+                          >
+                            {isConverted ? "✓ Work Order" : "Inspect Details →"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Real-Time Telemetry Mapbox Map */}
+        <div className="bg-white rounded-2xl border border-surface-200 overflow-hidden shadow-sm flex flex-col h-[660px]">
+          <div className="px-5 py-3 border-b border-surface-200 flex items-center justify-between bg-surface-50/50 shrink-0">
+            <div className="flex items-center gap-2">
+              <MapPin size={16} className="text-civic-600" />
+              <h3 className="font-display font-bold text-sm text-surface-900">
+                Bengaluru South Real-Time Telemetry Map
+              </h3>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] font-bold text-surface-600">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block border border-red-800"></span>
+                <span>Critical</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block border border-amber-800"></span>
+                <span>Warning</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block border border-blue-800"></span>
+                <span>Monitor</span>
+              </div>
+            </div>
+          </div>
+          <div ref={mapContainerRef} className="w-full flex-1 min-h-0" />
+        </div>
+      </div>
+    </div>
+  );
+}
