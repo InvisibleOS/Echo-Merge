@@ -52,7 +52,7 @@ export default function SubmissionForm() {
         channel: "web",
       });
       setSubmissionId(res.submission_id);
-    } catch (err) {
+    } catch {
       setError(
         "Something went wrong sending your report. Please check your connection and try again."
       );

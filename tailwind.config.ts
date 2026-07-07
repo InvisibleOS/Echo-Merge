@@ -30,7 +30,16 @@ const config: Config = {
           red: "#DC2626", // critical urgency only
           green: "#16A34A", // low urgency / success
         },
-        paper: "#FAFAF9", // citizen app background — warm, approachable, high contrast for outdoor mobile use
+        surface: {
+          50: "#F8FAFC", // clean slate page background
+          100: "#F1F5F9",
+          200: "#E2E8F0", // minimal borders
+          300: "#CBD5E1",
+          700: "#334155", // muted typography
+          800: "#1E293B",
+          900: "#0F172A", // high contrast black/dark gray typography
+        },
+        paper: "#FFFFFF", // pure white surface container background
       },
       fontFamily: {
         display: ["var(--font-display)"],
