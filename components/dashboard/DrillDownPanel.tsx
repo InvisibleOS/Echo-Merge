@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PriorityItem } from "@/lib/types";
 import { resolvePriority, assignPriority } from "@/lib/api";
+import { RATING_DIMENSIONS, ratingFor } from "@/lib/rating";
 import { CategoryBadge } from "@/components/ui/Badge";
 import {
   X,
@@ -42,7 +43,7 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
     : item.department?.id || DEPARTMENTS_LIST[0].id;
   
   const [selectedDeptId, setSelectedDeptId] = useState(initialDeptId);
-  const [activeReasoning, setActiveReasoning] = useState<'demand' | 'urgency' | 'equity' | 'validation' | null>(null);
+  const rating = ratingFor(item);
 
   const isResolved = item.status === "Resolved";
   const isAssigned = item.status === "Assigned";
@@ -138,104 +139,44 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
           </span>
         </div>
 
-        {/* AI Scoring Breakdown */}
+        {/* AI Score — the AI rates each complaint 1–5 on four dimensions (sum / 20) */}
         <div className="mt-4">
-          <h3 className="text-xs font-semibold text-surface-500 uppercase tracking-wide mb-3 flex items-center justify-between">
-            <span>AI Scoring Breakdown</span>
+          <h3 className="text-xs font-semibold text-surface-500 uppercase tracking-wide mb-2 flex items-center justify-between">
+            <span>AI Score</span>
             <span className="text-civic-700 font-bold bg-civic-50 border border-civic-200 px-2.5 py-0.5 rounded-full shadow-3xs">
-              {(item.scoring_breakdown?.final_score || item.demand_score).toFixed(1)} / 100
+              {rating.total} / {rating.max}
             </span>
           </h3>
 
-          <div className="bg-surface-50 border border-surface-200 rounded-xl p-1.5 shadow-3xs">
-            <div className="grid grid-cols-2 gap-1.5 mb-1.5">
-              <button 
-                type="button"
-                onClick={() => setActiveReasoning(activeReasoning === 'demand' ? null : 'demand')}
-                className={clsx(
-                  "text-left bg-white rounded-lg p-3 shadow-sm border transition-colors hover:bg-civic-50/50",
-                  activeReasoning === 'demand' ? "border-civic-400 bg-civic-50/50" : "border-surface-200"
-                )}
+          <p className="text-[11px] text-surface-500 mb-3 leading-relaxed">
+            The AI rates each complaint 1&ndash;5 on four dimensions; the score is
+            their sum out of {rating.max}, and ranking is by this total.
+          </p>
+
+          <div className="grid grid-cols-2 gap-1.5 bg-surface-50 border border-surface-200 rounded-xl p-1.5 shadow-3xs">
+            {RATING_DIMENSIONS.map((dim) => (
+              <div
+                key={dim.key}
+                className="bg-white rounded-lg p-3 shadow-sm border border-surface-200"
+                title={dim.hint}
               >
-                <span className="text-[10px] uppercase font-bold text-civic-600 mb-1 block">Citizen Demand</span>
-                <div className="flex items-end justify-between">
-                  <span className="text-xl font-display font-bold text-surface-900 leading-none">
-                    {item.scoring_breakdown?.base_demand.toFixed(1) || item.demand_score.toFixed(1)}
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] uppercase font-bold ${dim.tone}`}>{dim.label}</span>
+                  <span className="text-sm font-display font-bold text-surface-900 leading-none">
+                    {rating[dim.key]}
+                    <span className="text-[10px] text-surface-400 font-medium">/5</span>
                   </span>
-                  <span className="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Base</span>
                 </div>
-              </button>
-              
-              <button 
-                type="button"
-                onClick={() => setActiveReasoning(activeReasoning === 'urgency' ? null : 'urgency')}
-                className={clsx(
-                  "text-left bg-white rounded-lg p-3 shadow-sm border transition-colors hover:bg-red-50/50",
-                  activeReasoning === 'urgency' ? "border-red-400 bg-red-50/50" : "border-surface-200"
-                )}
-              >
-                <span className="text-[10px] uppercase font-bold text-red-600 mb-1 block">Urgency</span>
-                <div className="flex items-end justify-between">
-                  <span className="text-xl font-display font-bold text-surface-900 leading-none">
-                    +{(item.scoring_breakdown?.urgency_multiplier || 0.12).toFixed(2)}x
-                  </span>
-                  <span className="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Boost</span>
+                <div className="mt-2 flex gap-1" aria-label={`${dim.label} ${rating[dim.key]} out of 5`}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span
+                      key={n}
+                      className={`h-1.5 flex-1 rounded-full ${n <= rating[dim.key] ? dim.bar : "bg-surface-200"}`}
+                    />
+                  ))}
                 </div>
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <button 
-                type="button"
-                onClick={() => setActiveReasoning(activeReasoning === 'equity' ? null : 'equity')}
-                className={clsx(
-                  "text-left bg-white rounded-lg p-3 shadow-sm border transition-colors hover:bg-purple-50/50",
-                  activeReasoning === 'equity' ? "border-purple-400 bg-purple-50/50" : "border-surface-200"
-                )}
-              >
-                <span className="text-[10px] uppercase font-bold text-purple-600 mb-1 block">Census Equity</span>
-                <div className="flex items-end justify-between">
-                  <span className="text-xl font-display font-bold text-surface-900 leading-none">
-                    +{(item.scoring_breakdown?.equity_multiplier || 0.05).toFixed(2)}x
-                  </span>
-                  <span className="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Boost</span>
-                </div>
-              </button>
-              
-              <button 
-                type="button"
-                onClick={() => setActiveReasoning(activeReasoning === 'validation' ? null : 'validation')}
-                className={clsx(
-                  "text-left bg-white rounded-lg p-3 shadow-sm border transition-colors hover:bg-amber-50/50",
-                  activeReasoning === 'validation' ? "border-amber-400 bg-amber-50/50" : "border-surface-200"
-                )}
-              >
-                <span className="text-[10px] uppercase font-bold text-amber-600 mb-1 block">AI Validation</span>
-                <div className="flex items-end justify-between">
-                  <span className="text-xl font-display font-bold text-surface-900 leading-none">
-                    +{(item.scoring_breakdown?.validation_multiplier ?? (item.scoring_breakdown?.data_gap_multiplier || 0.05)).toFixed(2)}x
-                  </span>
-                  <span className="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Boost</span>
-                </div>
-              </button>
-            </div>
-            
-            {/* Animated expansion box for reasoning text */}
-            <div 
-              className={clsx(
-                "overflow-hidden transition-all duration-300 ease-in-out",
-                activeReasoning ? "max-h-40 opacity-100 mt-2" : "max-h-0 opacity-0"
-              )}
-            >
-              <div className="bg-surface-900 text-surface-50 rounded-lg p-3.5 text-xs font-medium leading-relaxed border border-surface-700 shadow-inner">
-                <div className="text-civic-300 font-bold mb-1.5 flex items-center gap-1.5 uppercase text-[10px] tracking-wider">
-                  {activeReasoning === 'demand' && "📊 Citizen Demand Math"}
-                  {activeReasoning === 'urgency' && "🚨 Urgency Multiplier"}
-                  {activeReasoning === 'equity' && "⚖️ Census Equity Boost"}
-                  {activeReasoning === 'validation' && "🛡️ AI Fact-Check"}
-                </div>
-                {activeReasoning && item.scoring_breakdown?.reasoning?.[activeReasoning]}
               </div>
-            </div>
+            ))}
           </div>
         </div>
 

@@ -95,6 +95,22 @@ export interface ScoringBreakdown {
   };
 }
 
+/**
+ * AI complaint rating — the priority score. The AI rates each complaint 1–5 on
+ * four dimensions; the overall score is their plain sum ÷ 20 (max 4 × 5 = 20).
+ * Every dimension is oriented so 5 = higher priority (cost is rated as
+ * efficiency: 5 = cheap quick win). Ranking is by `total`, descending.
+ */
+export interface AiRating {
+  urgency: number; // 1–5
+  impact: number; // 1–5
+  feasibility: number; // 1–5
+  cost: number; // 1–5 (cost-efficiency: 5 = low cost)
+  total: number; // 4–20
+  max: number; // 20
+  overall: number; // 0–100 convenience (total / 20 × 100)
+}
+
 export interface DepartmentSummary {
   id: string;
   name: string;
@@ -155,6 +171,7 @@ export interface PriorityItem {
   constituency?: string;
   solution_plan?: SolutionPlan;
   scoring_breakdown?: ScoringBreakdown;
+  ai_rating?: AiRating;
   status?: ComplaintStatus; // resolution tracking — defaults to "Open"
   assigned_department?: string; // department delegation tracking
   predictive_status?: "Confirmed" | "System-Detected"; // direct report vs CV/SCADA/NLP detection
