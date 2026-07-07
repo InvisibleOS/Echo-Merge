@@ -1,4 +1,14 @@
 import pg from 'pg'
+import fs from 'fs'
+import path from 'path'
+
+// Clear any global PG env variables that could override explicit config
+delete process.env.PGUSER;
+delete process.env.PGPASSWORD;
+delete process.env.PGHOST;
+delete process.env.PGPORT;
+delete process.env.PGDATABASE;
+
 const { Client } = pg
 
 async function run() {
@@ -12,8 +22,31 @@ async function run() {
   })
 
   await client.connect()
-  await client.query("ALTER TABLE priorities ADD COLUMN IF NOT EXISTS solution_plan JSONB;")
-  console.log("Added solution_plan column")
+  console.log("Connected to Supabase Postgres database.")
+
+  // Find all migrations in order
+  const dir = "supabase/migrations"
+  const files = fs.readdirSync(dir)
+    .filter(f => f.endsWith('.sql'))
+    .sort()
+    .map(f => path.join(dir, f))
+  
+  for (const file of files) {
+    console.log(`Applying migration: ${file}`)
+    const sql = fs.readFileSync(file, 'utf8')
+    try {
+      await client.query(sql)
+      console.log(`Successfully applied: ${file}`)
+    } catch (err) {
+      console.error(`Error in ${file}:`, err.message)
+    }
+  }
+
   await client.end()
+  console.log("All migrations executed!")
 }
-run()
+
+run().catch(err => {
+  console.error("Migrations runner failed:", err)
+  process.exit(1)
+})

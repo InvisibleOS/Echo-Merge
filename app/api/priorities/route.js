@@ -6,14 +6,8 @@ import { getActionPriorities } from '../../../lib/server/action-os';
 
 export const dynamic = 'force-dynamic';
 
-const TTL_MS = 20000;
+const TTL_MS = 1000; // Keep cache low for instant map update feedback
 
-/**
- * GET /priorities  (Person 2 -> Person 1)
- * Returns a bare PriorityItem[] (contract §2), ranked. Cached ~20s and
- * invalidated on each processed submission.
- * Query: ?sortBy=rank (default) | demand_score
- */
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -33,7 +27,22 @@ export async function GET(request) {
 
       const { data, error } = await query;
       if (error) throw new Error(error.message);
-      const mapped = (data || []).map(toPriorityItem);
+      // Fetch all cases to merge their live status and department assignments
+      const { data: casesData } = await supabase
+        .from('cases')
+        .select('case_id, work_id, status, department_id');
+
+      const mapped = (data || []).map((row) => {
+        const item = toPriorityItem(row);
+        const matchedCase = (casesData || []).find((c) => c.work_id === item.work_id);
+        if (matchedCase) {
+          item.case_id = matchedCase.case_id;
+          item.status = matchedCase.status;
+          item.assigned_department = matchedCase.department_id;
+        }
+        return item;
+      });
+
       return mapped;
     });
 

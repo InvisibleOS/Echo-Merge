@@ -137,8 +137,11 @@ export interface ImpactPrediction {
   risk_if_delayed: string;
 }
 
+export type ComplaintStatus = "Open" | "Ongoing" | "Under Review" | "Assigned" | "Resolved";
+
 export interface PriorityItem {
   work_id: string;
+  case_id?: string;
   title: string;
   category: IssueCategory;
   demand_score: number;
@@ -151,7 +154,10 @@ export interface PriorityItem {
   constituency?: string;
   solution_plan?: SolutionPlan;
   scoring_breakdown?: ScoringBreakdown;
-  status?: "Open" | "Resolved";
+  status?: ComplaintStatus; // resolution tracking — defaults to "Open"
+  assigned_department?: string; // department delegation tracking
+  predictive_status?: "Confirmed" | "System-Detected"; // direct report vs CV/SCADA/NLP detection
+  ingestion_source?: string; // e.g. "Source: BWSSB SCADA"
   department?: DepartmentSummary;
   scheme_matches?: SchemeMatch[];
   priority_band?: string;
@@ -160,6 +166,24 @@ export interface PriorityItem {
   budget_recommendation?: BudgetRecommendation;
   impact_prediction?: ImpactPrediction;
 }
+
+export interface CitizenComplaintRecord {
+  id: string;
+  work_id?: string;
+  title: string;
+  category: IssueCategory;
+  timestamp: string;
+  status: ComplaintStatus;
+  assigned_department?: string;
+  predictive_status?: "Confirmed" | "System-Detected";
+  ingestion_source?: string;
+  raw_text?: string;
+  photo_base64?: string;
+  audio_base64?: string;
+  geo?: GeoPoint;
+  constituency?: string;
+}
+
 
 // ---------- Hotspot (map aggregation) ----------
 
@@ -261,4 +285,25 @@ export interface GovernanceInsights {
     playbook: string[];
   };
 }
+
+export type ProactivePriorityLevel = "Critical" | "Warning" | "Monitor";
+export type IngestionType = "SCADA Telemetry" | "Computer Vision (CV)" | "News Feeds (NLP)";
+
+export interface ProactiveAlert {
+  id: string;
+  source: string;
+  source_tooltip: string;
+  ingestion_type: IngestionType;
+  predictive_status?: string;
+  title: string;
+  category: string;
+  priority: ProactivePriorityLevel;
+  timestamp: string;
+  geo: { lat: number; lng: number; ward?: string };
+  location_label: string;
+  details: string;
+  suggested_action: string;
+  department: string;
+}
+
 
