@@ -26,12 +26,12 @@ export async function GET(request) {
     const hotspots = await cached(CACHE_KEYS.hotspots, TTL_MS, async () => {
       const { data: priorities, error: pErr } = await supabase
         .from('priorities')
-        .select('category, demand_score, demand_count, hotspot_geo, supporting_evidence, solution_plan');
+        .select('title, category, demand_score, demand_count, hotspot_geo, supporting_evidence, solution_plan');
       
       if (pErr) throw new Error(pErr.message);
 
       const activePriorities = (priorities || []).filter(
-        (p) => !p.solution_plan?.resolved
+        (p) => !p.solution_plan?.resolved && !p.title?.includes('[PROACTIVE')
       );
 
       const points = [];
