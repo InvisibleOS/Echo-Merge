@@ -13,15 +13,37 @@ import {
   getDepartmentAnalytics,
 } from "@/lib/api";
 import { subscribeToSync } from "@/lib/storageSync";
-import { CITIES } from "@/lib/cities";
+import { CITIES, CityConfig } from "@/lib/cities";
 import PriorityList from "./PriorityList";
 import HotspotMap from "./HotspotMap";
 import DrillDownPanel from "./DrillDownPanel";
 import ProactiveAnalysisPanel from "./ProactiveAnalysisPanel";
 import DelegationPanel from "./DelegationPanel";
 import DepartmentAnalyticsPanel from "./DepartmentAnalyticsPanel";
-import { Map, Cpu, Building2, Users, ArrowLeft, Landmark, ShieldCheck } from "lucide-react";
+import { Map, Cpu, Building2, Users, ShieldCheck } from "lucide-react";
 import clsx from "clsx";
+
+// Complaints within this radius (km) of the selected city's centre are shown on
+// the map/list — so choosing a city both flies there AND reveals that city's
+// complaints, instead of the old exact-string constituency filter that matched
+// nothing (priorities are rarely tagged with a constituency) and emptied the map.
+const CITY_FOCUS_RADIUS_KM = 70;
+
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function withinCity(geo: { lat?: number; lng?: number } | undefined, city: CityConfig) {
+  if (!geo || !Number.isFinite(geo.lat) || !Number.isFinite(geo.lng)) return false;
+  return distanceKm(geo.lat as number, geo.lng as number, city.lat, city.lng) <= CITY_FOCUS_RADIUS_KM;
+}
 
 export default function DashboardShell() {
   const [activeTab, setActiveTab] = useState<"map" | "analysis" | "delegation" | "workload">("map");
@@ -32,18 +54,22 @@ export default function DashboardShell() {
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCityId, setSelectedCityId] = useState<string>("bengaluru");
-  const [constituency, setConstituency] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+
+  const activeCity = useMemo(
+    () => CITIES.find((c) => c.id === selectedCityId) || CITIES[0],
+    [selectedCityId]
+  );
 
   const load = useCallback(async (showLoading = true) => {
     if (showLoading) setIsLoading(true);
     setError(null);
     try {
-      const activeConstituency = constituency || "Bengaluru South";
+      const city = CITIES.find((c) => c.id === selectedCityId) || CITIES[0];
       const [p, h, deptData] = await Promise.all([
-        getPriorities(constituency),
-        getHotspots(constituency),
-        getDepartmentAnalytics(activeConstituency),
+        getPriorities(),
+        getHotspots(),
+        getDepartmentAnalytics(city?.name || "Bengaluru"),
       ]);
       setPriorities(p);
       setHotspots(h);
@@ -55,7 +81,7 @@ export default function DashboardShell() {
     } finally {
       if (showLoading) setIsLoading(false);
     }
-  }, [constituency]);
+  }, [selectedCityId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,12 +122,12 @@ export default function DashboardShell() {
   const isProactive = (p: PriorityItem) => Boolean(p.title?.includes("[PROACTIVE"));
 
   // Tab 1 (map + list): citizen-complaint clusters only — keep proactively
-  // crawled work orders off the public hotspot map.
+  // crawled work orders off the public hotspot map. Focus on the selected city
+  // by geographic proximity so markers AND heatmap stay consistent.
   const filteredPriorities = useMemo(() => {
-    let filtered = priorities.filter((p) => p.status !== "Resolved" && !isProactive(p));
-    if (constituency) {
-      filtered = filtered.filter((p) => p.constituency === constituency);
-    }
+    let filtered = priorities.filter(
+      (p) => p.status !== "Resolved" && !isProactive(p) && withinCity(p.hotspot_geo, activeCity)
+    );
     if (category) {
       filtered = filtered.filter((p) => p.category === category);
     }
@@ -110,25 +136,23 @@ export default function DashboardShell() {
       ...p,
       rank: index + 1,
     }));
-  }, [priorities, category, constituency]);
+  }, [priorities, category, activeCity]);
 
   // Tab 3 (Management & Delegation): every open work order to delegate,
-  // INCLUDING proactively-detected / converted ones.
+  // INCLUDING proactively-detected / converted ones (not city-scoped).
   const delegationPriorities = useMemo(() => {
-    let filtered = priorities.filter((p) => p.status !== "Resolved");
-    if (constituency) {
-      filtered = filtered.filter((p) => p.constituency === constituency);
-    }
+    const filtered = priorities.filter((p) => p.status !== "Resolved");
     return filtered.map((p, index) => ({ ...p, rank: index + 1 }));
-  }, [priorities, constituency]);
+  }, [priorities]);
 
+  // Heatmap follows the same city focus as the markers so they never diverge.
   const filteredHotspots = useMemo(() => {
-    let filtered = hotspots;
+    let filtered = hotspots.filter((h) => withinCity(h.geo, activeCity));
     if (category) {
       filtered = filtered.filter((h) => h.category === category);
     }
     return filtered;
-  }, [hotspots, category]);
+  }, [hotspots, category, activeCity]);
 
   const selectedItem =
     filteredPriorities.find((p) => p.work_id === selectedId) || null;
@@ -144,7 +168,7 @@ export default function DashboardShell() {
       )
     );
     try {
-      const freshHotspots = await getHotspots(constituency || undefined);
+      const freshHotspots = await getHotspots();
       setHotspots(freshHotspots);
     } catch (err) {
       console.error("Failed to refresh hotspots after resolve", err);
@@ -196,19 +220,6 @@ export default function DashboardShell() {
 
         {/* Filters and Portal Switcher */}
         <div className="flex items-center gap-3 flex-wrap">
-          <select 
-            className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
-            value={constituency}
-            onChange={(e) => setConstituency(e.target.value)}
-          >
-            <option value="">All Constituencies</option>
-            <option value="Bengaluru South">Bengaluru South</option>
-            <option value="Lucknow">Lucknow</option>
-            <option value="Wayanad">Wayanad</option>
-            <option value="New Delhi">New Delhi</option>
-            <option value="Mumbai South">Mumbai South</option>
-          </select>
-
           {activeTab === "map" && (
             <select 
               className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
@@ -359,6 +370,7 @@ export default function DashboardShell() {
           <div className="flex-1 overflow-y-auto p-6 min-h-0 animate-slide-up-fade">
             <div className="max-w-7xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-glass">
               <ProactiveAnalysisPanel
+                selectedCityId={selectedCityId}
                 onConverted={() => {
                   setActiveTab("delegation");
                   void load(false);

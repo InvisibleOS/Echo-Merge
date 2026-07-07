@@ -1,5 +1,3 @@
-"use client";
-
 import { GeoPoint } from "./types";
 
 export type ProactivePriorityLevel = "Critical" | "Warning" | "Monitor" | "High" | "Medium";
