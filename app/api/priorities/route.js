@@ -43,7 +43,16 @@ export async function GET(request) {
         return item;
       });
 
-      return mapped;
+      // Rank by the AI rating (sum of the four 1–5 dimensions, out of 20). Ties
+      // fall back to citizen demand so heavier clusters lead. `sortBy=demand_score`
+      // stays a legacy override that ranks purely by raw demand.
+      const sorted = [...mapped].sort((a, b) => {
+        if (sortBy === 'demand_score') return b.demand_score - a.demand_score;
+        const at = a.ai_rating?.total ?? 0;
+        const bt = b.ai_rating?.total ?? 0;
+        return bt - at || b.demand_score - a.demand_score;
+      });
+      return sorted.map((item, index) => ({ ...item, rank: index + 1 }));
     });
 
     return NextResponse.json(items, { status: 200 });

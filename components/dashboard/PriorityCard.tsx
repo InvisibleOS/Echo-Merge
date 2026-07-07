@@ -2,6 +2,7 @@
 
 import { PriorityItem } from "@/lib/types";
 import { CategoryBadge } from "@/components/ui/Badge";
+import { RATING_DIMENSIONS, ratingFor } from "@/lib/rating";
 import { Users, ChevronRight, Activity, Building2, Clock } from "lucide-react";
 import clsx from "clsx";
 
@@ -12,30 +13,7 @@ interface Props {
 }
 
 export default function PriorityCard({ item, isSelected, onSelect }: Props) {
-  // Safe extraction of scoring breakdown with defaults
-  const breakdown = item.scoring_breakdown || {
-    base_demand: item.demand_score,
-    urgency_multiplier: 0.12,
-    equity_multiplier: 0.05,
-    validation_multiplier: 0.05,
-    feasibility_multiplier: 0.05,
-    final_score: item.demand_score,
-  };
-
-  const validationMult = breakdown.validation_multiplier ?? (breakdown.data_gap_multiplier || 0.05);
-
-  // Calculate percentages for the progress bar (approximate visual weights)
-  const totalMultiplier =
-    1.0 +
-    breakdown.urgency_multiplier +
-    breakdown.equity_multiplier +
-    validationMult +
-    breakdown.feasibility_multiplier;
-    
-  const basePct = (1.0 / totalMultiplier) * 100;
-  const equityPct = (breakdown.equity_multiplier / totalMultiplier) * 100;
-  const validationPct = (validationMult / totalMultiplier) * 100;
-  const urgencyPct = (breakdown.urgency_multiplier / totalMultiplier) * 100;
+  const rating = ratingFor(item);
 
   return (
     <button
@@ -67,7 +45,7 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
               <Users size={12} /> {item.demand_count}
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 shadow-2xs">
-              <Activity size={12} /> {breakdown.final_score.toFixed(1)} AI Score
+              <Activity size={12} /> {rating.total}/{rating.max} AI Score
             </span>
             {item.predictive_status && (
               <span className={clsx(
@@ -100,32 +78,32 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
             )}
           </div>
           
-          {/* Micro-visualization of AI Scoring Math */}
+          {/* AI rating: four dimensions, each 1–5 (overall = their sum / 20) */}
           <div className="mt-3.5">
-            <div className="flex justify-between items-end mb-1">
-              <span className="text-[10px] font-semibold text-surface-500 uppercase tracking-wide">AI Scoring Weights</span>
+            <div className="flex justify-between items-end mb-1.5">
+              <span className="text-[10px] font-semibold text-surface-500 uppercase tracking-wide">
+                AI rating &middot; {rating.total}/{rating.max}
+              </span>
             </div>
-            <div className="h-1.5 w-full bg-surface-100 rounded-full flex overflow-hidden border border-surface-200/50">
-              <div 
-                style={{ width: `${basePct}%` }} 
-                className="bg-civic-500 h-full"
-                title={`Citizen Demand: ${basePct.toFixed(0)}%`}
-              />
-              <div 
-                style={{ width: `${equityPct}%` }} 
-                className="bg-purple-500 h-full border-l border-white/80"
-                title={`Census Equity Boost: ${equityPct.toFixed(0)}%`}
-              />
-              <div 
-                style={{ width: `${validationPct}%` }} 
-                className="bg-amber-500 h-full border-l border-white/80"
-                title={`AI Validation Boost: ${validationPct.toFixed(0)}%`}
-              />
-               <div 
-                style={{ width: `${urgencyPct}%` }} 
-                className="bg-red-500 h-full border-l border-white/80"
-                title={`Urgency: ${urgencyPct.toFixed(0)}%`}
-              />
+            <div className="grid grid-cols-4 gap-2">
+              {RATING_DIMENSIONS.map((dim) => (
+                <div key={dim.key} title={`${dim.label}: ${rating[dim.key]}/5 — ${dim.hint}`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-[9px] font-bold uppercase ${dim.tone}`}>
+                      {dim.label.slice(0, 4)}
+                    </span>
+                    <span className="text-[9px] font-bold text-surface-500">
+                      {rating[dim.key]}
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 w-full bg-surface-100 rounded-full overflow-hidden border border-surface-200/50">
+                    <div
+                      className={`${dim.bar} h-full rounded-full`}
+                      style={{ width: `${(rating[dim.key] / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
