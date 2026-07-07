@@ -36,10 +36,24 @@ async function safeFetch<T>(path: string, options?: RequestInit): Promise<T> {
 export async function submitComplaint(
   payload: SubmitPayload
 ): Promise<SubmitResponse> {
+  let res: SubmitResponse;
+
+  if (USE_MOCK) {
+    await new Promise((r) => setTimeout(r, 800));
+    res = mockSubmitResponse();
+  } else {
+    res = await safeFetch<SubmitResponse>("/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
+
   // Always log to client local storage for real-time tracking in Citizen Dashboard
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && res && res.submission_id) {
     try {
       addCitizenComplaint({
+        id: res.submission_id,
         title: payload.raw_text ? payload.raw_text.split(".")[0].slice(0, 60) : "Media Submission",
         raw_text: payload.raw_text,
         photo_base64: payload.photo_base64,
@@ -51,15 +65,7 @@ export async function submitComplaint(
     }
   }
 
-  if (USE_MOCK) {
-    await new Promise((r) => setTimeout(r, 800));
-    return mockSubmitResponse();
-  }
-
-  return safeFetch<SubmitResponse>("/submit", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  return res;
 }
 
 export async function getPriorities(constituency?: string): Promise<PriorityItem[]> {

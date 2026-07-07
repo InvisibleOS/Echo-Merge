@@ -283,6 +283,7 @@ export function getCitizenComplaints(): CitizenComplaintRecord[] {
 /** Add a new complaint submitted from the citizen portal */
 export function addCitizenComplaint(
   payload: {
+    id?: string;
     title: string;
     category?: string;
     raw_text?: string;
@@ -292,7 +293,7 @@ export function addCitizenComplaint(
   }
 ): CitizenComplaintRecord {
   const current = getCitizenComplaints();
-  const newId = `CIT_${Date.now()}`;
+  const newId = payload.id || `CIT_${Date.now()}`;
   
   // Try to match category or assign a fallback
   const category = payload.category || KNOWN_CATEGORIES[0] || "General Civic Issue";

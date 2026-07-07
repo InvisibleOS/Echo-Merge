@@ -35,6 +35,20 @@ export async function PATCH(request, context) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Update corresponding case in 'cases' table if it exists
+  const { error: caseErr } = await supabase
+    .from('cases')
+    .update({
+      status: 'Resolved',
+      latest_update: 'Resolved by representative.',
+      updated_at: new Date().toISOString()
+    })
+    .eq('work_id', work_id);
+
+  if (caseErr) {
+    console.error('[resolve] Failed to update matching case status:', caseErr.message);
+  }
+
   // Instantly invalidate the hotspots cache so the map pin disappears!
   invalidate(CACHE_KEYS.hotspots);
   invalidate(CACHE_KEYS.priorities);
