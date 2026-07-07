@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '../../../utils/supabase/server';
-import { toEnrichedSubmission } from '../../../lib/server/mappers';
-import { getActionSubmissions, getCases } from '../../../lib/server/action-os';
+import { toEnrichedSubmission, toPriorityItem } from '../../../lib/server/mappers';
+import { getActionSubmissions, getActionPriorities } from '../../../lib/server/action-os';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,16 +18,16 @@ const ENRICHED_SELECT = `
   )
 `;
 
-function enrichSubmissionsWithStatus(submissions, cases) {
+function enrichSubmissionsWithStatus(submissions, priorities) {
   const subStatusMap = {};
-  for (const c of cases) {
-    const evidence = Array.isArray(c.evidence) ? c.evidence : [];
+  for (const p of priorities) {
+    const evidence = Array.isArray(p.supporting_evidence) ? p.supporting_evidence : [];
     for (const e of evidence) {
       const subId = e.submission_id || e.id;
       if (subId) {
         subStatusMap[subId] = {
-          status: c.status,
-          assigned_department: c.department?.name || c.department?.short_name || undefined
+          status: p.status || (p.solution_plan?.resolved ? 'Resolved' : 'Open'),
+          assigned_department: p.assigned_department || p.department?.name || undefined
         };
       }
     }
@@ -55,22 +55,40 @@ export async function GET(request) {
     const workId = searchParams.get('work_id');
 
     if (!isSupabaseConfigured) {
-      const cases = getCases();
+      const priorities = getActionPriorities();
       const submissions = getActionSubmissions();
       if (!workId) {
-        const enriched = enrichSubmissionsWithStatus(submissions, cases);
+        const enriched = enrichSubmissionsWithStatus(submissions, priorities);
         return NextResponse.json(enriched, { status: 200 });
       }
       const filtered = submissions.filter((item) => item.work_id === workId || item.id === workId);
-      const enriched = enrichSubmissionsWithStatus(filtered, cases);
+      const enriched = enrichSubmissionsWithStatus(filtered, priorities);
       return NextResponse.json(enriched, { status: 200 });
     }
 
-    // Load cases to map status
+    // 1. Load priorities
+    const { data: prioritiesData, error: pErr } = await supabase
+      .from('priorities')
+      .select('*');
+    if (pErr) throw new Error(pErr.message);
+
+    // 2. Load cases to resolve their statuses and department assignments
     const { data: casesData } = await supabase
       .from('cases')
-      .select('status, evidence, department:departments(name)');
+      .select('work_id, status, department:departments(name)');
     const cases = casesData || [];
+
+    const priorities = (prioritiesData || []).map((row) => {
+      const item = toPriorityItem(row);
+      const matchedCase = cases.find((c) => c.work_id === item.work_id);
+      if (matchedCase) {
+        item.status = matchedCase.status;
+        item.assigned_department = matchedCase.department?.name || undefined;
+      } else {
+        item.status = item.solution_plan?.resolved ? 'Resolved' : 'Open';
+      }
+      return item;
+    });
 
     if (workId) {
       const ids = await evidenceSubmissionIds(workId);
@@ -83,7 +101,7 @@ export async function GET(request) {
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
       const mapped = (data || []).map(toEnrichedSubmission);
-      const enriched = enrichSubmissionsWithStatus(mapped, cases);
+      const enriched = enrichSubmissionsWithStatus(mapped, priorities);
       return NextResponse.json(enriched, { status: 200 });
     }
 
@@ -94,7 +112,7 @@ export async function GET(request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
     const mapped = (data || []).map(toEnrichedSubmission);
-    const enriched = enrichSubmissionsWithStatus(mapped, cases);
+    const enriched = enrichSubmissionsWithStatus(mapped, priorities);
     return NextResponse.json(enriched, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 });
