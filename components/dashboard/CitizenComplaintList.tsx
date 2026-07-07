@@ -52,7 +52,7 @@ export default function CitizenComplaintList() {
     }
 
     if (showSpinner) {
-      setTimeout(() => setIsRefreshing(false), 300);
+      setIsRefreshing(false);
     }
   }
 
