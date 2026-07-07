@@ -22,17 +22,19 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
     final_score: item.demand_score,
   };
 
+  const validationMult = breakdown.validation_multiplier ?? (breakdown.data_gap_multiplier || 0.05);
+
   // Calculate percentages for the progress bar (approximate visual weights)
   const totalMultiplier =
     1.0 +
     breakdown.urgency_multiplier +
     breakdown.equity_multiplier +
-    breakdown.validation_multiplier +
+    validationMult +
     breakdown.feasibility_multiplier;
     
   const basePct = (1.0 / totalMultiplier) * 100;
   const equityPct = (breakdown.equity_multiplier / totalMultiplier) * 100;
-  const validationPct = (breakdown.validation_multiplier / totalMultiplier) * 100;
+  const validationPct = (validationMult / totalMultiplier) * 100;
   const urgencyPct = (breakdown.urgency_multiplier / totalMultiplier) * 100;
 
   return (

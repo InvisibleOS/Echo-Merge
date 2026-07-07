@@ -208,7 +208,7 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
               <span className="text-[10px] uppercase font-bold text-signal-amber mb-1 block">AI Validation</span>
               <div className="flex items-end justify-between">
                 <span className="text-xl font-display font-bold text-ink-900 leading-none">
-                  +{(item.scoring_breakdown?.validation_multiplier || 0.05).toFixed(2)}x
+                  +{(item.scoring_breakdown?.validation_multiplier ?? (item.scoring_breakdown?.data_gap_multiplier || 0.05)).toFixed(2)}x
                 </span>
                 <span className="text-xs text-ink-800/60 font-medium">Boost</span>
               </div>
@@ -269,7 +269,7 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
             Recommended Action Steps
           </span>
           <ul className="space-y-2 mb-4">
-            {item.solution_plan.action_steps.map((step, idx) => (
+            {(item.solution_plan?.action_steps || []).map((step, idx) => (
               <li key={idx} className="text-sm text-ink-900 flex items-start gap-2">
                 <span className="text-signal-amber font-bold mt-0.5">•</span>
                 <span className="leading-snug">{step}</span>
