@@ -11,10 +11,46 @@ export default function CitizenComplaintList() {
   const [complaints, setComplaints] = useState<CitizenComplaintRecord[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  function load() {
+  async function load() {
     setIsRefreshing(true);
-    const data = getCitizenComplaints();
+    let data = getCitizenComplaints();
     setComplaints(data);
+
+    try {
+      const res = await fetch("/api/submissions");
+      if (res.ok) {
+        const liveSubmissions = await res.json();
+        const statusMap = new Map();
+        for (const sub of liveSubmissions) {
+          statusMap.set(sub.id, {
+            status: sub.status,
+            assigned_department: sub.assigned_department
+          });
+        }
+
+        let changed = false;
+        const updatedData = data.map((c) => {
+          const live = statusMap.get(c.id);
+          if (live && (c.status !== live.status || c.assigned_department !== live.assigned_department)) {
+            changed = true;
+            return {
+              ...c,
+              status: live.status,
+              assigned_department: live.assigned_department
+            };
+          }
+          return c;
+        });
+
+        if (changed) {
+          localStorage.setItem("echo_merge_citizen_complaints_v1", JSON.stringify(updatedData));
+          setComplaints(updatedData);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to sync complaints with server:", e);
+    }
+
     setTimeout(() => setIsRefreshing(false), 300);
   }
 
