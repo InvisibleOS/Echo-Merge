@@ -220,11 +220,17 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
               <label className="block text-[10px] font-bold uppercase text-surface-500">
                 Assign Municipal Agency
               </label>
+              {isAssigned && (
+                <div className="text-xs text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-2.5 font-semibold flex items-center gap-1.5">
+                  <span>ℹ Already assigned to {DEPARTMENTS_LIST.find((d) => d.id === initialDeptId || d.name === initialDeptId)?.name || initialDeptId}.</span>
+                </div>
+              )}
               <div className="flex gap-2">
                 <select
                   value={selectedDeptId}
                   onChange={(e) => setSelectedDeptId(e.target.value)}
-                  className="flex-1 bg-white text-surface-900 text-xs border border-surface-200 rounded-lg px-3 py-2 outline-none focus:border-civic-500 font-medium shadow-3xs"
+                  disabled={isAssigning || isAssigned}
+                  className="flex-1 bg-white text-surface-900 text-xs border border-surface-200 rounded-lg px-3 py-2 outline-none focus:border-civic-500 font-medium shadow-3xs disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {DEPARTMENTS_LIST.map((dept) => (
                     <option key={dept.id} value={dept.id}>
@@ -235,11 +241,18 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                 <button
                   type="button"
                   onClick={handleAssign}
-                  disabled={isAssigning}
-                  className="bg-civic-600 hover:bg-civic-750 text-white font-bold text-xs rounded-lg px-4 py-2 shadow-sm transition-all hover:scale-102 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center min-w-[100px]"
+                  disabled={isAssigning || isAssigned}
+                  className={clsx(
+                    "font-bold text-xs rounded-lg px-4 py-2 shadow-sm transition-all inline-flex items-center justify-center min-w-[100px] border disabled:opacity-60 disabled:cursor-not-allowed",
+                    isAssigned
+                      ? "bg-purple-50 text-purple-700 border-purple-200"
+                      : "bg-civic-600 hover:bg-civic-750 text-white border-transparent hover:scale-102 active:scale-95"
+                  )}
                 >
                   {isAssigning ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : isAssigned ? (
+                    "Assigned"
                   ) : (
                     "Assign"
                   )}
