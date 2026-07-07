@@ -27,15 +27,23 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
     >
       <div className="flex items-start gap-4">
         {/* Rank Badge */}
-        <div className="flex flex-col items-center justify-center bg-surface-100 rounded-xl w-11 h-11 shrink-0 border border-surface-200">
-          <span className="text-[10px] uppercase font-bold text-surface-500 leading-none">Rank</span>
-          <span className="font-display font-900 text-lg text-civic-600 leading-none mt-0.5">
+        <div className={clsx(
+          "flex flex-col items-center justify-center rounded-xl w-11 h-11 shrink-0 border transition-all duration-300",
+          isSelected
+            ? "bg-civic-500 border-civic-600 text-white shadow-xs"
+            : "bg-surface-950 border-surface-950 text-white shadow-3xs"
+        )}>
+          <span className={clsx(
+            "text-[9px] uppercase font-extrabold leading-none",
+            isSelected ? "text-white/80" : "text-surface-400"
+          )}>Rank</span>
+          <span className="font-display font-black text-lg leading-none mt-0.5">
             {item.rank}
           </span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-display font-semibold text-surface-900 leading-snug group-hover:text-civic-600 transition-colors">
+          <h3 className="font-display font-extrabold text-sm sm:text-base text-surface-950 leading-snug group-hover:text-civic-600 transition-colors">
             {item.title}
           </h3>
 

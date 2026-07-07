@@ -136,26 +136,26 @@ export default function DashboardShell() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-surface-50 text-surface-900 font-body relative overflow-hidden">
+    <div className="h-screen flex flex-col bg-slate-50 text-slate-900 font-body relative overflow-hidden">
       {/* ── Top Header Bar ── */}
-      <header className="px-6 py-3.5 border-b border-surface-200 flex flex-wrap items-center justify-between shrink-0 gap-4 bg-white z-20 shadow-sm">
-        <div className="flex items-center gap-3">
+      <header className="px-6 py-4 border-b border-surface-150 flex flex-wrap items-center justify-between shrink-0 gap-4 bg-white/80 backdrop-blur-md z-20 shadow-xs">
+        <div className="flex items-center gap-3.5">
           <Link
             href="/"
-            className="text-surface-700 hover:text-surface-900 transition-colors"
+            className="text-surface-600 hover:text-surface-900 transition-colors p-1.5 hover:bg-surface-100 rounded-lg"
             title="Back to Landing Gate"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
           </Link>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-3xs">
             <Landmark size={18} />
           </div>
           <div>
-            <span className="text-amber-600 font-display font-semibold text-[10px] uppercase tracking-wide block">
-              People&rsquo;s Priorities &bull; Representative Portal
+            <span className="text-amber-600 font-display font-extrabold text-[9px] uppercase tracking-widest block">
+              Representative Portal &bull; Executive Command
             </span>
-            <h1 className="font-display font-bold text-base sm:text-lg text-surface-900 leading-tight">
-              Constituency Executive Control Center
+            <h1 className="font-display font-extrabold text-base text-surface-950 leading-tight">
+              Constituency Control Center
             </h1>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function DashboardShell() {
         {/* Filters and Portal Switcher */}
         <div className="flex items-center gap-3 flex-wrap">
           <select 
-            className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
+            className="bg-white text-surface-800 text-xs border border-surface-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all font-display font-bold shadow-2xs cursor-pointer"
             value={constituency}
             onChange={(e) => setConstituency(e.target.value)}
           >
@@ -177,7 +177,7 @@ export default function DashboardShell() {
 
           {activeTab === "map" && (
             <select 
-              className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
+              className="bg-white text-surface-800 text-xs border border-surface-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-civic-500 focus:border-civic-500 transition-all font-display font-bold shadow-2xs cursor-pointer"
               value={category}
               onChange={(e) => {
                 setCategory(e.target.value);
@@ -193,31 +193,31 @@ export default function DashboardShell() {
 
           <Link
             href="/citizen"
-            className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-surface-100 hover:bg-surface-200 border border-surface-200 text-xs font-bold text-surface-900 transition-colors shadow-sm"
+            className="hidden md:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-200 text-xs font-display font-bold text-surface-800 transition-colors shadow-2xs"
           >
-            <Users size={14} className="text-civic-600" />
+            <Users size={13} className="text-civic-600" />
             <span>Switch to Citizen Portal →</span>
           </Link>
         </div>
       </header>
 
       {/* ── Navigation Bar ── */}
-      <nav className="bg-white/80 backdrop-blur px-6 py-2.5 border-b border-surface-200 flex items-center gap-2.5 shrink-0 overflow-x-auto shadow-2xs">
+      <nav className="bg-white px-6 py-3 border-b border-surface-150 flex items-center gap-3 shrink-0 overflow-x-auto shadow-3xs">
         <button
           onClick={() => setActiveTab("map")}
           className={clsx(
-            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all whitespace-nowrap border border-transparent shadow-3xs",
+            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
             activeTab === "map"
-              ? "bg-surface-900 text-white"
-              : "text-surface-700 hover:text-surface-900 hover:bg-surface-100"
+              ? "bg-surface-950 text-white border-surface-950 shadow-md"
+              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
           )}
           id="tab-complaint-map"
         >
-          <Map size={15} />
-          <span>1. Complaint Map &amp; Hotspots</span>
+          <Map size={14} />
+          <span>1. Map &amp; Hotspots</span>
           <span className={clsx(
-            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
-            activeTab === "map" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
+            "ml-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border",
+            activeTab === "map" ? "bg-white/20 text-white border-white/10" : "bg-surface-100 text-surface-700 border-surface-200"
           )}>
             {filteredPriorities.length}
           </span>
@@ -226,49 +226,49 @@ export default function DashboardShell() {
         <button
           onClick={() => setActiveTab("analysis")}
           className={clsx(
-            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all whitespace-nowrap border border-transparent shadow-3xs",
+            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
             activeTab === "analysis"
-              ? "bg-surface-900 text-white"
-              : "text-surface-700 hover:text-surface-900 hover:bg-surface-100"
+              ? "bg-surface-950 text-white border-surface-950 shadow-md"
+              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
           )}
           id="tab-realtime-analysis"
         >
-          <Cpu size={15} />
+          <Cpu size={14} />
           <span>2. Real-time Area Analysis</span>
-          <span className="ml-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[10px] font-mono font-bold">
-            ⚡ Proactive Mapbox
+          <span className="ml-1.5 px-2 py-0.5 bg-red-100 text-red-700 border border-red-200 rounded-full text-[9px] font-mono font-bold uppercase tracking-wide">
+            ⚡ Proactive Anomaly
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("delegation")}
           className={clsx(
-            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all whitespace-nowrap border border-transparent shadow-3xs",
+            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
             activeTab === "delegation"
-              ? "bg-surface-900 text-white"
-              : "text-surface-700 hover:text-surface-900 hover:bg-surface-100"
+              ? "bg-surface-950 text-white border-surface-950 shadow-md"
+              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
           )}
           id="tab-management-delegation"
         >
-          <Building2 size={15} />
+          <Building2 size={14} />
           <span>3. Management &amp; Delegation</span>
         </button>
 
         <button
           onClick={() => setActiveTab("workload")}
           className={clsx(
-            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all whitespace-nowrap border border-transparent shadow-3xs",
+            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
             activeTab === "workload"
-              ? "bg-surface-900 text-white"
-              : "text-surface-700 hover:text-surface-900 hover:bg-surface-100"
+              ? "bg-surface-950 text-white border-surface-950 shadow-md"
+              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
           )}
           id="tab-department-workload"
         >
-          <Building2 size={15} />
+          <Building2 size={14} />
           <span>4. Department Workload</span>
           <span className={clsx(
-            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
-            activeTab === "workload" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
+            "ml-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border",
+            activeTab === "workload" ? "bg-white/20 text-white border-white/10" : "bg-surface-100 text-surface-700 border-surface-200"
           )}>
             {departments.length}
           </span>

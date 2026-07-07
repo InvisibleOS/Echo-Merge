@@ -11,27 +11,27 @@ export default function CitizenDashboardPage() {
   const [activeTab, setActiveTab] = useState<"submit" | "track">("submit");
 
   return (
-    <div className="min-h-screen bg-surface-50 flex flex-col text-surface-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900 font-body">
       {/* ── Header / Navigation Gate ── */}
-      <header className="bg-white px-6 py-4 border-b border-surface-200 shrink-0 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white/80 backdrop-blur-md px-6 py-4 border-b border-surface-150 shrink-0 sticky top-0 z-50 shadow-xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             <Link
               href="/"
-              className="text-surface-700 hover:text-surface-900 transition-colors"
+              className="text-surface-600 hover:text-surface-900 transition-colors p-1.5 hover:bg-surface-100 rounded-lg"
               title="Back to Landing Gate"
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={16} />
             </Link>
-            <div className="w-8 h-8 rounded-lg bg-civic-50 border border-civic-200 flex items-center justify-center text-civic-600 shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-civic-500/10 border border-civic-500/20 flex items-center justify-center text-civic-600 shadow-3xs">
               <ShieldAlert size={18} />
             </div>
             <div>
-              <span className="text-civic-600 font-display font-semibold text-[10px] uppercase tracking-wider block">
-                People&rsquo;s Priorities &bull; Citizen Control Gate
+              <span className="text-civic-600 font-display font-extrabold text-[9px] uppercase tracking-widest block">
+                Citizen Portal &bull; Constituency Action
               </span>
-              <h1 className="font-display font-bold text-lg text-surface-900 leading-tight">
-                Citizen Reporting &amp; Live Tracking Portal
+              <h1 className="font-display font-extrabold text-base text-surface-950 leading-tight">
+                Neighborhood Need Intake &amp; Tracking
               </h1>
             </div>
           </div>
@@ -39,59 +39,59 @@ export default function CitizenDashboardPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-surface-100 hover:bg-surface-200 border border-surface-200 text-xs font-semibold text-surface-900 transition-colors shadow-sm"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-200 text-xs font-display font-bold text-surface-800 transition-colors shadow-2xs"
             >
-              <Landmark size={14} className="text-amber-600" />
-              <span>Switch to MP Dashboard →</span>
+              <Landmark size={13} className="text-amber-500" />
+              <span>Representative Dashboard →</span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* ── Main Container with Two-Tab Switcher ── */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10">
         {/* Tab Selector Bar */}
-        <div className="flex rounded-xl bg-surface-200/60 p-1.5 border border-surface-200 mb-8 max-w-md mx-auto shadow-sm">
+        <div className="flex rounded-xl bg-surface-200/50 p-1.5 border border-surface-200/60 mb-10 max-w-sm mx-auto shadow-2xs">
           <button
             type="button"
             onClick={() => setActiveTab("submit")}
             className={clsx(
-              "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-display font-semibold text-sm transition-all duration-200",
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-display font-bold text-xs sm:text-sm transition-all duration-200 active:scale-97",
               activeTab === "submit"
-                ? "bg-white text-civic-600 shadow border border-surface-200"
-                : "text-surface-700 hover:text-surface-900 hover:bg-white/50"
+                ? "bg-civic-500 text-white shadow-md shadow-civic-500/10"
+                : "text-surface-700 hover:text-surface-900 hover:bg-white/60"
             )}
             id="tab-submit-complaint"
           >
-            <PlusCircle size={16} />
-            <span>1. Submit Complaint</span>
+            <PlusCircle size={15} />
+            <span>Submit Report</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("track")}
             className={clsx(
-              "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-display font-semibold text-sm transition-all duration-200",
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-display font-bold text-xs sm:text-sm transition-all duration-200 active:scale-97",
               activeTab === "track"
-                ? "bg-white text-civic-600 shadow border border-surface-200"
-                : "text-surface-700 hover:text-surface-900 hover:bg-white/50"
+                ? "bg-civic-500 text-white shadow-md shadow-civic-500/10"
+                : "text-surface-700 hover:text-surface-900 hover:bg-white/60"
             )}
             id="tab-my-complaints"
           >
-            <ListTodo size={16} />
-            <span>2. My Complaints</span>
+            <ListTodo size={15} />
+            <span>My Grievances</span>
           </button>
         </div>
 
         {/* Tab 1: Submit Complaint */}
         {activeTab === "submit" && (
-          <div className="bg-white rounded-2xl border border-surface-200 shadow-sm p-6 sm:p-8 animate-[fadeSlideIn_200ms_ease-out]">
-            <div className="mb-6 pb-4 border-b border-surface-200 text-center sm:text-left">
-              <h2 className="font-display font-bold text-xl text-surface-900">
+          <div className="bg-white rounded-3xl border border-surface-200/80 shadow-md p-6 sm:p-10 animate-[fadeSlideIn_200ms_ease-out]">
+            <div className="mb-8 pb-5 border-b border-surface-150 text-center sm:text-left">
+              <h2 className="font-display font-extrabold text-xl text-surface-950">
                 Report a Neighborhood Need
               </h2>
-              <p className="text-sm text-surface-700 mt-1">
-                Your submission is analyzed by AI and routed directly to the representative and agency responsible.
+              <p className="text-xs sm:text-sm text-surface-600 mt-1.5 font-medium leading-relaxed">
+                Provide text description, record voice transcripts, or snap photos. Our AI maps, groups, and assigns your report directly to the responsible municipal department.
               </p>
             </div>
 
@@ -101,7 +101,7 @@ export default function CitizenDashboardPage() {
 
         {/* Tab 2: My Complaints Tracker */}
         {activeTab === "track" && (
-          <div>
+          <div className="animate-[fadeSlideIn_200ms_ease-out]">
             <CitizenComplaintList />
           </div>
         )}

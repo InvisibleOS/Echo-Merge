@@ -125,10 +125,10 @@ export default function SubmissionForm() {
 
       {/* ── Input Mode Selector Row ── */}
       <div>
-        <p className="block text-sm font-semibold text-ink-800 mb-3">
+        <p className="block text-sm font-bold text-surface-900 mb-3.5">
           How would you like to report?
         </p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4">
           {INPUT_MODES.map(({ id, label, icon: Icon }) => {
             const isActive = activeMode === id;
             const captured = hasData(id);
@@ -138,16 +138,16 @@ export default function SubmissionForm() {
                 type="button"
                 onClick={() => setActiveMode(isActive ? null : id)}
                 className={clsx(
-                  "relative flex flex-col items-center justify-center gap-2 rounded-md border-2 px-3 py-4 text-center transition-all duration-200",
-                  "font-display font-semibold text-xs sm:text-sm",
+                  "relative flex flex-col items-center justify-center gap-3.5 rounded-2xl border px-3 py-5 text-center transition-all duration-200 active:scale-97 shadow-2xs",
+                  "font-display font-extrabold text-xs sm:text-sm",
                   isActive
-                    ? "border-civic-500 bg-civic-50 text-civic-700 shadow-sm"
-                    : "border-ink-900/12 bg-white text-ink-800/70 hover:border-civic-400/60 hover:text-civic-600 hover:bg-civic-50/40"
+                    ? "border-civic-500 bg-civic-50/60 text-civic-700 ring-2 ring-civic-500/10"
+                    : "border-surface-200 bg-white text-surface-600 hover:border-civic-400/40 hover:text-civic-600 hover:bg-civic-50/10"
                 )}
                 id={`input-mode-${id}`}
               >
                 <Icon
-                  size={22}
+                  size={20}
                   strokeWidth={isActive ? 2.4 : 1.8}
                   className="transition-colors"
                 />
@@ -155,7 +155,7 @@ export default function SubmissionForm() {
 
                 {/* Data-captured indicator dot */}
                 {captured && (
-                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-signal-green" />
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-signal-green ring-4 ring-white shadow-xs" />
                 )}
               </button>
             );
@@ -165,7 +165,7 @@ export default function SubmissionForm() {
 
       {/* ── Active Input Panel ── */}
       {activeMode && (
-        <div className="rounded-md border border-ink-900/8 bg-ink-900/[0.02] p-4 animate-[fadeSlideIn_200ms_ease-out]">
+        <div className="rounded-2xl border border-surface-200 bg-slate-50/50 p-6 shadow-inner animate-[fadeSlideIn_200ms_ease-out]">
           {activeMode === "text" && (
             <TextInput value={text} onChange={setText} />
           )}
