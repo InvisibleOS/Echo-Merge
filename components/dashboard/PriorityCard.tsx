@@ -2,7 +2,7 @@
 
 import { PriorityItem } from "@/lib/types";
 import { CategoryBadge } from "@/components/ui/Badge";
-import { Users, ChevronRight, Activity } from "lucide-react";
+import { Users, ChevronRight, Activity, Building2, Clock } from "lucide-react";
 import clsx from "clsx";
 
 interface Props {
@@ -17,7 +17,7 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
     base_demand: item.demand_score,
     urgency_multiplier: 0.12,
     equity_multiplier: 0.05,
-    data_gap_multiplier: 0.05,
+    validation_multiplier: 0.05,
     feasibility_multiplier: 0.05,
     final_score: item.demand_score,
   };
@@ -27,12 +27,12 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
     1.0 +
     breakdown.urgency_multiplier +
     breakdown.equity_multiplier +
-    breakdown.data_gap_multiplier +
+    breakdown.validation_multiplier +
     breakdown.feasibility_multiplier;
     
   const basePct = (1.0 / totalMultiplier) * 100;
   const equityPct = (breakdown.equity_multiplier / totalMultiplier) * 100;
-  const gapPct = (breakdown.data_gap_multiplier / totalMultiplier) * 100;
+  const validationPct = (breakdown.validation_multiplier / totalMultiplier) * 100;
   const urgencyPct = (breakdown.urgency_multiplier / totalMultiplier) * 100;
 
   return (
@@ -86,6 +86,16 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
                 🏢 Assigned
               </span>
             ) : null}
+            {item.department && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-civic-700 bg-civic-50 px-2.5 py-0.5 rounded-full border border-civic-200 shadow-2xs">
+                <Building2 size={12} /> {item.department.short_name}
+              </span>
+            )}
+            {item.sla_status && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200 shadow-2xs">
+                <Clock size={12} /> {item.sla_status}
+              </span>
+            )}
           </div>
           
           {/* Micro-visualization of AI Scoring Math */}
@@ -105,9 +115,9 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
                 title={`Census Equity Boost: ${equityPct.toFixed(0)}%`}
               />
               <div 
-                style={{ width: `${gapPct}%` }} 
+                style={{ width: `${validationPct}%` }} 
                 className="bg-amber-500 h-full border-l border-white/80"
-                title={`UDISE/Health Data Gap: ${gapPct.toFixed(0)}%`}
+                title={`AI Validation Boost: ${validationPct.toFixed(0)}%`}
               />
                <div 
                 style={{ width: `${urgencyPct}%` }} 

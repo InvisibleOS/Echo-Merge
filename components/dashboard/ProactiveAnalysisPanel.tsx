@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { PROACTIVE_ALERTS, ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/proactiveData";
-import { addConvertedPriority } from "@/lib/storageSync";
+import { ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/types";
+import { getProactiveAlerts, convertProactiveAlert } from "@/lib/api";
 import { CategoryBadge } from "@/components/ui/Badge";
 import {
   Radio,
@@ -26,49 +26,47 @@ import clsx from "clsx";
 const DEFAULT_CENTER: [number, number] = [77.605, 12.915];
 
 export default function ProactiveAnalysisPanel() {
+  const [alerts, setAlerts] = useState<ProactiveAlert[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
   const [filterPriority, setFilterPriority] = useState<string>("All");
   const [filterIngestion, setFilterIngestion] = useState<string>("All");
   const [filterCategory, setFilterCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
+  const [isConvertingId, setIsConvertingId] = useState<string | null>(null);
 
-  // Lazy initializer to avoid setState in useEffect on mount
-  const [convertedIds, setConvertedIds] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("echo_converted_priorities");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          const map: Record<string, boolean> = {};
-          if (Array.isArray(parsed)) {
-            parsed.forEach((item: { work_id?: string }) => {
-              if (item.work_id && item.work_id.startsWith("PRO_")) {
-                map[item.work_id] = true;
-              }
-            });
-          }
-          return map;
-        }
-      } catch {
-        // ignore
-      }
-    }
-    return {};
-  });
+  const [convertedIds, setConvertedIds] = useState<Record<string, boolean>>({});
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
 
+  // Fetch proactive alerts from database API
+  const fetchAlerts = useCallback(async (showLoading = true) => {
+    if (showLoading) setIsFetching(true);
+    try {
+      const res = await getProactiveAlerts();
+      setAlerts(res || []);
+    } catch (err) {
+      console.error("Failed to load proactive alerts:", err);
+    } finally {
+      setIsFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAlerts(false);
+  }, [fetchAlerts]);
+
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = new Set(PROACTIVE_ALERTS.map((a) => a.category));
+    const cats = new Set(alerts.map((a) => a.category));
     return ["All", ...Array.from(cats)];
-  }, []);
+  }, [alerts]);
 
   // Filter alerts
   const filtered = useMemo(() => {
-    return PROACTIVE_ALERTS.filter((item) => {
+    return alerts.filter((item) => {
       if (filterPriority !== "All" && item.priority !== filterPriority) return false;
       if (filterIngestion !== "All" && item.ingestion_type !== filterIngestion) return false;
       if (filterCategory !== "All" && item.category !== filterCategory) return false;
@@ -82,17 +80,35 @@ export default function ProactiveAnalysisPanel() {
       }
       return true;
     });
-  }, [filterPriority, filterIngestion, filterCategory, searchQuery]);
+  }, [alerts, filterPriority, filterIngestion, filterCategory, searchQuery]);
 
   const selectedItem = useMemo(() => {
     return filtered.find((a) => a.id === selectedAlertId) || null;
   }, [filtered, selectedAlertId]);
 
-  // Handle one-click conversion to work order
-  function handleConvert(alert: ProactiveAlert) {
-    if (convertedIds[alert.id]) return;
-    addConvertedPriority(alert);
-    setConvertedIds((prev) => ({ ...prev, [alert.id]: true }));
+  // Handle one-click conversion to work order using backend database transaction
+  async function handleConvert(alert: ProactiveAlert) {
+    if (convertedIds[alert.id] || isConvertingId) return;
+    setIsConvertingId(alert.id);
+    
+    try {
+      const res = await convertProactiveAlert(alert.id);
+      if (res && res.success) {
+        setConvertedIds((prev) => ({ ...prev, [alert.id]: true }));
+        // Re-fetch live data to update alerts list (converted alert is deleted from proactive table)
+        await fetchAlerts(false);
+        setSelectedAlertId(null);
+
+        // Dispatch sync event so Tab 1 map & list update instantly
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("echo-storage-sync"));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to convert alert:", err);
+    } finally {
+      setIsConvertingId(null);
+    }
   }
 
   // Initialize Mapbox map
@@ -178,7 +194,7 @@ export default function ProactiveAnalysisPanel() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedAlertId) return;
-    const item = PROACTIVE_ALERTS.find((a) => a.id === selectedAlertId);
+    const item = alerts.find((a) => a.id === selectedAlertId);
     if (!item) return;
 
     map.flyTo({
@@ -186,7 +202,7 @@ export default function ProactiveAnalysisPanel() {
       zoom: 14.5,
       duration: 800,
     });
-  }, [selectedAlertId]);
+  }, [selectedAlertId, alerts]);
 
   function getPriorityBadge(priority: ProactivePriorityLevel) {
     switch (priority) {
@@ -243,7 +259,16 @@ export default function ProactiveAnalysisPanel() {
   }
 
   return (
-    <div className="space-y-6 animate-[fadeSlideIn_200ms_ease-out]">
+    <div className="space-y-6 animate-[fadeSlideIn_200ms_ease-out] relative">
+      {isFetching && (
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-xs flex items-center justify-center z-35">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-8 rounded-full border-3 border-civic-500 border-t-transparent animate-spin" />
+            <span className="text-xs font-semibold text-surface-700">Loading telemetry data...</span>
+          </div>
+        </div>
+      )}
+
       {/* Control Center Header & Telemetry Status Banner */}
       <div className="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-3xl">
@@ -340,7 +365,7 @@ export default function ProactiveAnalysisPanel() {
         </div>
       </div>
 
-      {/* ── Side-by-Side Layout (Like Complaint Map & Hotspot Tab) ── */}
+      {/* Side-by-Side Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-6 min-h-[660px]">
         {/* Left Hand Side Panel */}
         <div className="bg-white rounded-2xl border border-surface-200 shadow-sm flex flex-col overflow-hidden h-[660px]">
@@ -350,7 +375,7 @@ export default function ProactiveAnalysisPanel() {
               <div className="px-5 py-3.5 border-b border-surface-200 bg-surface-50/80 flex items-center justify-between shrink-0">
                 <button
                   onClick={() => setSelectedAlertId(null)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-surface-700 hover:text-civic-600 transition-colors bg-white px-3 py-1 rounded-lg border border-surface-200 shadow-2xs"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-surface-700 hover:text-civic-600 transition-colors bg-white px-3 py-1 rounded-lg border border-surface-205 shadow-2xs"
                 >
                   <ArrowLeft size={14} />
                   <span>Back to all alerts ({filtered.length})</span>
@@ -427,15 +452,17 @@ export default function ProactiveAnalysisPanel() {
                 <button
                   type="button"
                   onClick={() => handleConvert(selectedItem)}
-                  disabled={convertedIds[selectedItem.id]}
+                  disabled={convertedIds[selectedItem.id] || isConvertingId === selectedItem.id}
                   className={clsx(
-                    "px-5 py-3 rounded-xl font-display font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm shrink-0",
+                    "px-5 py-3 rounded-xl font-display font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 min-w-[200px]",
                     convertedIds[selectedItem.id]
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default"
-                      : "bg-purple-600 text-white hover:bg-purple-700 active:scale-95 shadow-md hover:shadow-lg ring-2 ring-purple-500/20"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default animate-none"
+                      : "bg-purple-600 text-white hover:bg-purple-705 active:scale-95 shadow-md"
                   )}
                 >
-                  {convertedIds[selectedItem.id] ? (
+                  {isConvertingId === selectedItem.id ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : convertedIds[selectedItem.id] ? (
                     <>
                       <CheckCircle size={15} className="text-emerald-600" />
                       <span>Converted to Work Order</span>
@@ -467,11 +494,11 @@ export default function ProactiveAnalysisPanel() {
                 </span>
               </div>
 
-              <div className="overflow-y-auto divide-y divide-surface-100 flex-1 min-h-0">
+              <div className="overflow-y-auto divide-y divide-surface-100 flex-1 min-h-0 animate-[fadeSlideIn_150ms_ease-out]">
                 {filtered.length === 0 ? (
                   <div className="text-center py-16 px-4">
                     <p className="text-surface-500 text-sm font-medium">
-                      No telemetry alerts match your current filter criteria. Try selecting &quot;All&quot; sources or resetting the search query.
+                      No telemetry alerts match your current filter criteria.
                     </p>
                   </div>
                 ) : (
@@ -504,10 +531,10 @@ export default function ProactiveAnalysisPanel() {
                           </span>
                           <span
                             className={clsx(
-                              "text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0",
+                              "text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0 border transition-all shadow-3xs",
                               isConverted
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : "text-civic-600 bg-civic-50 group-hover:bg-civic-100 transition-colors"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-250"
+                                : "text-civic-600 bg-civic-50 border-civic-200 group-hover:bg-civic-100"
                             )}
                           >
                             {isConverted ? "✓ Work Order" : "Inspect Details →"}

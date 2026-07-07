@@ -79,7 +79,7 @@ export function addConvertedPriority(alert: ProactiveAlert): PriorityItem {
       base_demand: score * 0.75,
       urgency_multiplier: alert.priority === "Critical" ? 0.25 : 0.15,
       equity_multiplier: 0.05,
-      data_gap_multiplier: 0.05,
+      validation_multiplier: 0.05,
       feasibility_multiplier: 1.0,
       final_score: score,
     },
