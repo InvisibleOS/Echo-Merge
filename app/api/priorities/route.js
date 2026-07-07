@@ -27,7 +27,6 @@ export async function GET(request) {
 
       const { data, error } = await query;
       if (error) throw new Error(error.message);
-
       // Fetch all cases to merge their live status and department assignments
       const { data: casesData } = await supabase
         .from('cases')
@@ -44,9 +43,7 @@ export async function GET(request) {
         return item;
       });
 
-      return constituency
-        ? mapped.filter((item) => (item.hotspot_geo?.ward || '').includes(constituency))
-        : mapped;
+      return mapped;
     });
 
     return NextResponse.json(items, { status: 200 });

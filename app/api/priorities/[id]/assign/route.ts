@@ -54,6 +54,10 @@ export async function POST(request: Request, context: any) {
       throw new Error(rpcError.message);
     }
 
+    const { invalidate, CACHE_KEYS } = require('../../../../../lib/server/cache');
+    invalidate(CACHE_KEYS.hotspots);
+    invalidate(CACHE_KEYS.priorities);
+
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 });
