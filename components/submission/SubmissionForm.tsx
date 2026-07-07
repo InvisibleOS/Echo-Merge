@@ -29,7 +29,6 @@ export default function SubmissionForm() {
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [photoDescription, setPhotoDescription] = useState("");
   const [geo, setGeo] = useState<GeoPoint | undefined>(undefined);
-  const [constituency, setConstituency] = useState<string>("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +65,7 @@ export default function SubmissionForm() {
         channel: "web",
       });
       setSubmissionId(res.submission_id);
-    } catch (err) {
+    } catch {
       setError(
         "Something went wrong sending your report. Please check your connection and try again."
       );

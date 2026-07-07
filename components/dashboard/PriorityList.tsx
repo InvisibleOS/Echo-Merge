@@ -19,7 +19,7 @@ export default function PriorityList({
 }: Props) {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 text-ink-800/40">
+      <div className="flex items-center justify-center h-64 text-surface-400">
         <LoadingSpinner size={24} />
       </div>
     );
@@ -28,7 +28,7 @@ export default function PriorityList({
   if (items.length === 0) {
     return (
       <div className="text-center py-16 px-4">
-        <p className="text-ink-800/50 text-sm">
+        <p className="text-surface-500 text-sm font-medium">
           No priorities yet. As citizens submit reports, ranked development
           needs will appear here.
         </p>

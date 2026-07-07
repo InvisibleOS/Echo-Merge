@@ -108,6 +108,8 @@ export interface ScoringBreakdown {
   final_score: number;
 }
 
+export type ComplaintStatus = "Open" | "Ongoing" | "Under Review" | "Assigned" | "Resolved";
+
 export interface PriorityItem {
   work_id: string;
   title: string;
@@ -124,8 +126,29 @@ export interface PriorityItem {
   constituency?: string;
   solution_plan?: SolutionPlan;
   scoring_breakdown?: ScoringBreakdown;
-  status?: "Open" | "Resolved"; // resolution tracking — defaults to "Open"
+  status?: ComplaintStatus; // resolution tracking — defaults to "Open"
+  assigned_department?: string; // department delegation tracking
+  predictive_status?: "Confirmed" | "System-Detected"; // direct report vs CV/SCADA/NLP detection
+  ingestion_source?: string; // e.g. "Source: BWSSB SCADA"
 }
+
+export interface CitizenComplaintRecord {
+  id: string;
+  work_id?: string;
+  title: string;
+  category: IssueCategory;
+  timestamp: string;
+  status: ComplaintStatus;
+  assigned_department?: string;
+  predictive_status?: "Confirmed" | "System-Detected";
+  ingestion_source?: string;
+  raw_text?: string;
+  photo_base64?: string;
+  audio_base64?: string;
+  geo?: GeoPoint;
+  constituency?: string;
+}
+
 
 // ---------- Hotspot (map aggregation) ----------
 

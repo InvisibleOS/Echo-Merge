@@ -26,7 +26,7 @@ export default function DashboardShell() {
           setPriorities(p);
           setHotspots(h);
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setError(
             "Couldn't load priorities. Check the API connection and try refreshing."
