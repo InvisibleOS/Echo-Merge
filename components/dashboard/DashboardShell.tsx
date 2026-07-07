@@ -92,7 +92,7 @@ export default function DashboardShell() {
   }, [priorities]);
 
   const filteredPriorities = useMemo(() => {
-    let filtered = priorities;
+    let filtered = priorities.filter(p => p.status !== "Resolved");
     if (constituency) {
       filtered = filtered.filter((p) => p.constituency === constituency);
     }
@@ -121,12 +121,18 @@ export default function DashboardShell() {
     setSelectedId((current) => (current === workId ? null : workId));
   }
 
-  function handleResolvePriority(workId: string) {
+  async function handleResolvePriority(workId: string) {
     setPriorities((current) =>
       current.map((item) =>
         item.work_id === workId ? { ...item, status: "Resolved" } : item
       )
     );
+    try {
+      const freshHotspots = await getHotspots(constituency || undefined);
+      setHotspots(freshHotspots);
+    } catch (err) {
+      console.error("Failed to refresh hotspots after resolve", err);
+    }
   }
 
   return (

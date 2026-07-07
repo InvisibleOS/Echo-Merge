@@ -7,16 +7,12 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const constituency = searchParams.get('constituency') || '';
     const status = searchParams.get('status') || '';
 
     if (isSupabaseConfigured) {
       let query = supabase.from('cases').select('*, department:departments(*)');
       if (status) {
         query = query.eq('status', status);
-      }
-      if (constituency) {
-        query = query.ilike('ward', `%${constituency}%`);
       }
       query = query.order('priority_score', { ascending: false });
       
@@ -27,7 +23,6 @@ export async function GET(request) {
 
     return NextResponse.json(
       getCases({
-        constituency,
         status,
       }),
       { status: 200 }

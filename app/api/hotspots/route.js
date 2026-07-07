@@ -24,36 +24,38 @@ export async function GET(request) {
     }
 
     const hotspots = await cached(CACHE_KEYS.hotspots, TTL_MS, async () => {
-      const { data: subs, error: subErr } = await supabase
-        .from('submissions')
-        .select('geo, enriched_submissions ( category, urgency )');
-      if (subErr) throw new Error(subErr.message);
-
-      const points = (subs || [])
-        .filter((s) => s.geo && s.geo.lat != null && s.geo.lng != null)
-        .map((s) => {
-          const e = Array.isArray(s.enriched_submissions)
-            ? s.enriched_submissions[0]
-            : s.enriched_submissions;
-          return hotspotFromSubmission({
-            geo: s.geo,
-            category: e?.category,
-            urgency: e?.urgency,
-            constituency: s.constituency,
-          });
-        });
-
-      if (points.length > 0) return points;
-
-      // Fallback: aggregate centroids from priorities.
       const { data: priorities, error: pErr } = await supabase
         .from('priorities')
-        .select('category, demand_score, demand_count, hotspot_geo');
+        .select('category, demand_score, demand_count, hotspot_geo, supporting_evidence, solution_plan');
+      
       if (pErr) throw new Error(pErr.message);
 
-      return (priorities || [])
-        .filter((p) => p.hotspot_geo && p.hotspot_geo.lat != null && p.hotspot_geo.lng != null)
-        .map(hotspotFromPriority);
+      const activePriorities = (priorities || []).filter(
+        (p) => !p.solution_plan?.resolved
+      );
+
+      const points = [];
+
+      for (const p of activePriorities) {
+        if (p.supporting_evidence && p.supporting_evidence.length > 0) {
+          // Add denser points from evidence
+          for (const ev of p.supporting_evidence) {
+            if (ev.geo && ev.geo.lat != null && ev.geo.lng != null) {
+              points.push(hotspotFromSubmission({
+                geo: ev.geo,
+                category: p.category,
+                urgency: 'Medium', // We don't store urgency per evidence currently, so fallback
+                constituency: p.hotspot_geo?.ward,
+              }));
+            }
+          }
+        } else if (p.hotspot_geo && p.hotspot_geo.lat != null && p.hotspot_geo.lng != null) {
+          // Fallback to centroid if no evidence coords
+          points.push(hotspotFromPriority(p));
+        }
+      }
+
+      return points;
     });
 
     return NextResponse.json(hotspots, { status: 200 });

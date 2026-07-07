@@ -108,9 +108,11 @@ export default function HotspotMap({
     Object.values(markersRef.current).forEach((m) => m.remove());
     markersRef.current = {};
 
-    priorities.forEach((item) => {
-      const el = document.createElement("button");
-      el.setAttribute("aria-label", item.title);
+    priorities
+      .filter((item) => item.status !== "Resolved")
+      .forEach((item) => {
+        const el = document.createElement("button");
+        el.setAttribute("aria-label", item.title);
       el.style.width = "28px";
       el.style.height = "28px";
       el.style.borderRadius = "50%";
