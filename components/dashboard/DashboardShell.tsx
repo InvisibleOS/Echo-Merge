@@ -91,20 +91,34 @@ export default function DashboardShell() {
     return Array.from(cats).sort();
   }, [priorities]);
 
+  const isProactive = (p: PriorityItem) => Boolean(p.title?.includes("[PROACTIVE"));
+
+  // Tab 1 (map + list): citizen-complaint clusters only — keep proactively
+  // crawled work orders off the public hotspot map.
   const filteredPriorities = useMemo(() => {
-    let filtered = priorities.filter(p => p.status !== "Resolved");
+    let filtered = priorities.filter((p) => p.status !== "Resolved" && !isProactive(p));
     if (constituency) {
       filtered = filtered.filter((p) => p.constituency === constituency);
     }
     if (category) {
       filtered = filtered.filter((p) => p.category === category);
     }
-    // Re-rank from 1 to N within this filtered list (assuming they are already sorted by demand_score desc)
+    // Re-rank from 1 to N within this filtered list (already sorted by AI rating desc)
     return filtered.map((p, index) => ({
       ...p,
       rank: index + 1,
     }));
   }, [priorities, category, constituency]);
+
+  // Tab 3 (Management & Delegation): every open work order to delegate,
+  // INCLUDING proactively-detected / converted ones.
+  const delegationPriorities = useMemo(() => {
+    let filtered = priorities.filter((p) => p.status !== "Resolved");
+    if (constituency) {
+      filtered = filtered.filter((p) => p.constituency === constituency);
+    }
+    return filtered.map((p, index) => ({ ...p, rank: index + 1 }));
+  }, [priorities, constituency]);
 
   const filteredHotspots = useMemo(() => {
     let filtered = hotspots;
@@ -136,26 +150,26 @@ export default function DashboardShell() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 text-slate-900 font-body relative overflow-hidden">
+    <div className="h-screen flex flex-col mesh-bg text-surface-900 font-body relative overflow-hidden">
       {/* ── Top Header Bar ── */}
-      <header className="px-6 py-4 border-b border-surface-150 flex flex-wrap items-center justify-between shrink-0 gap-4 bg-white/80 backdrop-blur-md z-20 shadow-xs">
-        <div className="flex items-center gap-3.5">
+      <header className="px-6 py-3.5 border-b border-white/40 flex flex-wrap items-center justify-between shrink-0 gap-4 glass-nav z-20 shadow-sm">
+        <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="text-surface-600 hover:text-surface-900 transition-colors p-1.5 hover:bg-surface-100 rounded-lg"
+            className="text-surface-700 hover:text-surface-900 transition-colors"
             title="Back to Landing Gate"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={18} />
           </Link>
-          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-3xs">
+          <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-sm">
             <Landmark size={18} />
           </div>
           <div>
-            <span className="text-amber-600 font-display font-extrabold text-[9px] uppercase tracking-widest block">
-              Representative Portal &bull; Executive Command
+            <span className="text-amber-600 font-display font-semibold text-[10px] uppercase tracking-wide block">
+              People&rsquo;s Priorities &bull; Representative Portal
             </span>
-            <h1 className="font-display font-extrabold text-base text-surface-950 leading-tight">
-              Constituency Control Center
+            <h1 className="font-display font-bold text-base sm:text-lg text-surface-900 leading-tight">
+              Constituency Executive Control Center
             </h1>
           </div>
         </div>
@@ -163,7 +177,7 @@ export default function DashboardShell() {
         {/* Filters and Portal Switcher */}
         <div className="flex items-center gap-3 flex-wrap">
           <select 
-            className="bg-white text-surface-800 text-xs border border-surface-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all font-display font-bold shadow-2xs cursor-pointer"
+            className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
             value={constituency}
             onChange={(e) => setConstituency(e.target.value)}
           >
@@ -177,7 +191,7 @@ export default function DashboardShell() {
 
           {activeTab === "map" && (
             <select 
-              className="bg-white text-surface-800 text-xs border border-surface-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-civic-500 focus:border-civic-500 transition-all font-display font-bold shadow-2xs cursor-pointer"
+              className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
               value={category}
               onChange={(e) => {
                 setCategory(e.target.value);
@@ -193,31 +207,31 @@ export default function DashboardShell() {
 
           <Link
             href="/citizen"
-            className="hidden md:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-200 text-xs font-display font-bold text-surface-800 transition-colors shadow-2xs"
+            className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-surface-100 hover:bg-surface-200 border border-surface-200 text-xs font-bold text-surface-900 transition-colors shadow-sm"
           >
-            <Users size={13} className="text-civic-600" />
+            <Users size={14} className="text-civic-600" />
             <span>Switch to Citizen Portal →</span>
           </Link>
         </div>
       </header>
 
       {/* ── Navigation Bar ── */}
-      <nav className="bg-white px-6 py-3 border-b border-surface-150 flex items-center gap-3 shrink-0 overflow-x-auto shadow-3xs">
+      <nav className="glass-nav px-6 py-2.5 border-b border-white/40 flex items-center gap-2.5 shrink-0 overflow-x-auto shadow-sm z-10">
         <button
           onClick={() => setActiveTab("map")}
           className={clsx(
-            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
+            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all duration-300 whitespace-nowrap border border-transparent shadow-sm hover:-translate-y-0.5",
             activeTab === "map"
-              ? "bg-surface-950 text-white border-surface-950 shadow-md"
-              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
+              ? "bg-gradient-to-r from-ink-950 to-ink-800 text-white shadow-glow-civic"
+              : "text-surface-700 hover:text-surface-900 bg-white/50 hover:bg-white"
           )}
           id="tab-complaint-map"
         >
-          <Map size={14} />
-          <span>1. Map &amp; Hotspots</span>
+          <Map size={15} />
+          <span>1. Complaint Map &amp; Hotspots</span>
           <span className={clsx(
-            "ml-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border",
-            activeTab === "map" ? "bg-white/20 text-white border-white/10" : "bg-surface-100 text-surface-700 border-surface-200"
+            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
+            activeTab === "map" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
           )}>
             {filteredPriorities.length}
           </span>
@@ -226,49 +240,49 @@ export default function DashboardShell() {
         <button
           onClick={() => setActiveTab("analysis")}
           className={clsx(
-            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
+            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all duration-300 whitespace-nowrap border border-transparent shadow-sm hover:-translate-y-0.5",
             activeTab === "analysis"
-              ? "bg-surface-950 text-white border-surface-950 shadow-md"
-              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
+              ? "bg-gradient-to-r from-ink-950 to-ink-800 text-white shadow-glow-amber"
+              : "text-surface-700 hover:text-surface-900 bg-white/50 hover:bg-white"
           )}
           id="tab-realtime-analysis"
         >
-          <Cpu size={14} />
+          <Cpu size={15} />
           <span>2. Real-time Area Analysis</span>
-          <span className="ml-1.5 px-2 py-0.5 bg-red-100 text-red-700 border border-red-200 rounded-full text-[9px] font-mono font-bold uppercase tracking-wide">
-            ⚡ Proactive Anomaly
+          <span className="ml-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[10px] font-mono font-bold">
+            ⚡ Proactive Mapbox
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("delegation")}
           className={clsx(
-            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
+            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all duration-300 whitespace-nowrap border border-transparent shadow-sm hover:-translate-y-0.5",
             activeTab === "delegation"
-              ? "bg-surface-950 text-white border-surface-950 shadow-md"
-              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
+              ? "bg-gradient-to-r from-ink-950 to-ink-800 text-white shadow-glow-civic"
+              : "text-surface-700 hover:text-surface-900 bg-white/50 hover:bg-white"
           )}
           id="tab-management-delegation"
         >
-          <Building2 size={14} />
+          <Building2 size={15} />
           <span>3. Management &amp; Delegation</span>
         </button>
 
         <button
           onClick={() => setActiveTab("workload")}
           className={clsx(
-            "flex items-center gap-2 px-4.5 py-2.5 rounded-xl font-display font-extrabold text-xs transition-all whitespace-nowrap border shadow-3xs active:scale-97",
+            "flex items-center gap-2 px-4 py-2 rounded-xl font-display font-bold text-xs transition-all duration-300 whitespace-nowrap border border-transparent shadow-sm hover:-translate-y-0.5",
             activeTab === "workload"
-              ? "bg-surface-950 text-white border-surface-950 shadow-md"
-              : "text-surface-700 bg-white border-surface-200 hover:text-surface-900 hover:bg-surface-50"
+              ? "bg-gradient-to-r from-ink-950 to-ink-800 text-white shadow-glow-civic"
+              : "text-surface-700 hover:text-surface-900 bg-white/50 hover:bg-white"
           )}
           id="tab-department-workload"
         >
-          <Building2 size={14} />
+          <Building2 size={15} />
           <span>4. Department Workload</span>
           <span className={clsx(
-            "ml-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border",
-            activeTab === "workload" ? "bg-white/20 text-white border-white/10" : "bg-surface-100 text-surface-700 border-surface-200"
+            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
+            activeTab === "workload" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
           )}>
             {departments.length}
           </span>
@@ -286,9 +300,9 @@ export default function DashboardShell() {
         
         {/* Tab 1: Map and Priorities */}
         {activeTab === "map" && (
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-5 p-5 min-h-0 bg-surface-50">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-5 p-5 min-h-0 animate-slide-up-fade">
             {/* Left: Priority list */}
-            <div className="overflow-y-auto bg-white rounded-2xl p-4 border border-surface-200 shadow-sm h-full flex flex-col">
+            <div className="overflow-y-auto glass-panel rounded-3xl p-4 h-full flex flex-col">
               <PriorityList
                 items={filteredPriorities}
                 isLoading={isLoading}
@@ -319,19 +333,24 @@ export default function DashboardShell() {
 
         {/* Tab 2: Proactive Telemetry */}
         {activeTab === "analysis" && (
-          <div className="flex-1 overflow-y-auto p-6 min-h-0 bg-surface-50">
-            <div className="max-w-7xl mx-auto">
-              <ProactiveAnalysisPanel />
+          <div className="flex-1 overflow-y-auto p-6 min-h-0 animate-slide-up-fade">
+            <div className="max-w-7xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-glass">
+              <ProactiveAnalysisPanel
+                onConverted={() => {
+                  setActiveTab("delegation");
+                  void load(false);
+                }}
+              />
             </div>
           </div>
         )}
 
         {/* Tab 3: Delegation */}
         {activeTab === "delegation" && (
-          <div className="flex-1 overflow-y-auto p-6 min-h-0 bg-surface-50">
-            <div className="max-w-7xl mx-auto">
+          <div className="flex-1 overflow-y-auto p-6 min-h-0 animate-slide-up-fade">
+            <div className="max-w-7xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-glass p-6">
               <DelegationPanel
-                priorities={filteredPriorities}
+                priorities={delegationPriorities}
                 onDelegationUpdate={() => load(false)}
               />
             </div>
@@ -340,9 +359,9 @@ export default function DashboardShell() {
 
         {/* Tab 4: Department Workload */}
         {activeTab === "workload" && (
-          <div className="flex-1 overflow-y-auto p-6 min-h-0 bg-surface-50">
+          <div className="flex-1 overflow-y-auto p-6 min-h-0 animate-slide-up-fade">
             <div className="max-w-7xl mx-auto space-y-6">
-              <div className="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="glass-panel rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-civic-600 uppercase tracking-widest bg-civic-50 px-2 py-0.5 rounded border border-civic-200 mb-1">
                     <Building2 size={13} />
@@ -368,20 +387,20 @@ export default function DashboardShell() {
       {/* ── Slide-out Side Drawer ── */}
       <div
         className={clsx(
-          "fixed inset-0 z-50 overflow-hidden transition-all duration-300 ease-in-out",
+          "fixed inset-0 z-50 overflow-hidden transition-all duration-500 ease-in-out",
           selectedItem ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
         {/* Backdrop overlay */}
         <div
-          className="absolute inset-0 bg-black/45 backdrop-blur-xs transition-opacity duration-300"
+          className="absolute inset-0 bg-ink-950/20 backdrop-blur-md transition-opacity duration-500"
           onClick={() => setSelectedId(null)}
         />
 
         {/* Drawer content sliding in from right */}
         <div
           className={clsx(
-            "absolute inset-y-0 right-0 max-w-lg w-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out transform border-l border-surface-200",
+            "absolute inset-y-0 right-0 max-w-lg w-full glass-panel shadow-2xl flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform border-l border-white/50",
             selectedItem ? "translate-x-0" : "translate-x-full"
           )}
         >

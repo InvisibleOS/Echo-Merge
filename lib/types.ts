@@ -74,6 +74,9 @@ export interface SupportingEvidence {
 export interface SolutionPlan {
   primary_department: string;
   estimated_budget_tier: string;
+  estimated_budget_inr?: string; // approximate government budget range, e.g. "₹1.2 L – ₹4.5 L"
+  estimated_budget_low?: number; // INR
+  estimated_budget_high?: number; // INR
   remediation_timeline: string;
   action_steps: string[];
   strategic_rationale: string;

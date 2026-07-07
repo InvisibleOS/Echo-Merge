@@ -6,13 +6,10 @@
   --font-body: "Noto Sans", "Noto Sans Devanagari", "Noto Sans Tamil",
     "Noto Sans Telugu", "Noto Sans Bengali", "Noto Sans Kannada",
     system-ui, sans-serif;
-  --font-display: "Manrope", "Noto Sans", system-ui, sans-serif;
 }
 
 * {
   scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -21,26 +18,7 @@ body {
   font-family: var(--font-body);
 }
 
-/* Custom Premium Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Keyboard Accessibility */
+/* Visible keyboard focus everywhere — accessibility floor */
 :focus-visible {
   outline: 2px solid #4f46e5;
   outline-offset: 2px;
@@ -58,36 +36,63 @@ body {
   }
 }
 
-@keyframes float-slow {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(15px, -25px) scale(1.08);
-  }
-}
-
-@keyframes float-reverse {
-  0%, 100% {
-    transform: translate(0, 0) scale(1.08);
-  }
-  50% {
-    transform: translate(-20px, 15px) scale(1);
-  }
-}
-
-.animate-float-slow {
-  animation: float-slow 15s ease-in-out infinite;
-}
-
-.animate-float-reverse {
-  animation: float-reverse 20s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* --- Custom Sleek Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+/* --- Glassmorphism Utilities --- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--tw-shadow-glass);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* --- Ambient Mesh Background --- */
+.mesh-bg {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 40% 20%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%);
+  background-size: 200% 200%;
+  animation: meshFlow 20s ease infinite alternate;
+}
+
+@keyframes meshFlow {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 100%; }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Hotspot, PriorityItem } from "@/lib/types";
@@ -32,7 +32,8 @@ export default function HotspotMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
-  const hasMapboxToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
+  const [mapError, setMapError] = useState(false);
+  const useFallback = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapError;
   const fallbackClusters = useMemo(() => getConstituencyClusters(hotspots), [hotspots]);
 
   // Initialize map once
@@ -41,17 +42,23 @@ export default function HotspotMap({
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!token) return;
-    mapboxgl.accessToken = token;
 
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: DEFAULT_CENTER,
-      zoom: 12,
-    });
-
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
-    mapRef.current = map;
+    let map: mapboxgl.Map;
+    try {
+      mapboxgl.accessToken = token;
+      map = new mapboxgl.Map({
+        container: containerRef.current,
+        style: "mapbox://styles/mapbox/light-v11",
+        center: DEFAULT_CENTER,
+        zoom: 12,
+      });
+      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      mapRef.current = map;
+    } catch {
+      // e.g. WebGL unavailable — degrade to the token-free India fallback.
+      setMapError(true);
+      return;
+    }
 
     map.on("load", () => {
       map.addSource("hotspots", {
@@ -158,7 +165,7 @@ export default function HotspotMap({
 
   // Token-free fallback: a lightweight India heatmap so complaints still render
   // (numbered priority pins + demand glow) when NEXT_PUBLIC_MAPBOX_TOKEN is unset.
-  if (!hasMapboxToken) {
+  if (useFallback) {
     const openPriorities = priorities.filter((item) => item.status !== "Resolved");
     return (
       <div className="w-full h-full min-h-[520px] rounded-lg overflow-hidden border border-white/10 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.16),transparent_32%),linear-gradient(135deg,#101827,#020617)] p-4">

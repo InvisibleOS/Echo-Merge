@@ -32,18 +32,23 @@ export async function GET(request) {
         .from('cases')
         .select('case_id, work_id, status, department_id');
 
-      const mapped = (data || [])
-        .map((row) => {
-          const item = toPriorityItem(row);
-          const matchedCase = (casesData || []).find((c) => c.work_id === item.work_id);
-          if (matchedCase) {
-            item.case_id = matchedCase.case_id;
-            item.status = matchedCase.status;
-            item.assigned_department = matchedCase.department_id;
-          }
-          return item;
-        })
-        .filter((item) => !item.title?.includes('[PROACTIVE'));
+      // Note: converted proactive alerts carry a '[PROACTIVE CRAWL]' title and
+      // are intentionally kept here so they surface as actionable work orders in
+      // the Management & Delegation tab. The map tab filters them out client-side.
+      const mapped = (data || []).map((row) => {
+        const item = toPriorityItem(row);
+        const matchedCase = (casesData || []).find((c) => c.work_id === item.work_id);
+        if (matchedCase) {
+          item.case_id = matchedCase.case_id;
+          item.status = matchedCase.status;
+          item.assigned_department = matchedCase.department_id;
+        }
+        // Flag proactively-detected work orders so the UI can route them.
+        if (item.title?.includes('[PROACTIVE')) {
+          item.predictive_status = item.predictive_status || 'System-Detected';
+        }
+        return item;
+      });
 
       // Rank by the AI rating (sum of the four 1–5 dimensions, out of 20). Ties
       // fall back to citizen demand so heavier clusters lead. `sortBy=demand_score`

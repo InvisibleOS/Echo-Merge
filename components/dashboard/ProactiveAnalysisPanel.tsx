@@ -25,7 +25,20 @@ import clsx from "clsx";
 
 const DEFAULT_CENTER: [number, number] = [77.605, 12.915];
 
-export default function ProactiveAnalysisPanel() {
+// Bengaluru South viewport for the token-free fallback projection.
+const LOCAL_BOUNDS = { minLat: 12.82, maxLat: 13.02, minLng: 77.48, maxLng: 77.74 };
+function projectLocalPoint(lat: number, lng: number) {
+  const x = ((Number(lng) - LOCAL_BOUNDS.minLng) / (LOCAL_BOUNDS.maxLng - LOCAL_BOUNDS.minLng)) * 100;
+  const y = (1 - (Number(lat) - LOCAL_BOUNDS.minLat) / (LOCAL_BOUNDS.maxLat - LOCAL_BOUNDS.minLat)) * 100;
+  return { x: Math.max(4, Math.min(96, x)), y: Math.max(5, Math.min(95, y)) };
+}
+
+interface Props {
+  /** Called after an alert is successfully converted into an actionable work order. */
+  onConverted?: () => void;
+}
+
+export default function ProactiveAnalysisPanel({ onConverted }: Props) {
   const [alerts, setAlerts] = useState<ProactiveAlert[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [filterPriority, setFilterPriority] = useState<string>("All");
@@ -40,6 +53,8 @@ export default function ProactiveAnalysisPanel() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
+  const [mapError, setMapError] = useState(false);
+  const showFallbackMap = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapError;
 
   // Fetch proactive alerts from database API
   const fetchAlerts = useCallback(async (showLoading = true) => {
@@ -104,6 +119,9 @@ export default function ProactiveAnalysisPanel() {
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("echo-storage-sync"));
         }
+
+        // Hand off to the Management & Delegation tab where the new work order lands.
+        onConverted?.();
       }
     } catch (err) {
       console.error("Failed to convert alert:", err);
@@ -117,21 +135,24 @@ export default function ProactiveAnalysisPanel() {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) {
-      console.error("Missing NEXT_PUBLIC_MAPBOX_TOKEN");
+    if (!token) return; // token-free fallback renders instead (see below)
+
+    let map: mapboxgl.Map;
+    try {
+      mapboxgl.accessToken = token;
+      map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: "mapbox://styles/mapbox/light-v11",
+        center: DEFAULT_CENTER,
+        zoom: 12.2,
+      });
+      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      mapRef.current = map;
+    } catch {
+      // e.g. WebGL unavailable — degrade to the token-free fallback view.
+      setMapError(true);
       return;
     }
-    mapboxgl.accessToken = token;
-
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: DEFAULT_CENTER,
-      zoom: 12.2,
-    });
-
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
-    mapRef.current = map;
 
     return () => {
       map.remove();
@@ -574,7 +595,44 @@ export default function ProactiveAnalysisPanel() {
               </div>
             </div>
           </div>
-          <div ref={mapContainerRef} className="w-full flex-1 min-h-0" />
+          {!showFallbackMap ? (
+            <div ref={mapContainerRef} className="w-full flex-1 min-h-0" />
+          ) : (
+            <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-[radial-gradient(circle_at_30%_25%,rgba(79,70,229,0.10),transparent_35%),linear-gradient(135deg,#0F172A,#020617)]">
+              <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:40px_40px]" />
+              {filtered.map((item) => {
+                const p = projectLocalPoint(item.geo.lat, item.geo.lng);
+                const isSel = selectedAlertId === item.id;
+                const color =
+                  item.priority === "Critical" ? "#DC2626" : item.priority === "Warning" ? "#D97706" : "#2563EB";
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelectedAlertId(item.id)}
+                    title={item.title}
+                    className="absolute flex items-center justify-center rounded-full border-2 border-white text-white font-bold shadow-lg transition-transform hover:scale-110"
+                    style={{
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      width: isSel ? 34 : 26,
+                      height: isSel ? 34 : 26,
+                      fontSize: isSel ? 15 : 12,
+                      transform: "translate(-50%, -50%)",
+                      backgroundColor: color,
+                      zIndex: isSel ? 10 : 1,
+                      boxShadow: isSel ? `0 0 0 4px ${color}44` : "0 2px 6px rgba(0,0,0,.35)",
+                    }}
+                  >
+                    {item.priority === "Critical" ? "⚠" : item.priority === "Warning" ? "⚡" : "ℹ"}
+                  </button>
+                );
+              })}
+              <div className="absolute bottom-3 left-3 rounded-md border border-white/10 bg-ink-950/80 px-3 py-1.5 text-[10px] font-semibold text-white/60 backdrop-blur">
+                Live telemetry positions &middot; {filtered.length} alerts &middot; add NEXT_PUBLIC_MAPBOX_TOKEN for the interactive map
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -156,9 +156,16 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
                   <div className="space-y-1">
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-surface-500 flex items-center gap-1">
                       <DollarSign size={12} />
-                      Estimated Budget Tier
+                      Est. Govt. Budget
                     </span>
-                    <p className="text-xs font-bold text-emerald-700">{plan.estimated_budget_tier}</p>
+                    <p className="text-sm font-bold text-emerald-700">
+                      {plan.estimated_budget_inr || plan.estimated_budget_tier}
+                    </p>
+                    {plan.estimated_budget_inr && (
+                      <p className="text-[10px] font-semibold text-surface-500">
+                        {plan.estimated_budget_tier} tier &middot; municipal allocation
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-1">
