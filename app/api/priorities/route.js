@@ -34,9 +34,7 @@ export async function GET(request) {
       const { data, error } = await query;
       if (error) throw new Error(error.message);
       const mapped = (data || []).map(toPriorityItem);
-      return constituency
-        ? mapped.filter((item) => (item.hotspot_geo?.ward || '').includes(constituency))
-        : mapped;
+      return mapped;
     });
 
     return NextResponse.json(items, { status: 200 });

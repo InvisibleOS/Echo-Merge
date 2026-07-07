@@ -7,10 +7,8 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   return NextResponse.json(
     getCases({
-      constituency: searchParams.get('constituency') || '',
       status: searchParams.get('status') || '',
     }),
     { status: 200 }
   );
 }
-
