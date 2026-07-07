@@ -84,6 +84,7 @@ export interface ScoringBreakdown {
   urgency_multiplier: number;
   equity_multiplier: number;
   validation_multiplier: number;
+  data_gap_multiplier?: number;
   feasibility_multiplier: number;
   final_score: number;
   reasoning?: {

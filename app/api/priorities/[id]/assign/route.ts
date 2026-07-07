@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '../../../../../utils/supabase/server';
+import { invalidate, CACHE_KEYS } from '../../../../../lib/server/cache';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +14,10 @@ function mapAgencyToDeptId(agencyName: string): string {
   return "dept-safety";
 }
 
-export async function POST(request: Request, context: any) {
+export async function POST(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const params = await context.params;
     const workId = params.id;
@@ -28,7 +33,7 @@ export async function POST(request: Request, context: any) {
     }
 
     const deptId = mapAgencyToDeptId(agencyName);
-    const db = supabase as any;
+    const db = supabase as unknown as SupabaseClient;
 
     // Update the cases table status to 'Assigned' and link department ID
     const { error: updateError } = await db
@@ -54,12 +59,12 @@ export async function POST(request: Request, context: any) {
       throw new Error(rpcError.message);
     }
 
-    const { invalidate, CACHE_KEYS } = require('../../../../../lib/server/cache');
     invalidate(CACHE_KEYS.hotspots);
     invalidate(CACHE_KEYS.priorities);
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Server error: ' + msg }, { status: 500 });
   }
 }
