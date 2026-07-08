@@ -8,6 +8,10 @@ import { processOfflineSubmission } from '../../../lib/server/action-os';
 // Route handlers are not cached by default in Next 16 — this is request-time.
 export const dynamic = 'force-dynamic';
 
+// The enrich→embed→score pipeline (LLM/geocode) can run longer than Vercel's
+// 10s Hobby default; allow up to 60s so the function isn't killed mid-request.
+export const maxDuration = 60;
+
 // How long /submit waits for the enrich→embed→score pipeline before responding.
 // The pipeline usually finishes in a few seconds; if an upstream (geocode/LLM) is
 // slow we respond anyway — the raw row is already saved and the pipeline keeps
@@ -75,7 +79,6 @@ export async function POST(request) {
 
     // --- Persist any base64 media to durable URLs --------------------------
     const media = await persistMedia(
-      supabase,
       { audio_base64: value.audio_base64, photo_base64: value.photo_base64 },
       hash
     );
@@ -125,9 +128,10 @@ export async function POST(request) {
     // there yet" gap. The cap guarantees a slow geocode/LLM upstream can't hang the
     // request: on timeout the raw row is still saved and the pipeline finishes in
     // the background. Errors are logged and never lose the citizen's report.
-    const pipelinePromise = runPipeline(supabase, rawData).catch((err) => {
-      console.error('[Pipeline Error]:', err);
-    });
+    let workId = null;
+    const pipelinePromise = runPipeline(supabase, rawData)
+      .then((r) => { workId = r?.workId ?? null; })
+      .catch((err) => { console.error('[Pipeline Error]:', err); });
     await Promise.race([
       pipelinePromise,
       new Promise((resolve) => setTimeout(resolve, PIPELINE_MAX_WAIT_MS)),
@@ -137,6 +141,10 @@ export async function POST(request) {
       {
         success: true,
         submission_id: rawData.id,
+        // The priority this report landed in. Lets the citizen's saved complaint
+        // link straight to its work order so a later assign/resolve reflects back
+        // reliably. Null if the pipeline is still finishing past the wait cap.
+        work_id: workId,
         message: 'Submission received and processed.',
       },
       { status: 201 }

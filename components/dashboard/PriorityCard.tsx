@@ -5,6 +5,7 @@ import { CategoryBadge } from "@/components/ui/Badge";
 import { RATING_DIMENSIONS, ratingFor } from "@/lib/rating";
 import { Users, ChevronRight, Activity, Building2, Clock } from "lucide-react";
 import clsx from "clsx";
+import EvidenceAttachments from "./EvidenceAttachments";
 
 interface Props {
   item: PriorityItem;
@@ -14,12 +15,26 @@ interface Props {
 
 export default function PriorityCard({ item, isSelected, onSelect }: Props) {
   const rating = ratingFor(item);
+  const photoImages = (item.supporting_evidence || [])
+    .filter((e) => e.has_photo)
+    .map((e) => ({ submissionId: e.submission_id }));
+  const audioClips = (item.supporting_evidence || [])
+    .filter((e) => e.has_audio)
+    .map((e) => ({ submissionId: e.submission_id }));
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className={clsx(
-        "w-full text-left rounded-2xl border p-4 sm:p-5 transition-all duration-300 relative overflow-hidden group shadow-xs",
+        "w-full text-left rounded-2xl border p-4 sm:p-5 transition-all duration-300 relative overflow-hidden group shadow-xs cursor-pointer",
         isSelected
           ? "border-civic-500 bg-gradient-to-br from-white to-civic-50/50 shadow-md ring-1 ring-civic-500/20"
           : "border-surface-200 bg-white hover:border-civic-500/50 hover:shadow-sm"
@@ -116,6 +131,12 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
           )}
         />
       </div>
-    </button>
+
+      {(photoImages.length > 0 || audioClips.length > 0) && (
+        <div className="mt-3">
+          <EvidenceAttachments images={photoImages} audios={audioClips} />
+        </div>
+      )}
+    </div>
   );
 }

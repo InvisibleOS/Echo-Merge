@@ -69,6 +69,8 @@ export interface SupportingEvidence {
   geo?: GeoPoint;
   canonical_location?: string;
   validation_context?: string | null;
+  has_photo?: boolean; // a photo is attached (fetch bytes via /api/submissions/media)
+  has_audio?: boolean; // a voice note is attached
 }
 
 export interface SolutionPlan {
@@ -179,6 +181,7 @@ export interface PriorityItem {
   assigned_department?: string; // department delegation tracking
   predictive_status?: "Confirmed" | "System-Detected"; // direct report vs CV/SCADA/NLP detection
   ingestion_source?: string; // e.g. "Source: BWSSB SCADA"
+  updated_at?: string; // ISO — last activity (post/rescore/convert/assign); drives delegation recency sort
   department?: DepartmentSummary;
   scheme_matches?: SchemeMatch[];
   priority_band?: string;
@@ -203,6 +206,10 @@ export interface CitizenComplaintRecord {
   audio_base64?: string;
   geo?: GeoPoint;
   constituency?: string;
+  location_label?: string; // resolved city/town/village name for display
+  voice_transcript?: string; // browser speech-to-text of the voice note
+  voice_lang?: string; // spoken language name (e.g. "Malayalam")
+  audio_mime?: string; // recorded audio MIME, for local playback in the lightbox
 }
 
 
@@ -226,11 +233,14 @@ export interface SubmitPayload {
   language: string;
   geo?: GeoPoint;
   channel: Channel;
+  voice_lang?: string; // spoken language of a voice note (e.g. "Malayalam"), for display
+  audio_mime?: string; // recorded audio MIME (e.g. "audio/webm"), for local playback
 }
 
 export interface SubmitResponse {
   success: boolean;
   submission_id: string;
+  work_id?: string | null; // priority this report landed in (for status tracking)
   message: string;
   case_id?: string;
   department?: DepartmentSummary;

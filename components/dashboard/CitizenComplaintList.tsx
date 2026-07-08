@@ -2,10 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { CitizenComplaintRecord, ComplaintStatus } from "@/lib/types";
-import { getCitizenComplaints, subscribeToSync } from "@/lib/storageSync";
+import { getCitizenComplaints } from "@/lib/storageSync";
+import { getPriorities } from "@/lib/api";
 import { CategoryBadge } from "@/components/ui/Badge";
 import { CheckCircle2, Clock, AlertCircle, Building2, MapPin, Calendar, RefreshCw } from "lucide-react";
 import clsx from "clsx";
+import EvidenceAttachments from "./EvidenceAttachments";
+
+// Cache of coordinate -> place name so we reverse-geocode each spot at most once
+// (persisted across sessions). Keyed by coarse (3-dp ~110m) lat,lng.
+const GEO_CACHE_KEY = "echo_geo_labels_v1";
+function coordKey(lat: number, lng: number) {
+  return `${lat.toFixed(3)},${lng.toFixed(3)}`;
+}
+function readGeoCache(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+function writeGeoCache(map: Record<string, string>) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(map));
+  } catch {
+    // ignore quota errors
+  }
+}
 
 /** Priority status → the status the citizen sees. Anything that isn't an explicit
  *  Assigned/Resolved/Under Review/Ongoing state reads as "Open" for the citizen
@@ -32,6 +57,12 @@ function friendlyDept(dep?: string): string | undefined {
 export default function CitizenComplaintList() {
   const [complaints, setComplaints] = useState<CitizenComplaintRecord[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // complaint id -> resolved city/town/village name (from evidence or geocoding).
+  const [labels, setLabels] = useState<Record<string, string>>({});
+  // complaint id -> whether the matched work order has a photo / voice note on
+  // the server (lets complaints without locally-stored media still show it).
+  const [photoEvidence, setPhotoEvidence] = useState<Record<string, boolean>>({});
+  const [audioEvidence, setAudioEvidence] = useState<Record<string, boolean>>({});
 
   async function syncWithServer(showSpinner = false) {
     if (showSpinner) setIsRefreshing(true);
@@ -39,17 +70,26 @@ export default function CitizenComplaintList() {
     setComplaints(data);
 
     try {
-      // Derive live status from /api/priorities rather than the full
-      // /api/submissions join: priorities already carry each item's live status +
-      // department assignment + supporting evidence, and the endpoint is cached
-      // and fast (<1s) — the submissions join is ~5s and times out under polling,
-      // which silently left assignments showing as "Open". Each citizen submission
-      // is matched to the priority that cites it as supporting evidence.
-      const res = await fetch("/api/priorities");
-      if (res.ok) {
-        const priorities = await res.json();
+      // Read the SAME override-aware source the MP dashboard uses (getPriorities →
+      // getSyncedPriorities) so the citizen's status AND assigned department always
+      // match exactly what the MP sees — not a raw /api/priorities row, which can
+      // lag a just-made assignment/resolution (held in local sync overrides) and
+      // can surface a raw "dept-pwd" id instead of the department name the MP set.
+      // Each citizen submission is matched to the priority that cites it as
+      // supporting evidence (or by the stored work_id link).
+      const priorities = await getPriorities();
+      if (priorities) {
         const bySubmission = new Map<string, { status: ComplaintStatus; assigned_department?: string }>();
         const byWorkId = new Map<string, { status: ComplaintStatus; assigned_department?: string }>();
+        // Place name (city/town/village) captured from the pipeline's reverse-geocode,
+        // carried on each evidence entry — free labels for submitted complaints.
+        const locBySubmission = new Map<string, string>();
+        const locByWorkId = new Map<string, string>();
+        // Which submissions / work orders have a photo / voice note (server-side).
+        const photoBySubmission = new Set<string>();
+        const photoByWorkId = new Set<string>();
+        const audioBySubmission = new Set<string>();
+        const audioByWorkId = new Set<string>();
 
         if (Array.isArray(priorities)) {
           for (const p of priorities) {
@@ -59,23 +99,67 @@ export default function CitizenComplaintList() {
             };
             if (p.work_id) byWorkId.set(p.work_id, live);
             const evidence = Array.isArray(p.supporting_evidence) ? p.supporting_evidence : [];
+            let firstCanon: string | undefined;
+            let anyPhoto = false;
+            let anyAudio = false;
             for (const e of evidence) {
-              const subId = e?.submission_id || e?.id;
+              const subId = e?.submission_id;
               if (subId) bySubmission.set(subId, live);
+              const canon = typeof e?.canonical_location === "string" ? e.canonical_location : undefined;
+              if (canon) {
+                if (subId) locBySubmission.set(subId, canon);
+                if (!firstCanon) firstCanon = canon;
+              }
+              if (e?.has_photo) {
+                if (subId) photoBySubmission.add(subId);
+                anyPhoto = true;
+              }
+              if (e?.has_audio) {
+                if (subId) audioBySubmission.add(subId);
+                anyAudio = true;
+              }
             }
+            if (p.work_id && firstCanon) locByWorkId.set(p.work_id, firstCanon);
+            if (p.work_id && anyPhoto) photoByWorkId.add(p.work_id);
+            if (p.work_id && anyAudio) audioByWorkId.add(p.work_id);
           }
+        }
+
+        // Resolve a display place name per complaint from the evidence we just saw.
+        const labelUpdates: Record<string, string> = {};
+        const photoUpdates: Record<string, boolean> = {};
+        const audioUpdates: Record<string, boolean> = {};
+        for (const c of data) {
+          const canon = locBySubmission.get(c.id) || (c.work_id ? locByWorkId.get(c.work_id) : undefined);
+          if (canon) labelUpdates[c.id] = canon;
+          if (photoBySubmission.has(c.id) || (c.work_id && photoByWorkId.has(c.work_id))) {
+            photoUpdates[c.id] = true;
+          }
+          if (audioBySubmission.has(c.id) || (c.work_id && audioByWorkId.has(c.work_id))) {
+            audioUpdates[c.id] = true;
+          }
+        }
+        if (Object.keys(labelUpdates).length) {
+          setLabels((prev) => ({ ...prev, ...labelUpdates }));
+        }
+        if (Object.keys(photoUpdates).length) {
+          setPhotoEvidence((prev) => ({ ...prev, ...photoUpdates }));
+        }
+        if (Object.keys(audioUpdates).length) {
+          setAudioEvidence((prev) => ({ ...prev, ...audioUpdates }));
         }
 
         let changed = false;
         const updatedData = data.map((c) => {
           const live = bySubmission.get(c.id) || (c.work_id ? byWorkId.get(c.work_id) : undefined);
-          if (live && (c.status !== live.status || c.assigned_department !== live.assigned_department)) {
+          if (!live) return c;
+          // Keep the MP's assigned department; only fall back to the existing one
+          // if the live record somehow lacks it, so an "Assigned" complaint never
+          // shows a blank department.
+          const nextDept = live.assigned_department ?? c.assigned_department;
+          if (c.status !== live.status || c.assigned_department !== nextDept) {
             changed = true;
-            return {
-              ...c,
-              status: live.status,
-              assigned_department: live.assigned_department,
-            };
+            return { ...c, status: live.status, assigned_department: nextDept };
           }
           return c;
         });
@@ -99,39 +183,60 @@ export default function CitizenComplaintList() {
   }
 
   useEffect(() => {
-    // Pull fresh status the instant the list mounts — i.e. every time the user
-    // switches to the "My Complaints" page/tab (it remounts on tab change).
+    // Refresh ONLY when the user opens this section — the component remounts each
+    // time they switch to the "My Complaints" tab, so this pulls fresh status on
+    // open. There is deliberately NO automatic background refresh (no polling,
+    // focus, visibility, or storage-sync), so the list stays visually stable and
+    // never fluctuates on its own during the demo. The manual refresh button
+    // (load()) re-pulls on demand; navigating away and back also re-syncs.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     syncWithServer(false);
+  }, []);
 
-    // Re-sync immediately when the tab/window regains focus, so returning from
-    // the MP dashboard reflects a just-made assignment without waiting for a poll.
-    const onFocus = () => syncWithServer(false);
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") syncWithServer(false);
-    };
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisibility);
+  // Fallback: reverse-geocode any complaint that has coordinates but no place name
+  // yet (e.g. before the pipeline's canonical_location lands). Cached per coarse
+  // coordinate so each spot is looked up at most once, ever.
+  useEffect(() => {
+    let cancelled = false;
+    const pending = complaints.filter(
+      (c) => !labels[c.id] && c.geo && typeof c.geo.lat === "number" && typeof c.geo.lng === "number"
+    );
+    if (!pending.length) return;
 
-    // Cross-window storage events from MP dashboard actions — pull server state
-    // too (not just local) so assignments made in another tab show right away.
-    const unsubscribe = subscribeToSync(() => {
-      syncWithServer(false);
-    });
-
-    // Lightweight fallback poll for eventual consistency. Instant updates already
-    // come from the focus/visibility/storage triggers above, so this can be gentle
-    // — no need to hammer the API every 1.5s (which caused overlapping requests).
-    const interval = setInterval(() => {
-      syncWithServer(false);
-    }, 4000);
+    (async () => {
+      const cache = readGeoCache();
+      const updates: Record<string, string> = {};
+      for (const c of pending) {
+        const lat = c.geo!.lat as number;
+        const lng = c.geo!.lng as number;
+        const key = coordKey(lat, lng);
+        if (cache[key]) {
+          updates[c.id] = cache[key];
+          continue;
+        }
+        try {
+          const r = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+          if (r.ok) {
+            const d = await r.json();
+            if (d?.label) {
+              updates[c.id] = d.label;
+              cache[key] = d.label;
+            }
+          }
+        } catch {
+          // ignore — falls back to constituency / no label
+        }
+      }
+      writeGeoCache(cache);
+      if (!cancelled && Object.keys(updates).length) {
+        setLabels((prev) => ({ ...prev, ...updates }));
+      }
+    })();
 
     return () => {
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisibility);
-      unsubscribe();
-      clearInterval(interval);
+      cancelled = true;
     };
-  }, []);
+  }, [complaints, labels]);
 
   function getStatusBadge(status: ComplaintStatus, assignedDept?: string) {
     switch (status) {
@@ -210,20 +315,21 @@ export default function CitizenComplaintList() {
                 <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <CategoryBadge category={item.category} />
-                    {item.geo && typeof item.geo.lat === "number" ? (
-                      <span
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200"
-                        title="Location captured at submission"
-                      >
-                        <MapPin size={11} />
-                        {item.geo.lat.toFixed(4)}, {item.geo.lng.toFixed(4)}
-                      </span>
-                    ) : item.constituency ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200">
-                        <MapPin size={11} />
-                        {item.constituency}
-                      </span>
-                    ) : null}
+                    {(() => {
+                      // Show the city/town/village name, not raw coordinates.
+                      const place = labels[item.id] || item.location_label || item.constituency;
+                      const hasGeo = item.geo && typeof item.geo.lat === "number";
+                      if (!place && !hasGeo) return null;
+                      return (
+                        <span
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-surface-700 bg-surface-100 px-2.5 py-0.5 rounded-full border border-surface-200"
+                          title="Location of the reported issue"
+                        >
+                          <MapPin size={11} />
+                          {place || "Locating…"}
+                        </span>
+                      );
+                    })()}
                     {rec.predictive_status && (
                       <span className={clsx(
                         "inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs",
@@ -232,6 +338,14 @@ export default function CitizenComplaintList() {
                           : "bg-emerald-50 text-emerald-700 border-emerald-200"
                       )}>
                         <span>{rec.predictive_status === "System-Detected" ? "⚡ System-Detected" : "👤 Confirmed"}</span>
+                      </span>
+                    )}
+                    {(item.voice_lang || item.audio_base64 || audioEvidence[item.id]) && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200"
+                        title="Submitted by voice"
+                      >
+                        🎙 Voice{item.voice_lang ? ` · ${item.voice_lang}` : ""}
                       </span>
                     )}
                   </div>
@@ -251,11 +365,24 @@ export default function CitizenComplaintList() {
                 </p>
               )}
 
-              {item.photo_base64 && (
+              {(item.photo_base64 || photoEvidence[item.id] || item.audio_base64 || audioEvidence[item.id]) && (
                 <div className="mt-3.5">
-                  <span className="inline-flex items-center gap-1 text-xs text-civic-700 font-medium bg-civic-50 px-2.5 py-1 rounded-lg border border-civic-200">
-                    📷 Photo evidence attached
-                  </span>
+                  <EvidenceAttachments
+                    images={
+                      item.photo_base64
+                        ? [{ base64: item.photo_base64 }]
+                        : photoEvidence[item.id]
+                          ? [{ submissionId: item.id }]
+                          : []
+                    }
+                    audios={
+                      item.audio_base64
+                        ? [{ base64: item.audio_base64, mime: item.audio_mime }]
+                        : audioEvidence[item.id]
+                          ? [{ submissionId: item.id }]
+                          : []
+                    }
+                  />
                 </div>
               )}
 

@@ -119,7 +119,7 @@ export function addConvertedPriority(alert: ProactiveAlert): PriorityItem {
 export function getSyncedPriorities(defaultPriorities: PriorityItem[]): PriorityItem[] {
   const overrides = getOverrides();
   const converted = getConvertedPrioritiesRaw();
-  
+
   const all = [...defaultPriorities];
   for (const c of converted) {
     if (!all.some((p) => p.work_id === c.work_id)) {
@@ -284,11 +284,14 @@ export function getCitizenComplaints(): CitizenComplaintRecord[] {
 export function addCitizenComplaint(
   payload: {
     id?: string;
+    work_id?: string;
     title: string;
     category?: string;
     raw_text?: string;
     photo_base64?: string;
     audio_base64?: string;
+    voice_lang?: string;
+    audio_mime?: string;
     geo?: GeoPoint;
     constituency?: string;
   }
@@ -301,6 +304,7 @@ export function addCitizenComplaint(
 
   const record: CitizenComplaintRecord = {
     id: newId,
+    work_id: payload.work_id,
     title: payload.title || (payload.raw_text ? payload.raw_text.slice(0, 60) + "..." : "New Civic Submission"),
     category,
     timestamp: new Date().toISOString(),
@@ -308,6 +312,8 @@ export function addCitizenComplaint(
     raw_text: payload.raw_text,
     photo_base64: payload.photo_base64,
     audio_base64: payload.audio_base64,
+    voice_lang: payload.voice_lang,
+    audio_mime: payload.audio_mime,
     // Store the citizen's actual captured location; only tag a constituency when
     // one is genuinely known (no hardcoded "Bengaluru South" for every report).
     geo: payload.geo,

@@ -58,10 +58,18 @@ export async function submitComplaint(
           : undefined;
       addCitizenComplaint({
         id: res.submission_id,
+        // Stable link to the work order this report clustered into, so a later
+        // MP assign/resolve reflects back to this complaint reliably (even after
+        // the priority's supporting_evidence rotates past its cap).
+        work_id: res.work_id ?? undefined,
         title: payload.raw_text ? payload.raw_text.split(".")[0].slice(0, 60) : "Media Submission",
         raw_text: payload.raw_text,
         photo_base64: payload.photo_base64,
         audio_base64: payload.audio_base64,
+        // Voice note metadata: the spoken language (for the "🎙 Voice · Malayalam"
+        // tag) and the audio MIME so the lightbox can play it back locally.
+        voice_lang: payload.voice_lang,
+        audio_mime: payload.audio_mime,
         // Real captured location — no hardcoded constituency. `ward` is set only
         // if the payload actually carried one.
         geo: payload.geo,

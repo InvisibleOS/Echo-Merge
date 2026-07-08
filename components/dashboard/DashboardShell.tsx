@@ -12,6 +12,8 @@ import {
   getPriorities,
   getHotspots,
   getDepartmentAnalytics,
+  getProactiveAlerts,
+  resolvePriority,
 } from "@/lib/api";
 import { subscribeToSync } from "@/lib/storageSync";
 import { CITIES, CityConfig } from "@/lib/cities";
@@ -80,12 +82,15 @@ export default function DashboardShell() {
   const [priorities, setPriorities] = useState<PriorityItem[]>([]);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [departments, setDepartments] = useState<DepartmentAnalytics[]>([]);
+  const [proactiveCount, setProactiveCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCityId, setSelectedCityId] = useState<string>("all");
   const [category, setCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortKey>("overall");
+  // Management & Delegation queue ordering — by recency (most recent activity first).
+  const [delegationSort, setDelegationSort] = useState<"recent" | "oldest">("recent");
 
   const activeCity = useMemo(
     () => (selectedCityId === "all" ? ALL_INDIA : CITIES.find((c) => c.id === selectedCityId) || CITIES[0]),
@@ -105,6 +110,11 @@ export default function DashboardShell() {
       setPriorities(p);
       setHotspots(h);
       setDepartments(deptData);
+      // Proactive-alert count for the tab-2 badge. Best-effort and fire-and-forget
+      // so it never blocks or fails the dashboard's core load.
+      getProactiveAlerts()
+        .then((a) => setProactiveCount(Array.isArray(a) ? a.length : 0))
+        .catch(() => {});
     } catch {
       setError(
         "Couldn't load priorities. Check the API connection and try refreshing."
@@ -156,8 +166,16 @@ export default function DashboardShell() {
   // crawled work orders off the public hotspot map. Focus on the selected city
   // by geographic proximity so markers AND heatmap stay consistent.
   const filteredPriorities = useMemo(() => {
+    // Tab 1 holds UNASSIGNED citizen complaints only. The moment a complaint is
+    // assigned to a department (or resolved) it leaves the map and moves to the
+    // Management & Delegation queue (Tab 3).
     const filtered = priorities.filter(
-      (p) => p.status !== "Resolved" && !isProactive(p) && withinCity(p.hotspot_geo, activeCity)
+      (p) =>
+        p.status !== "Resolved" &&
+        p.status !== "Assigned" &&
+        !p.assigned_department &&
+        !isProactive(p) &&
+        withinCity(p.hotspot_geo, activeCity)
     );
     const scoped = category ? filtered.filter((p) => p.category === category) : filtered;
     // Sort by the chosen AI-rating dimension (desc), then re-rank 1..N.
@@ -171,9 +189,24 @@ export default function DashboardShell() {
   // Tab 3 (Management & Delegation): every open work order to delegate,
   // INCLUDING proactively-detected / converted ones (not city-scoped).
   const delegationPriorities = useMemo(() => {
-    const filtered = priorities.filter((p) => p.status !== "Resolved");
-    return filtered.map((p, index) => ({ ...p, rank: index + 1 }));
-  }, [priorities]);
+    // Tab 3 holds ONLY complaints that have already been assigned to a department
+    // (assignment happens on the complaint itself, not here). New/unassigned
+    // complaints never appear until an MP assigns them.
+    const filtered = priorities.filter(
+      (p) => p.status === "Assigned" || p.status === "Resolved" || Boolean(p.assigned_department)
+    );
+    // Order by recency of activity (assign / resolve / rescore). "Most recent"
+    // first by default, so a just-assigned work order leads the queue; "oldest"
+    // flips it. Tie-break keeps a stable order.
+    const ts = (p: PriorityItem) => (p.updated_at ? new Date(p.updated_at).getTime() : 0);
+    const isDone = (p: PriorityItem) => (p.status === "Resolved" ? 1 : 0);
+    const sorted = [...filtered].sort((a, b) => {
+      // Resolved work orders always sink to the bottom of the queue.
+      if (isDone(a) !== isDone(b)) return isDone(a) - isDone(b);
+      return delegationSort === "oldest" ? ts(a) - ts(b) : ts(b) - ts(a);
+    });
+    return sorted.map((p, index) => ({ ...p, rank: index + 1 }));
+  }, [priorities, delegationSort]);
 
   // Heatmap follows the same city focus as the markers so they never diverge.
   const filteredHotspots = useMemo(() => {
@@ -202,6 +235,21 @@ export default function DashboardShell() {
       setHotspots(freshHotspots);
     } catch (err) {
       console.error("Failed to refresh hotspots after resolve", err);
+    }
+  }
+
+  // Resolve straight from the Management & Delegation queue (Tab 3). resolvePriority
+  // writes the "Resolved" override + server PATCH and emits a storage-sync event,
+  // which triggers a reload via subscribeToSync (mount effect) — that reload flips
+  // the status, sinks the item to the bottom, and updates the citizen's matching
+  // complaint. We deliberately do NOT optimistically flip status here: doing so
+  // would unmount the row's resolve spinner before it can render, and would add a
+  // redundant second refetch on top of the sync-driven one.
+  async function handleDelegationResolve(workId: string) {
+    try {
+      await resolvePriority(workId);
+    } catch (err) {
+      console.error("Failed to resolve work order", err);
     }
   }
 
@@ -329,8 +377,11 @@ export default function DashboardShell() {
         >
           <Cpu size={15} />
           <span>2. Real-time Area Analysis</span>
-          <span className="ml-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[10px] font-mono font-bold">
-            ⚡ Proactive Mapbox
+          <span className={clsx(
+            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
+            activeTab === "analysis" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
+          )}>
+            {proactiveCount}
           </span>
         </button>
 
@@ -346,6 +397,12 @@ export default function DashboardShell() {
         >
           <Building2 size={15} />
           <span>3. Management &amp; Delegation</span>
+          <span className={clsx(
+            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
+            activeTab === "delegation" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
+          )}>
+            {delegationPriorities.length}
+          </span>
         </button>
 
         <button
@@ -360,12 +417,6 @@ export default function DashboardShell() {
         >
           <Building2 size={15} />
           <span>4. Department Workload</span>
-          <span className={clsx(
-            "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
-            activeTab === "workload" ? "bg-white/20 text-white border-white/10" : "bg-surface-200 text-surface-700 border-surface-300"
-          )}>
-            {departments.length}
-          </span>
         </button>
       </nav>
 
@@ -435,7 +486,9 @@ export default function DashboardShell() {
             <div className="max-w-7xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-glass p-6">
               <DelegationPanel
                 priorities={delegationPriorities}
-                onDelegationUpdate={() => load(false)}
+                sortOrder={delegationSort}
+                onSortChange={setDelegationSort}
+                onResolve={handleDelegationResolve}
               />
             </div>
           </div>

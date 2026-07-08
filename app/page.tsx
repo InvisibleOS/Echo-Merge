@@ -88,7 +88,7 @@ export default function LandingPage() {
               <ul className="mt-8 space-y-3 text-sm text-surface-700 font-medium border-t border-surface-200/50 pt-6">
                 <li className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                  <span>Interactive Mapbox heatmaps</span>
+                  <span>Interactive Google Maps heatmaps</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
