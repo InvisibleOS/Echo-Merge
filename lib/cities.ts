@@ -56,4 +56,12 @@ export const CITIES: CityConfig[] = [
     zoom: 12,
     corporation: "PMC",
   },
+  {
+    id: "lucknow",
+    name: "Lucknow",
+    lat: 26.8467,
+    lng: 80.9462,
+    zoom: 12,
+    corporation: "LMC",
+  },
 ];
