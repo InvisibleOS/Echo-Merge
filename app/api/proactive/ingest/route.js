@@ -5,6 +5,10 @@ import { buildQueries, classifyArticle, titleSimilar } from '../../../../lib/ser
 
 export const dynamic = 'force-dynamic';
 
+// Multi-city Tavily crawl + classify can exceed Vercel's 10s Hobby default;
+// allow up to 60s (also the ceiling for a Vercel Cron trigger of this route).
+export const maxDuration = 60;
+
 const ALERT_COLUMNS = [
   'id', 'source', 'source_tooltip', 'ingestion_type', 'predictive_status', 'title',
   'category', 'priority', 'timestamp', 'geo', 'location_label', 'details',

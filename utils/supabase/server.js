@@ -37,10 +37,16 @@ function getPool() {
     );
   }
   if (!_pool) {
+    // Pool size per *process*. On serverless (Vercel) every warm function
+    // instance owns its own pool, so a large `max` × many concurrent instances
+    // exhausts Postgres. Keep it small there (and point DATABASE_URL at a
+    // transaction pooler — Supabase :6543 / PgBouncer). A long-lived container
+    // (Cloud Run) can afford more; override with PG_POOL_MAX.
+    const poolMax = Number(process.env.PG_POOL_MAX) || 3;
     _pool = new Pool({
       connectionString,
       ssl: sslConfig(connectionString),
-      max: 8,
+      max: poolMax,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
     });

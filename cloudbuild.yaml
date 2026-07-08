@@ -1,0 +1,27 @@
+# Builds the Next.js app image with the NEXT_PUBLIC_* client vars inlined at build
+# time and pushes it to Artifact Registry. Invoked by scripts/deploy-cloudrun.sh,
+# which then runs `gcloud run deploy`. (Cloud Run --source / buildpacks can't pass
+# --build-arg, which is why the Maps key is threaded through here as a substitution.)
+substitutions:
+  _REGION: us-central1
+  _REPO: apps
+  _SERVICE: peoples-priorities
+  _MAPS_KEY: ""        # NEXT_PUBLIC_GOOGLE_MAPS_API_KEY (browser key)
+  _MAP_ID: ""          # NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID (optional)
+
+images:
+  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:latest"
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --build-arg=NEXT_PUBLIC_API_BASE_URL=/api
+      - --build-arg=NEXT_PUBLIC_USE_MOCK_DATA=false
+      - --build-arg=NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${_MAPS_KEY}
+      - --build-arg=NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=${_MAP_ID}
+      - -t=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:latest
+      - .
+
+options:
+  logging: CLOUD_LOGGING_ONLY

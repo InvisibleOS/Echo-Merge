@@ -8,6 +8,10 @@ import { processOfflineSubmission } from '../../../lib/server/action-os';
 // Route handlers are not cached by default in Next 16 — this is request-time.
 export const dynamic = 'force-dynamic';
 
+// The enrich→embed→score pipeline (LLM/geocode) can run longer than Vercel's
+// 10s Hobby default; allow up to 60s so the function isn't killed mid-request.
+export const maxDuration = 60;
+
 // How long /submit waits for the enrich→embed→score pipeline before responding.
 // The pipeline usually finishes in a few seconds; if an upstream (geocode/LLM) is
 // slow we respond anyway — the raw row is already saved and the pipeline keeps

@@ -1,0 +1,49 @@
+# What NOT to upload to Cloud Build for `gcloud builds submit` / `--source` deploys.
+# NOTE: once this file exists, gcloud stops using .gitignore, so we must list the
+# heavy/secret build artifacts ourselves.
+
+# Deps & build output (reinstalled/rebuilt inside the image)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Secrets & local env (injected at runtime via Secret Manager, never in the image)
+.env
+.env.*
+!.env.example
+
+# VCS / OS noise
+.git/
+.gitignore
+.DS_Store
+
+# Python backend/services — deployed separately (services/ingestion has its own build)
+Data_Logic/
+services/
+*.py
+**/__pycache__/
+*.pyc
+.venv/
+
+# Stale earlier frontend (old Next 14 + Mapbox; app now lives at repo root)
+frontend/
+
+# Docs & planning (not needed to build the image)
+docs/
+ROADMAP.md
+README.md
+
+# Large data dumps at the repo ROOT only — leading slash is required so the
+# app-imported copies under lib/ (lib/day1_*.json) are NOT excluded.
+*.csv
+/day1_enriched_submissions.json
+/day1_priorities.json
+/day1_priorities_v2.json
+
+# Vercel-only artifacts
+.vercel
+.vercelignore
+
+# Local scratch
+scratchpad/
