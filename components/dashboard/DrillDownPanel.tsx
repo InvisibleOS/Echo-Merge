@@ -91,8 +91,9 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
   }
 
   return (
-    <div className="bg-white p-6 h-full flex flex-col justify-between">
-      <div className="space-y-6">
+    <div className="flex flex-col min-h-full bg-surface-100">
+      {/* Case details — white surface, everything ABOVE Management & Actions */}
+      <div className="bg-white p-6 space-y-6">
         {/* Header Title section */}
         <div className="flex items-start justify-between gap-4 border-b border-surface-150 pb-4">
           <div>
@@ -247,10 +248,14 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
         <p className="text-xs text-surface-700 leading-relaxed bg-surface-50 p-3 rounded-xl border border-surface-200/50 font-medium">
           {item.explanation}
         </p>
+      </div>
 
+      {/* Management & Actions onward — darker surface starts cleanly here and
+          fills to the bottom of the drawer (flex-1). */}
+      <div className="flex-1 bg-surface-100 border-t border-surface-200 p-6 space-y-6">
         {/* Management Controls Panel */}
         {!isResolved && (
-          <div className="border-t border-surface-200 pt-5 space-y-4">
+          <div className="space-y-4">
             <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider">
               Management &amp; Actions
             </h3>
@@ -320,16 +325,15 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
         )}
 
         {isResolved && (
-          <div className="border-t border-surface-250 pt-5">
+          <div>
             <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 border border-emerald-250 px-4 py-3 text-sm font-bold text-emerald-700 shadow-3xs">
               <CheckCircle2 size={16} />
               This ticket is fully resolved
             </div>
           </div>
         )}
-      </div>
 
-      <div className="mt-auto pt-6">
+      <div>
         <h3 className="text-xs font-semibold text-surface-500 uppercase tracking-wide mb-3">
           Supporting evidence ({item.supporting_evidence.length})
         </h3>
@@ -373,6 +377,7 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
             )}
           </div>
         ))}
+      </div>
       </div>
       </div>
     </div>
