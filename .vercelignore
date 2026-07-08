@@ -1,0 +1,45 @@
+# Vercel only builds the Next.js app at the repo root. Keep everything below out
+# of the deployment upload — none of it is imported by the app.
+
+# Python backend/services (deployed separately on Render / Cloud Run)
+Data_Logic/
+services/
+utils/supabase/**/*.py
+*.py
+**/__pycache__/
+*.pyc
+.venv/
+
+# Stale earlier frontend (old Next 14 + Mapbox copy; app now lives at root)
+frontend/
+
+# One-off scripts and DB helpers not needed at runtime
+fix_supabase.py
+fix_supabase2.py
+run_migrations.js
+run_migrations.py
+test_db.js
+test_gemini_tools.py
+upload_original_to_supabase.py
+upload_to_supabase.py
+wipe_priorities.py
+wipe_priorities.js
+
+# Large data dumps / backups at the repo ROOT only (leading slash is required —
+# the app imports identically-named copies under lib/ that must NOT be ignored).
+*.csv
+/day1_enriched_submissions.json
+/day1_priorities.json
+/day1_priorities_v2.json
+
+# Docs & planning
+docs/
+ROADMAP.md
+README.md
+
+# Container build files (Vercel doesn't use these)
+Dockerfile
+.dockerignore
+
+# Local scratch
+scratchpad/

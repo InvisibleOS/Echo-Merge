@@ -13,8 +13,18 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-# Build-time env for the client bundle. Runtime secrets (SUPABASE_SERVICE_ROLE_KEY
-# etc.) are injected by Cloud Run, not baked into the image.
+# NEXT_PUBLIC_* are inlined into the client bundle at BUILD time, so they MUST be
+# passed as --build-arg here (a runtime --set-env-vars is too late for these).
+# Server-side secrets (DATABASE_URL, GEMINI_API_KEY, GOOGLE_MAPS_API_KEY, …) are
+# NOT baked in — they are injected at runtime by Cloud Run / Secret Manager.
+ARG NEXT_PUBLIC_API_BASE_URL=/api
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+ARG NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=
+ARG NEXT_PUBLIC_USE_MOCK_DATA=false
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY \
+    NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=$NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID \
+    NEXT_PUBLIC_USE_MOCK_DATA=$NEXT_PUBLIC_USE_MOCK_DATA
 RUN npm run build
 
 # ---- runtime ----
