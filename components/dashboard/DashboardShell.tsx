@@ -13,6 +13,7 @@ import {
   getHotspots,
   getDepartmentAnalytics,
   getProactiveAlerts,
+  resolvePriority,
 } from "@/lib/api";
 import { subscribeToSync } from "@/lib/storageSync";
 import { CITIES, CityConfig } from "@/lib/cities";
@@ -198,9 +199,12 @@ export default function DashboardShell() {
     // first by default, so a just-assigned work order leads the queue; "oldest"
     // flips it. Tie-break keeps a stable order.
     const ts = (p: PriorityItem) => (p.updated_at ? new Date(p.updated_at).getTime() : 0);
-    const sorted = [...filtered].sort((a, b) =>
-      delegationSort === "oldest" ? ts(a) - ts(b) : ts(b) - ts(a)
-    );
+    const isDone = (p: PriorityItem) => (p.status === "Resolved" ? 1 : 0);
+    const sorted = [...filtered].sort((a, b) => {
+      // Resolved work orders always sink to the bottom of the queue.
+      if (isDone(a) !== isDone(b)) return isDone(a) - isDone(b);
+      return delegationSort === "oldest" ? ts(a) - ts(b) : ts(b) - ts(a);
+    });
     return sorted.map((p, index) => ({ ...p, rank: index + 1 }));
   }, [priorities, delegationSort]);
 
@@ -231,6 +235,21 @@ export default function DashboardShell() {
       setHotspots(freshHotspots);
     } catch (err) {
       console.error("Failed to refresh hotspots after resolve", err);
+    }
+  }
+
+  // Resolve straight from the Management & Delegation queue (Tab 3). resolvePriority
+  // writes the "Resolved" override + server PATCH and emits a storage-sync event,
+  // which triggers a reload via subscribeToSync (mount effect) — that reload flips
+  // the status, sinks the item to the bottom, and updates the citizen's matching
+  // complaint. We deliberately do NOT optimistically flip status here: doing so
+  // would unmount the row's resolve spinner before it can render, and would add a
+  // redundant second refetch on top of the sync-driven one.
+  async function handleDelegationResolve(workId: string) {
+    try {
+      await resolvePriority(workId);
+    } catch (err) {
+      console.error("Failed to resolve work order", err);
     }
   }
 
@@ -469,6 +488,7 @@ export default function DashboardShell() {
                 priorities={delegationPriorities}
                 sortOrder={delegationSort}
                 onSortChange={setDelegationSort}
+                onResolve={handleDelegationResolve}
               />
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PriorityItem } from "@/lib/types";
-import { resolvePriority, assignPriority } from "@/lib/api";
+import { assignPriority } from "@/lib/api";
 import { RATING_DIMENSIONS, ratingFor } from "@/lib/rating";
 import { CategoryBadge } from "@/components/ui/Badge";
 import EvidenceAttachments from "./EvidenceAttachments";
@@ -31,7 +31,6 @@ const DEPARTMENTS_LIST = [
 ];
 
 export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
-  const [isResolving, setIsResolving] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   
   // Resolve case ID (e.g. CASE-aac117fd)
@@ -56,21 +55,6 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
 
   const isResolved = item.status === "Resolved";
   const isAssigned = item.status === "Assigned";
-
-  async function handleResolve() {
-    if (isResolving || isResolved) return;
-    setIsResolving(true);
-    try {
-      const { success } = await resolvePriority(item.work_id);
-      if (success) {
-        onResolve(item.work_id);
-      }
-    } catch (err) {
-      console.error("Resolve failed:", err);
-    } finally {
-      setIsResolving(false);
-    }
-  }
 
   async function handleAssign() {
     if (isAssigning || isResolved) return;
@@ -304,23 +288,6 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
                 </button>
               </div>
             </div>
-
-            {/* Resolve button */}
-            <button
-              type="button"
-              onClick={handleResolve}
-              disabled={isResolving}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-xs py-2.5 shadow-sm transition-all hover:scale-101 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isResolving ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <CheckCircle2 size={14} />
-                  <span>Mark as Resolved</span>
-                </>
-              )}
-            </button>
           </div>
         )}
 
