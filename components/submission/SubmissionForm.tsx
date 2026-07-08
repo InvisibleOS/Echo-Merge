@@ -226,12 +226,24 @@ export default function SubmissionForm() {
       >
         {isSubmitting ? (
           <>
-            <LoadingSpinner size={16} /> Sending…
+            <LoadingSpinner size={16} /> Submitting report…
           </>
         ) : (
           "Submit report"
         )}
       </Button>
+
+      {/* Processing indicator — stays visible until the server confirms the
+          report is recorded and routed, at which point the success screen shows. */}
+      {isSubmitting && (
+        <div className="flex items-start gap-2.5 rounded-md border border-civic-400/30 bg-civic-50/60 px-4 py-3 animate-[fadeSlideIn_200ms_ease-out]">
+          <LoadingSpinner size={16} className="mt-0.5 shrink-0" />
+          <p className="text-xs font-medium text-civic-700 leading-relaxed">
+            Recording your report and routing it to the responsible department…
+            this takes a few seconds. Please don&apos;t close this page.
+          </p>
+        </div>
+      )}
     </form>
   );
 }

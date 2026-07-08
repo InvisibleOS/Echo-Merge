@@ -8,6 +8,12 @@ import { processOfflineSubmission } from '../../../lib/server/action-os';
 // Route handlers are not cached by default in Next 16 — this is request-time.
 export const dynamic = 'force-dynamic';
 
+// How long /submit waits for the enrich→embed→score pipeline before responding.
+// The pipeline usually finishes in a few seconds; if an upstream (geocode/LLM) is
+// slow we respond anyway — the raw row is already saved and the pipeline keeps
+// running in the background — so the citizen is never left hanging.
+const PIPELINE_MAX_WAIT_MS = 12000;
+
 /**
  * POST /submit  (Person 1 -> Person 2)
  * Accepts a citizen submission, stores it raw, then runs the ingestion pipeline
@@ -112,12 +118,20 @@ export async function POST(request) {
     }
 
     // --- Run the pipeline (enrich -> embed -> rescore) ----------------------
-    // Best-effort: the raw submission is already durable; pipeline errors are
-    // logged inside runPipeline and never lose the citizen's report.
-    // We run this asynchronously so the citizen gets an immediate success response.
-    runPipeline(supabase, rawData).catch(err => {
-      console.error('[Pipeline Background Error]:', err);
+    // The raw submission is already durable, but the MP dashboard reads from the
+    // `priorities` table, which this pipeline populates. We AWAIT it (capped) so
+    // that by the time the citizen sees the confirmation, the complaint is already
+    // scored and visible on the dashboard — closing the "switch over and it's not
+    // there yet" gap. The cap guarantees a slow geocode/LLM upstream can't hang the
+    // request: on timeout the raw row is still saved and the pipeline finishes in
+    // the background. Errors are logged and never lose the citizen's report.
+    const pipelinePromise = runPipeline(supabase, rawData).catch((err) => {
+      console.error('[Pipeline Error]:', err);
     });
+    await Promise.race([
+      pipelinePromise,
+      new Promise((resolve) => setTimeout(resolve, PIPELINE_MAX_WAIT_MS)),
+    ]);
 
     return NextResponse.json(
       {

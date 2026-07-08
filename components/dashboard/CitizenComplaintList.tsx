@@ -7,36 +7,74 @@ import { CategoryBadge } from "@/components/ui/Badge";
 import { CheckCircle2, Clock, AlertCircle, Building2, MapPin, Calendar, RefreshCw } from "lucide-react";
 import clsx from "clsx";
 
+/** Priority status → the status the citizen sees. Anything that isn't an explicit
+ *  Assigned/Resolved/Under Review/Ongoing state reads as "Open" for the citizen
+ *  (the priorities mapper uses "In Progress" as its unassigned default). */
+function normalizeStatus(s?: string): ComplaintStatus {
+  if (s === "Assigned" || s === "Resolved" || s === "Under Review" || s === "Ongoing") return s;
+  return "Open";
+}
+
+/** Map a raw department id ("dept-pwd") to a citizen-friendly agency name.
+ *  Already-friendly names (from a priority's solution_plan) pass through. */
+function friendlyDept(dep?: string): string | undefined {
+  if (!dep) return undefined;
+  const d = String(dep);
+  if (!d.startsWith("dept-")) return d;
+  if (d.includes("water")) return "Water & Sewerage Board";
+  if (d.includes("pwd")) return "Roads & Infrastructure";
+  if (d.includes("solid-waste")) return "Solid Waste Management";
+  if (d.includes("electricity")) return "Power & Electricity Discom";
+  if (d.includes("safety")) return "Public Safety";
+  return d;
+}
+
 export default function CitizenComplaintList() {
   const [complaints, setComplaints] = useState<CitizenComplaintRecord[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   async function syncWithServer(showSpinner = false) {
     if (showSpinner) setIsRefreshing(true);
-    let data = getCitizenComplaints();
+    const data = getCitizenComplaints();
     setComplaints(data);
 
     try {
-      const res = await fetch("/api/submissions");
+      // Derive live status from /api/priorities rather than the full
+      // /api/submissions join: priorities already carry each item's live status +
+      // department assignment + supporting evidence, and the endpoint is cached
+      // and fast (<1s) — the submissions join is ~5s and times out under polling,
+      // which silently left assignments showing as "Open". Each citizen submission
+      // is matched to the priority that cites it as supporting evidence.
+      const res = await fetch("/api/priorities");
       if (res.ok) {
-        const liveSubmissions = await res.json();
-        const statusMap = new Map();
-        for (const sub of liveSubmissions) {
-          statusMap.set(sub.id, {
-            status: sub.status,
-            assigned_department: sub.assigned_department
-          });
+        const priorities = await res.json();
+        const bySubmission = new Map<string, { status: ComplaintStatus; assigned_department?: string }>();
+        const byWorkId = new Map<string, { status: ComplaintStatus; assigned_department?: string }>();
+
+        if (Array.isArray(priorities)) {
+          for (const p of priorities) {
+            const live = {
+              status: normalizeStatus(p.status),
+              assigned_department: friendlyDept(p.assigned_department),
+            };
+            if (p.work_id) byWorkId.set(p.work_id, live);
+            const evidence = Array.isArray(p.supporting_evidence) ? p.supporting_evidence : [];
+            for (const e of evidence) {
+              const subId = e?.submission_id || e?.id;
+              if (subId) bySubmission.set(subId, live);
+            }
+          }
         }
 
         let changed = false;
         const updatedData = data.map((c) => {
-          const live = statusMap.get(c.id);
+          const live = bySubmission.get(c.id) || (c.work_id ? byWorkId.get(c.work_id) : undefined);
           if (live && (c.status !== live.status || c.assigned_department !== live.assigned_department)) {
             changed = true;
             return {
               ...c,
               status: live.status,
-              assigned_department: live.assigned_department
+              assigned_department: live.assigned_department,
             };
           }
           return c;
@@ -48,7 +86,7 @@ export default function CitizenComplaintList() {
         }
       }
     } catch (e) {
-      console.warn("Failed to sync complaints with server:", e);
+      console.warn("Failed to sync complaint status:", e);
     }
 
     if (showSpinner) {
@@ -80,10 +118,12 @@ export default function CitizenComplaintList() {
       syncWithServer(false);
     });
 
-    // Lightweight fallback poll to guarantee eventual consistency.
+    // Lightweight fallback poll for eventual consistency. Instant updates already
+    // come from the focus/visibility/storage triggers above, so this can be gentle
+    // — no need to hammer the API every 1.5s (which caused overlapping requests).
     const interval = setInterval(() => {
       syncWithServer(false);
-    }, 1500);
+    }, 4000);
 
     return () => {
       window.removeEventListener("focus", onFocus);
