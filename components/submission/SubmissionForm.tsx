@@ -59,7 +59,7 @@ export default function SubmissionForm() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const canSubmit = (text.trim().length > 0 || audioBase64 || photoBase64);
+  const canSubmit = text.trim().length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -166,10 +166,21 @@ export default function SubmissionForm() {
       {activeMode && (
         <div className="rounded-md border border-ink-900/8 bg-ink-900/[0.02] p-4 animate-[fadeSlideIn_200ms_ease-out]">
           {activeMode === "text" && (
-            <TextInput value={text} onChange={setText} />
+            <TextInput 
+              value={text} 
+              onChange={setText} 
+              placeholder="Describe the issue..."
+            />
           )}
           {activeMode === "voice" && (
-            <VoiceRecorder onAudioReady={setAudioBase64} />
+            <div className="space-y-4">
+              <VoiceRecorder onAudioReady={setAudioBase64} />
+              <TextInput 
+                value={text} 
+                onChange={setText} 
+                placeholder="Add a description of the issue..." 
+              />
+            </div>
           )}
           {activeMode === "photo" && (
             <div className="space-y-4">
@@ -177,7 +188,7 @@ export default function SubmissionForm() {
               <TextInput 
                 value={text} 
                 onChange={setText} 
-                placeholder="Add a description of the issue... (optional)" 
+                placeholder="Add a description of the issue..." 
               />
             </div>
           )}
