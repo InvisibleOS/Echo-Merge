@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { PriorityItem } from "@/lib/types";
 import { CategoryBadge } from "@/components/ui/Badge";
-import { Building2, CheckCircle2, DollarSign, ListChecks, Clock, AlertCircle, ShieldCheck } from "lucide-react";
+import { Building2, CheckCircle2, DollarSign, ListChecks, Clock, AlertCircle, ShieldCheck, Search, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import EvidenceAttachments from "./EvidenceAttachments";
 
@@ -10,12 +11,59 @@ interface Props {
   priorities: PriorityItem[];
   sortOrder: "recent" | "oldest";
   onSortChange: (order: "recent" | "oldest") => void;
+  onResolve: (workId: string) => void | Promise<void>;
 }
 
-// Read-only management view. Complaints only arrive here AFTER an MP has assigned
-// them to a department (from the map / drill-down), so there is deliberately no
-// assignment control here — only the already-assigned department is shown.
-export default function DelegationPanel({ priorities, sortOrder, onSortChange }: Props) {
+// The assigned department for a work order (falls back to the solution plan's
+// primary department). Module-level so it stays stable across renders.
+const deptOf = (p: PriorityItem) =>
+  p.assigned_department || p.solution_plan?.primary_department || "";
+
+// Management view. Complaints arrive here AFTER an MP has assigned them to a
+// department; here the MP tracks them, searches/filters by department, and marks
+// them resolved (which also updates the citizen's complaint tracker).
+export default function DelegationPanel({ priorities, sortOrder, onSortChange, onResolve }: Props) {
+  const [search, setSearch] = useState("");
+  const [deptFilter, setDeptFilter] = useState("all");
+  // Work orders currently resolving — a Set so several can resolve in parallel
+  // (each button is gated independently).
+  const [resolvingIds, setResolvingIds] = useState<Set<string>>(new Set());
+
+  // Distinct departments currently represented in the queue (for the filter).
+  const departments = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of priorities) {
+      const d = deptOf(p);
+      if (d) set.add(d);
+    }
+    return Array.from(set).sort();
+  }, [priorities]);
+
+  // Apply the search (complaint ID or title) + department filter.
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return priorities.filter((p) => {
+      if (deptFilter !== "all" && deptOf(p) !== deptFilter) return false;
+      if (q && !p.work_id.toLowerCase().includes(q) && !(p.title || "").toLowerCase().includes(q))
+        return false;
+      return true;
+    });
+  }, [priorities, search, deptFilter]);
+
+  async function handleResolveClick(workId: string) {
+    if (resolvingIds.has(workId)) return; // per-item guard — other rows can resolve in parallel
+    setResolvingIds((prev) => new Set(prev).add(workId));
+    try {
+      await onResolve(workId);
+    } finally {
+      setResolvingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(workId);
+        return next;
+      });
+    }
+  }
+
   function getStatusBadge(item: PriorityItem) {
     const dept = item.assigned_department || item.solution_plan?.primary_department;
     if (item.status === "Resolved") {
@@ -87,8 +135,48 @@ export default function DelegationPanel({ priorities, sortOrder, onSortChange }:
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {priorities.map((item) => {
+        <>
+          {/* Search + department filter toolbar */}
+          <div className="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by complaint ID or title…"
+                className="w-full pl-9 pr-3 py-2 rounded-lg border border-surface-200 bg-white text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="delegation-dept" className="text-[11px] font-semibold text-surface-600 uppercase tracking-wide shrink-0">
+                Department
+              </label>
+              <select
+                id="delegation-dept"
+                value={deptFilter}
+                onChange={(e) => setDeptFilter(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-surface-200 bg-white text-xs font-semibold text-surface-900 focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[16rem]"
+              >
+                <option value="all">All Departments ({priorities.length})</option>
+                {departments.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {visible.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-surface-200 p-12 text-center text-surface-700 shadow-sm">
+              <Search size={28} className="mx-auto mb-3 text-surface-300" />
+              <p className="font-display font-semibold text-base text-surface-900">No matching work orders</p>
+              <p className="text-xs mt-1">Try a different complaint ID, title, or department filter.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+          {visible.map((item, idx) => {
             const plan = item.solution_plan;
             const dept = item.assigned_department || plan?.primary_department;
             const photoImages = (item.supporting_evidence || [])
@@ -107,7 +195,7 @@ export default function DelegationPanel({ priorities, sortOrder, onSortChange }:
                   <div className="space-y-1.5 max-w-2xl">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-900 text-white font-mono text-xs font-bold">
-                        #{item.rank}
+                        #{idx + 1}
                       </span>
                       <CategoryBadge category={item.category} />
                       <span className="text-xs font-mono font-semibold text-surface-400">ID: {item.work_id}</span>
@@ -139,6 +227,21 @@ export default function DelegationPanel({ priorities, sortOrder, onSortChange }:
 
                   <div className="shrink-0 flex items-center gap-3">
                     {getStatusBadge(item)}
+                    {item.status !== "Resolved" && (
+                      <button
+                        type="button"
+                        onClick={() => handleResolveClick(item.work_id)}
+                        disabled={resolvingIds.has(item.work_id)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 shadow-sm transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {resolvingIds.has(item.work_id) ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <CheckCircle2 size={14} />
+                        )}
+                        <span>Mark as Resolved</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -208,7 +311,9 @@ export default function DelegationPanel({ priorities, sortOrder, onSortChange }:
               </div>
             );
           })}
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
