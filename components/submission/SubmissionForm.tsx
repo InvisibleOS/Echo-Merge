@@ -24,6 +24,8 @@ export default function SubmissionForm() {
   const [activeMode, setActiveMode] = useState<InputMode | null>(null);
   const [text, setText] = useState("");
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
+  const [audioMime, setAudioMime] = useState<string | null>(null);
+  const [voiceLang, setVoiceLang] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoPoint | undefined>(undefined);
 
@@ -59,7 +61,10 @@ export default function SubmissionForm() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const canSubmit = text.trim().length > 0;
+  // Text is required, EXCEPT a voice note can stand on its own (the transcript
+  // fills the text when speech-to-text works; otherwise the audio + language tag
+  // carry the report).
+  const canSubmit = text.trim().length > 0 || (activeMode === "voice" && !!audioBase64);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -79,6 +84,8 @@ export default function SubmissionForm() {
         language: "auto", // AI pipeline auto-detects the language from the submission
         geo: finalGeo,
         channel: "web",
+        voice_lang: voiceLang || undefined,
+        audio_mime: audioMime || undefined,
       });
       setSubmissionId(res.submission_id);
     } catch {
@@ -93,6 +100,8 @@ export default function SubmissionForm() {
   function reset() {
     setText("");
     setAudioBase64(null);
+    setAudioMime(null);
+    setVoiceLang(null);
     setPhotoBase64(null);
     setSubmissionId(null);
     setError(null);
@@ -174,23 +183,29 @@ export default function SubmissionForm() {
           )}
           {activeMode === "voice" && (
             <div className="space-y-4">
-              <VoiceRecorder onAudioReady={setAudioBase64} />
-              <TextInput 
-                value={text} 
-                onChange={setText} 
-                placeholder="Add a description of the issue..." 
+              <VoiceRecorder
+                onAudioReady={(b64, mime) => {
+                  setAudioBase64(b64);
+                  setAudioMime(mime ?? null);
+                }}
+                onTranscriptReady={(t) => {
+                  if (t) setText(t);
+                }}
+                onLanguageChange={setVoiceLang}
+              />
+              <TextInput
+                value={text}
+                onChange={setText}
+                placeholder="Your spoken words appear here — edit if needed, or type instead…"
               />
             </div>
           )}
           {activeMode === "photo" && (
-            <div className="space-y-4">
-              <PhotoUpload onPhotoReady={setPhotoBase64} />
-              <TextInput 
-                value={text} 
-                onChange={setText} 
-                placeholder="Add a description of the issue..." 
-              />
-            </div>
+            <PhotoUpload
+              onPhotoReady={setPhotoBase64}
+              description={text}
+              onDescriptionChange={setText}
+            />
           )}
         </div>
       )}

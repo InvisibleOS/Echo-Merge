@@ -50,6 +50,9 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
   const photoImages = (item.supporting_evidence || [])
     .filter((e) => e.has_photo)
     .map((e) => ({ submissionId: e.submission_id }));
+  const audioClips = (item.supporting_evidence || [])
+    .filter((e) => e.has_audio)
+    .map((e) => ({ submissionId: e.submission_id }));
 
   const isResolved = item.status === "Resolved";
   const isAssigned = item.status === "Assigned";
@@ -73,7 +76,10 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
     if (isAssigning || isResolved) return;
     setIsAssigning(true);
     try {
-      const { success } = await assignPriority(item.work_id, selectedDeptId);
+      // Store the readable department name so it displays cleanly everywhere
+      // (tab 3, citizen tracker) rather than a raw "dept-pwd" id.
+      const deptName = DEPARTMENTS_LIST.find((d) => d.id === selectedDeptId)?.name || selectedDeptId;
+      const { success } = await assignPriority(item.work_id, deptName);
       if (success) {
         onResolve(item.work_id);
       }
@@ -143,7 +149,9 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
             <MapPin size={13} />
             {item.hotspot_geo.lat.toFixed(4)}, {item.hotspot_geo.lng.toFixed(4)}
           </span>
-          {photoImages.length > 0 && <EvidenceAttachments images={photoImages} />}
+          {(photoImages.length > 0 || audioClips.length > 0) && (
+            <EvidenceAttachments images={photoImages} audios={audioClips} />
+          )}
         </div>
 
         {/* AI Score — the AI rates each complaint 1–5 on four dimensions (sum / 20) */}
