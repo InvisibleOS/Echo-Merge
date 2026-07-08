@@ -119,7 +119,7 @@ export function addConvertedPriority(alert: ProactiveAlert): PriorityItem {
 export function getSyncedPriorities(defaultPriorities: PriorityItem[]): PriorityItem[] {
   const overrides = getOverrides();
   const converted = getConvertedPrioritiesRaw();
-  
+
   const all = [...defaultPriorities];
   for (const c of converted) {
     if (!all.some((p) => p.work_id === c.work_id)) {
@@ -284,6 +284,7 @@ export function getCitizenComplaints(): CitizenComplaintRecord[] {
 export function addCitizenComplaint(
   payload: {
     id?: string;
+    work_id?: string;
     title: string;
     category?: string;
     raw_text?: string;
@@ -301,6 +302,7 @@ export function addCitizenComplaint(
 
   const record: CitizenComplaintRecord = {
     id: newId,
+    work_id: payload.work_id,
     title: payload.title || (payload.raw_text ? payload.raw_text.slice(0, 60) + "..." : "New Civic Submission"),
     category,
     timestamp: new Date().toISOString(),

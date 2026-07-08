@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '../../../../../utils/supabase/server';
 import { invalidate, CACHE_KEYS } from '../../../../../lib/server/cache';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +32,10 @@ export async function POST(
     }
 
     const deptId = mapAgencyToDeptId(agencyName);
-    const db = supabase as unknown as SupabaseClient;
+    // The db client is our pg-backed shim (utils/supabase/server.js, plain JS);
+    // `as any` keeps this TS route from strict-checking its thenable builder.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
 
     // Persist the assignment on the PRIORITY itself (in its solution_plan jsonb,
     // mirroring how /resolve stores `resolved`). This is the reliable source of
@@ -54,7 +56,9 @@ export async function POST(
     };
     const { error: planError } = await db
       .from('priorities')
-      .update({ solution_plan: mergedPlan })
+      // Bump updated_at so this just-assigned work order sorts to the top of the
+      // "most recent" delegation queue.
+      .update({ solution_plan: mergedPlan, updated_at: new Date().toISOString() })
       .eq('work_id', workId);
     if (planError) {
       throw new Error(planError.message);

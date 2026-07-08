@@ -12,9 +12,9 @@ This doc is the tracker — we work through the services one by one and check th
 | # | Service (current) | Role | Google target | Size | Status |
 |---|-------------------|------|---------------|------|--------|
 | 1 | **Nominatim / OpenStreetMap** | Reverse geocoding | Google Maps Geocoding API | S | ✅ Done & verified live |
-| 2 | **Tavily** | Web search (enrichment + news) | Custom Search JSON API | M | ⚠️ Code done — needs API key + `cx` |
-| 3 | **Mapbox GL** | Interactive maps / heatmaps | Google Maps JavaScript API | M | ⚠️ Code done — needs Maps JS API browser key |
-| 4 | **Supabase** | Postgres DB + Storage | Cloud SQL (Postgres + pgvector) + Cloud Storage | L | ☐ Not started |
+| 2 | **Tavily** | Web search (enrichment + news) | ~~Custom Search JSON API~~ — **reverted, stays on Tavily** | M | ⛔ Blocked by Google policy — kept Tavily |
+| 3 | **Mapbox GL** | Interactive maps / heatmaps | Google Maps JavaScript API | M | ✅ Done & verified rendering live |
+| 4 | **Supabase** | Postgres DB + Storage | Cloud SQL (Postgres + pgvector) + Cloud Storage | L | ✅ Done — migrated, 711 rows copied & verified, all ops tested |
 
 **Already Google — no migration needed:** Gemini (`generativelanguage`), Google Cloud
 Translation (`/api/translate`), Google Places API (enrichment + ingestion), Google Cloud
@@ -47,7 +47,19 @@ Reverse-geocode lat/lng → neighbourhood name on the `/submit` enrichment path.
   ([enrichment.js:218](../lib/server/enrichment.js#L218)), which was silently mocking `true`
   because `GOOGLE_MAPS_API_KEY` had never been set.
 
-## 2. Tavily → Gemini Grounding or Custom Search JSON API  `[M]`
+## 2. Tavily → Custom Search  `[⛔ REVERTED — staying on Tavily]`
+
+> **Outcome:** Google has **closed the Custom Search JSON API to new Cloud projects.** New
+> projects get a hard `403 PERMISSION_DENIED — "This project does not have the access to Custom
+> Search JSON API"` regardless of enablement, billing, or key/project match (confirmed across 3
+> keys + a fresh dedicated key + a fresh Programmable Search Engine). It's also being deprecated
+> entirely on 2027-01-01, and new engines can no longer search the full web (max 50 domains).
+> **Decision (2026-07-08): reverted the Custom Search work and kept the working Tavily integration.**
+> All Tavily code/env restored; `lib/server/googleSearch.js` removed. If a Google-native path is
+> wanted later, the options are **Vertex AI Search** (site/domain) or **Gemini Google-Search
+> grounding** (enrichment only) — neither is a drop-in for the news-URL ingestion path.
+
+## (original plan) Tavily → Gemini Grounding or Custom Search JSON API  `[M]`
 
 Web search for (a) real-time enrichment context and (b) civic news ingestion.
 
@@ -107,15 +119,49 @@ Interactive maps, markers, and hotspot heatmaps on the dashboards.
     `DEMO_MAP_ID`, overridable via `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`.
 - **Env:** `NEXT_PUBLIC_MAPBOX_TOKEN` → `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (+ optional
   `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`). Both map components keep their keyless fallback.
-- **Status:** `npm run build` passes (typecheck + compile). Renders the fallback until a key is set.
-- **⚠️ ACTION REQUIRED (user):** provide a **browser** Maps key (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`)
-  with the **Maps JavaScript API** enabled; restrict it to that API + your HTTP referrers. This must be
-  a *separate* public key from the server-side `GOOGLE_MAPS_API_KEY` (Geocoding/Places).
+- **Status:** ✅ **Done & verified rendering live.** `npm run build` passes; headless-Chrome check
+  of `/dashboard` confirmed a real Google map (raster tiles + Google attribution), the heat-glow
+  overlays, and numbered `AdvancedMarkerElement` markers — no auth errors.
+- **Key:** `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` set to the "Maps Platform API Key" (`AIzaSyA5_0…`,
+  Maps JavaScript API enabled). ⚠️ *Follow-up (non-blocking):* this is the same key used server-side
+  for Geocoding/Places — for production, split into a separate referrer-restricted browser key.
 - **Note:** the `frontend/` duplicate still uses Mapbox but is dead (own project, not built/deployed).
 
-## 4. Supabase → Cloud SQL (Postgres + pgvector) + Cloud Storage  `[L]`
+## 4. Supabase → Cloud SQL (Postgres + pgvector) + Cloud Storage  `[L]`  ✅ DONE
 
-The biggest lift — Supabase provides the primary database **and** media storage.
+> **Outcome (2026-07-08):** migrated to **Google Cloud SQL for PostgreSQL 18.4** (pgvector 0.8.1).
+> **Decision:** Cloud SQL (not Firestore) — keeps schema, SQL migrations, RPCs, and pgvector intact.
+>
+> **How it was done — a `pg`-backed compatibility shim, not a rewrite of every route:**
+> - [utils/supabase/server.js](../utils/supabase/server.js) rewritten as a thin Supabase-compatible
+>   query builder over `pg` (node-postgres) driven by `DATABASE_URL`. Same surface
+>   (`.from().select().eq()…`, `.rpc()`, embeds, `count/head`, `{data,error}`) → the ~14 API
+>   routes were left essentially untouched. `@supabase/supabase-js` removed entirely.
+> - The 3 Postgres functions (`match_submissions`/pgvector, `convert_proactive_alert`,
+>   `increment_active_cases`) travel with the schema and are called via `SELECT fn(...)`.
+> - Storage: [media.js](../lib/server/media.js) now uses **GCS** (`GCS_BUCKET`, ADC) with the
+>   existing data-URI fallback (which is what was actually in use — no bucket was ever set).
+> - Schema drift fixed: `priorities.solution_plan` existed in the live DB but not in the repo
+>   migrations → recorded as [20260708000000_priorities_solution_plan.sql](../supabase/migrations/20260708000000_priorities_solution_plan.sql).
+>
+> **Data migration — every record, verified:** replayed all migrations onto Cloud SQL, then copied
+> **711 rows** across 9 tables (Supabase REST → `pg`, each column via `::text` for type-safe transport;
+> pgvector as `::vector`, jsonb re-encoded). Row counts matched table-by-table; value-level spot
+> checks passed (768-dim vectors, `solution_plan` jsonb, geo). *(Supabase's direct `pg` password
+> in `DATABASE_URL` was stale/never-used — the app had always reached Supabase via REST — so the
+> copy read over REST with the app's working credentials.)*
+>
+> **Verified working on Cloud SQL:** 19/19 shim operations (all reads, both embeds, `count/head`,
+> `maybeSingle`, `PGRST116`, all 3 RPCs incl. the mutating `convert` txn, insert/update/upsert with
+> cleanup) + 7/7 HTTP read endpoints (200, correct data, embeds intact) + `npm run build` passes.
+>
+> **Env cutover:** `DATABASE_URL` now points at Cloud SQL. Legacy `SUPABASE_*` vars are unused
+> (kept blank-safe in `.env.example`). ⚠️ *Follow-up (non-blocking):* the Cloud SQL public IP is
+> open to my client IP for the migration — lock its Authorized Networks down for production, and
+> move the DB password out of `.env.local` into a secret manager.
+
+The biggest lift — Supabase provided the primary database **and** media storage. *(Original plan
+below, for reference.)*
 
 **Database (Supabase JS / PostgREST):** [utils/supabase/server.js](../utils/supabase/server.js)
 is the single client used by ~14 API routes.

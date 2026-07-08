@@ -75,7 +75,6 @@ export async function POST(request) {
 
     // --- Persist any base64 media to durable URLs --------------------------
     const media = await persistMedia(
-      supabase,
       { audio_base64: value.audio_base64, photo_base64: value.photo_base64 },
       hash
     );
@@ -125,9 +124,10 @@ export async function POST(request) {
     // there yet" gap. The cap guarantees a slow geocode/LLM upstream can't hang the
     // request: on timeout the raw row is still saved and the pipeline finishes in
     // the background. Errors are logged and never lose the citizen's report.
-    const pipelinePromise = runPipeline(supabase, rawData).catch((err) => {
-      console.error('[Pipeline Error]:', err);
-    });
+    let workId = null;
+    const pipelinePromise = runPipeline(supabase, rawData)
+      .then((r) => { workId = r?.workId ?? null; })
+      .catch((err) => { console.error('[Pipeline Error]:', err); });
     await Promise.race([
       pipelinePromise,
       new Promise((resolve) => setTimeout(resolve, PIPELINE_MAX_WAIT_MS)),
@@ -137,6 +137,10 @@ export async function POST(request) {
       {
         success: true,
         submission_id: rawData.id,
+        // The priority this report landed in. Lets the citizen's saved complaint
+        // link straight to its work order so a later assign/resolve reflects back
+        // reliably. Null if the pipeline is still finishing past the wait cap.
+        work_id: workId,
         message: 'Submission received and processed.',
       },
       { status: 201 }
