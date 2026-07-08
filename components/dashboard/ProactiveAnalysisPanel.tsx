@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-import { ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/types";
+import { ProactiveAlert, ProactivePriorityLevel, IngestionType, AiRating } from "@/lib/types";
 import { getProactiveAlerts, convertProactiveAlert, ingestNews } from "@/lib/api";
+import { rateComplaint } from "@/lib/server/ai-rating";
+import { RATING_DIMENSIONS } from "@/lib/rating";
 import { CityConfig } from "@/lib/cities";
 import { CategoryBadge } from "@/components/ui/Badge";
 import {
@@ -27,6 +29,36 @@ import clsx from "clsx";
 
 // Alerts within this radius (km) of the selected city are shown on the panel.
 const CITY_ALERT_RADIUS_KM = 120;
+
+// Rank/sort dimensions — the same four the AI rates citizen complaints on, plus
+// the overall /20 total. Mirrors Tab 1 so proactive alerts rank identically.
+const ALERT_SORT_OPTIONS = [
+  { value: "overall", label: "Overall Score" },
+  { value: "urgency", label: "Urgency" },
+  { value: "impact", label: "Impact" },
+  { value: "feasibility", label: "Feasibility" },
+  { value: "cost", label: "Cost Efficiency" },
+] as const;
+type AlertSortKey = (typeof ALERT_SORT_OPTIONS)[number]["value"];
+
+// A proactive alert isn't a citizen cluster, so translate its telemetry priority
+// into the urgency + demand signals the rating model expects.
+const PRIORITY_TO_URGENCY: Record<string, string> = { Critical: "Critical", Warning: "High", Monitor: "Medium" };
+const PRIORITY_TO_COUNT: Record<string, number> = { Critical: 10, Warning: 5, Monitor: 2 };
+
+function alertRating(alert: ProactiveAlert): AiRating {
+  return rateComplaint({
+    category: alert.category,
+    urgency: PRIORITY_TO_URGENCY[alert.priority] ?? "Medium",
+    demand_count: PRIORITY_TO_COUNT[alert.priority] ?? 2,
+  });
+}
+
+function ratingScore(r: AiRating | undefined, key: AlertSortKey): number {
+  if (!r) return 0;
+  if (key === "overall") return r.total ?? 0;
+  return (r[key] as number) ?? 0;
+}
 
 // AdvancedMarkerElement requires a Map ID; a cloud-styled id can come from env,
 // else Google's built-in DEMO_MAP_ID renders fine for the demo.
@@ -71,6 +103,7 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
   const [filterIngestion, setFilterIngestion] = useState<string>("All");
   const [filterCategory, setFilterCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<AlertSortKey>("overall");
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
   const [isConvertingId, setIsConvertingId] = useState<string | null>(null);
 
@@ -111,9 +144,18 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
     return ["All", ...Array.from(cats)];
   }, [alerts]);
 
-  // Filter alerts — scoped to the selected city, then by the on-panel controls.
+  // AI rating (four 1–5 dimensions + /20 total) for every alert, keyed by id.
+  const ratings = useMemo(() => {
+    const m: Record<string, AiRating> = {};
+    for (const a of alerts) m[a.id] = alertRating(a);
+    return m;
+  }, [alerts]);
+
+  // Filter alerts — scoped to the selected city, then by the on-panel controls —
+  // then RANK by the chosen AI-rating dimension (overall by default), exactly
+  // like Tab 1's citizen priorities.
   const filtered = useMemo(() => {
-    return alerts.filter((item) => {
+    const matched = alerts.filter((item) => {
       if (!nearCity(item.geo, activeCity)) return false;
       if (filterPriority !== "All" && item.priority !== filterPriority) return false;
       if (filterIngestion !== "All" && item.ingestion_type !== filterIngestion) return false;
@@ -128,7 +170,10 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
       }
       return true;
     });
-  }, [alerts, activeCity, filterPriority, filterIngestion, filterCategory, searchQuery]);
+    return matched.sort(
+      (a, b) => ratingScore(ratings[b.id], sortBy) - ratingScore(ratings[a.id], sortBy)
+    );
+  }, [alerts, activeCity, filterPriority, filterIngestion, filterCategory, searchQuery, sortBy, ratings]);
 
   const selectedItem = useMemo(() => {
     return filtered.find((a) => a.id === selectedAlertId) || null;
@@ -457,6 +502,20 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Sort Dropdown — rank by an AI-rating dimension, like Tab 1 */}
+          <select
+            title="Rank alerts by AI-rating dimension"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as AlertSortKey)}
+            className="px-3 py-1.5 rounded-lg border border-surface-200 bg-surface-50 text-xs font-semibold text-surface-900 focus:outline-none focus:ring-2 focus:ring-civic-500"
+          >
+            {ALERT_SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                Sort: {o.label}
+              </option>
+            ))}
+          </select>
+
           {/* Category Dropdown */}
           <select
             value={filterCategory}
@@ -533,6 +592,44 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
                     </span>
                   </div>
                 </div>
+
+                {/* AI Priority Rating — same four dimensions + total as Tab 1 */}
+                {(() => {
+                  const rating = ratings[selectedItem.id];
+                  if (!rating) return null;
+                  return (
+                    <div className="bg-white p-4 rounded-xl border border-surface-200 space-y-3 shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-surface-500 flex items-center gap-1.5">
+                          <Activity size={13} className="text-civic-600" />
+                          AI Priority Rating
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-surface-700">{rating.total}/{rating.max}</span>
+                          <span className="text-[11px] font-bold text-white bg-civic-600 px-2 py-0.5 rounded-full">
+                            {rating.overall}/100
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {RATING_DIMENSIONS.map((dim) => (
+                          <div key={dim.key} title={`${dim.label}: ${rating[dim.key]}/5 — ${dim.hint}`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className={`text-[10px] font-bold uppercase ${dim.tone}`}>{dim.label}</span>
+                              <span className="text-[10px] font-bold text-surface-500">{rating[dim.key]}/5</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-surface-100 rounded-full overflow-hidden border border-surface-200/50">
+                              <div
+                                className={`${dim.bar} h-full rounded-full`}
+                                style={{ width: `${(rating[dim.key] / 5) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Scraped Telemetry Findings */}
                 <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 space-y-1.5">
@@ -621,8 +718,9 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
                     </p>
                   </div>
                 ) : (
-                  filtered.map((item) => {
+                  filtered.map((item, idx) => {
                     const isConverted = convertedIds[item.id];
+                    const rating = ratings[item.id];
                     return (
                       <div
                         key={item.id}
@@ -631,6 +729,9 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-surface-900 text-white font-mono text-[11px] font-bold">
+                              #{idx + 1}
+                            </span>
                             {getPriorityBadge(item.priority)}
                             {getIngestionBadge(item.ingestion_type)}
                           </div>
@@ -642,6 +743,40 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
                         <h4 className="font-display font-bold text-base text-surface-900 leading-snug group-hover:text-civic-600 transition-colors mb-2">
                           {item.title}
                         </h4>
+
+                        {/* AI rating: four dimensions (1–5) + overall /20, ranked like Tab 1 */}
+                        {rating && (
+                          <div className="mt-3">
+                            <div className="flex justify-between items-end mb-1.5">
+                              <span className="text-[10px] font-semibold text-surface-500 uppercase tracking-wide">
+                                AI rating &middot; {rating.total}/{rating.max}
+                              </span>
+                              <span className="text-[10px] font-bold text-civic-600">
+                                {rating.overall}/100 overall
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                              {RATING_DIMENSIONS.map((dim) => (
+                                <div key={dim.key} title={`${dim.label}: ${rating[dim.key]}/5 — ${dim.hint}`}>
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-[9px] font-bold uppercase ${dim.tone}`}>
+                                      {dim.label.slice(0, 4)}
+                                    </span>
+                                    <span className="text-[9px] font-bold text-surface-500">
+                                      {rating[dim.key]}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1 h-1.5 w-full bg-surface-100 rounded-full overflow-hidden border border-surface-200/50">
+                                    <div
+                                      className={`${dim.bar} h-full rounded-full`}
+                                      style={{ width: `${(rating[dim.key] / 5) * 100}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-surface-100">
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-surface-700 truncate max-w-[220px]">

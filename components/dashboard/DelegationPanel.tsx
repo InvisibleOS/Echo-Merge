@@ -6,10 +6,13 @@ import { assignPriority } from "@/lib/api";
 import { CategoryBadge } from "@/components/ui/Badge";
 import { Building2, CheckCircle2, Clock, ShieldCheck, DollarSign, ListChecks, Send, AlertCircle } from "lucide-react";
 import clsx from "clsx";
+import EvidenceAttachments from "./EvidenceAttachments";
 
 interface Props {
   priorities: PriorityItem[];
   onDelegationUpdate: () => void;
+  sortOrder: "recent" | "oldest";
+  onSortChange: (order: "recent" | "oldest") => void;
 }
 
 const AGENCIES = [
@@ -23,7 +26,7 @@ const AGENCIES = [
   "Local Ward Contractor",
 ];
 
-export default function DelegationPanel({ priorities, onDelegationUpdate }: Props) {
+export default function DelegationPanel({ priorities, onDelegationUpdate, sortOrder, onSortChange }: Props) {
   const [selectedDepts, setSelectedDepts] = useState<Record<string, string>>({});
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [justAssigned, setJustAssigned] = useState<Record<string, string>>({});
@@ -86,11 +89,29 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-purple-50 px-4 py-2.5 rounded-xl border border-purple-200 shrink-0 shadow-2xs">
-          <ShieldCheck size={18} className="text-purple-600" />
-          <div className="text-left">
-            <p className="text-xs font-bold text-purple-950">Real-Time Sync</p>
-            <p className="text-[10px] text-purple-800">Citizens notified instantly</p>
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Simple recency sort — most recent activity first by default */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="delegation-sort" className="text-[11px] font-semibold text-surface-600 uppercase tracking-wide">
+              Sort
+            </label>
+            <select
+              id="delegation-sort"
+              value={sortOrder}
+              onChange={(e) => onSortChange(e.target.value as "recent" | "oldest")}
+              className="px-3 py-1.5 rounded-lg border border-surface-200 bg-white text-xs font-semibold text-surface-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="recent">Most Recent</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 bg-purple-50 px-4 py-2.5 rounded-xl border border-purple-200 shadow-2xs">
+            <ShieldCheck size={18} className="text-purple-600" />
+            <div className="text-left">
+              <p className="text-xs font-bold text-purple-950">Real-Time Sync</p>
+              <p className="text-[10px] text-purple-800">Citizens notified instantly</p>
+            </div>
           </div>
         </div>
       </div>
@@ -102,6 +123,9 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
           const assigned = justAssigned[item.work_id] || item.assigned_department;
           const currentSelect = selectedDepts[item.work_id] || plan?.primary_department || AGENCIES[0];
           const isAssigning = assigningId === item.work_id;
+          const photoImages = (item.supporting_evidence || [])
+            .filter((e) => e.has_photo)
+            .map((e) => ({ submissionId: e.submission_id }));
 
           return (
             <div
@@ -135,6 +159,11 @@ export default function DelegationPanel({ priorities, onDelegationUpdate }: Prop
                   <h3 className="font-display font-bold text-lg text-surface-900 leading-snug">
                     {item.title}
                   </h3>
+                  {photoImages.length > 0 && (
+                    <div className="pt-1">
+                      <EvidenceAttachments images={photoImages} />
+                    </div>
+                  )}
                 </div>
 
                 <div className="shrink-0 flex items-center gap-3">

@@ -58,6 +58,10 @@ export async function submitComplaint(
           : undefined;
       addCitizenComplaint({
         id: res.submission_id,
+        // Stable link to the work order this report clustered into, so a later
+        // MP assign/resolve reflects back to this complaint reliably (even after
+        // the priority's supporting_evidence rotates past its cap).
+        work_id: res.work_id ?? undefined,
         title: payload.raw_text ? payload.raw_text.split(".")[0].slice(0, 60) : "Media Submission",
         raw_text: payload.raw_text,
         photo_base64: payload.photo_base64,

@@ -69,6 +69,8 @@ export interface SupportingEvidence {
   geo?: GeoPoint;
   canonical_location?: string;
   validation_context?: string | null;
+  has_photo?: boolean; // a photo is attached (fetch bytes via /api/submissions/media)
+  has_audio?: boolean; // a voice note is attached
 }
 
 export interface SolutionPlan {
@@ -179,6 +181,7 @@ export interface PriorityItem {
   assigned_department?: string; // department delegation tracking
   predictive_status?: "Confirmed" | "System-Detected"; // direct report vs CV/SCADA/NLP detection
   ingestion_source?: string; // e.g. "Source: BWSSB SCADA"
+  updated_at?: string; // ISO — last activity (post/rescore/convert/assign); drives delegation recency sort
   department?: DepartmentSummary;
   scheme_matches?: SchemeMatch[];
   priority_band?: string;
@@ -203,6 +206,7 @@ export interface CitizenComplaintRecord {
   audio_base64?: string;
   geo?: GeoPoint;
   constituency?: string;
+  location_label?: string; // resolved city/town/village name for display
 }
 
 
@@ -231,6 +235,7 @@ export interface SubmitPayload {
 export interface SubmitResponse {
   success: boolean;
   submission_id: string;
+  work_id?: string | null; // priority this report landed in (for status tracking)
   message: string;
   case_id?: string;
   department?: DepartmentSummary;

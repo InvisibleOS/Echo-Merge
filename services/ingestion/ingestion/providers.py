@@ -204,7 +204,7 @@ class OfflineHeuristicEnrichmentProvider:
                 validation_context = f"Validation Agent ran Places API: {results}"
         elif category in ["Mobility - Roads, Footpaths and Infrastructure", "Water Supply and Services"]:
             results = search_local_news(f"{category} issue in {canonical_location or 'Bengaluru'}")
-            validation_context = f"Validation Agent ran Google Search: {results}"
+            validation_context = f"Validation Agent ran Tavily Search: {results}"
 
         return {
             "normalized_text_en": self._normalized_summary(text, normalized, canonical_location, photo),

@@ -5,6 +5,7 @@ import { PriorityItem } from "@/lib/types";
 import { resolvePriority, assignPriority } from "@/lib/api";
 import { RATING_DIMENSIONS, ratingFor } from "@/lib/rating";
 import { CategoryBadge } from "@/components/ui/Badge";
+import EvidenceAttachments from "./EvidenceAttachments";
 import {
   X,
   Users,
@@ -44,6 +45,11 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
   
   const [selectedDeptId, setSelectedDeptId] = useState(initialDeptId);
   const rating = ratingFor(item);
+  // Every image attached to this complaint's evidence — the MP can open these for
+  // reference at any stage (Open / Assigned / Resolved).
+  const photoImages = (item.supporting_evidence || [])
+    .filter((e) => e.has_photo)
+    .map((e) => ({ submissionId: e.submission_id }));
 
   const isResolved = item.status === "Resolved";
   const isAssigned = item.status === "Assigned";
@@ -137,6 +143,7 @@ export default function DrillDownPanel({ item, onClose, onResolve }: Props) {
             <MapPin size={13} />
             {item.hotspot_geo.lat.toFixed(4)}, {item.hotspot_geo.lng.toFixed(4)}
           </span>
+          {photoImages.length > 0 && <EvidenceAttachments images={photoImages} />}
         </div>
 
         {/* AI Score — the AI rates each complaint 1–5 on four dimensions (sum / 20) */}

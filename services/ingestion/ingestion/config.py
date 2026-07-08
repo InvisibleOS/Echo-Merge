@@ -25,8 +25,7 @@ class Settings:
     google_cloud_location: str = "us-central1"
     gemini_model: str = "gemini-1.5-flash"
     google_places_api_key: str | None = None
-    google_search_api_key: str | None = None
-    google_search_cx: str | None = None
+    tavily_api_key: str | None = None
     speech_recognizer: str = "_"
     speech_language_codes: tuple[str, ...] = field(default_factory=lambda: DEFAULT_LANGUAGE_CODES)
 
@@ -45,8 +44,7 @@ def load_settings() -> Settings:
         google_cloud_location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
         gemini_model=os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
         google_places_api_key=os.getenv("GOOGLE_PLACES_API_KEY") or None,
-        google_search_api_key=os.getenv("GOOGLE_SEARCH_API_KEY") or os.getenv("GOOGLE_API_KEY") or None,
-        google_search_cx=os.getenv("GOOGLE_SEARCH_CX") or None,
+        tavily_api_key=os.getenv("TAVILY_API_KEY") or None,
         speech_recognizer=os.getenv("SPEECH_RECOGNIZER", "_"),
         speech_language_codes=language_codes or DEFAULT_LANGUAGE_CODES,
     )
