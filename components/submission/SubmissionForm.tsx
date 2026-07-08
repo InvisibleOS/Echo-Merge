@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Mic, Camera, Type } from "lucide-react";
 import clsx from "clsx";
-import LanguageSelector from "./LanguageSelector";
 import TextInput from "./TextInput";
 import VoiceRecorder from "./VoiceRecorder";
 import PhotoUpload from "./PhotoUpload";
@@ -23,7 +22,6 @@ const INPUT_MODES: { id: InputMode; label: string; icon: typeof Mic }[] = [
 ];
 
 export default function SubmissionForm({ selectedCityId }: { selectedCityId?: string }) {
-  const [language, setLanguage] = useState("hi");
   const [activeMode, setActiveMode] = useState<InputMode | null>(null);
   const [text, setText] = useState("");
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
@@ -72,7 +70,7 @@ export default function SubmissionForm({ selectedCityId }: { selectedCityId?: st
     setError(null);
 
     // Override GPS with selected city center + slight randomization for demo realism
-    let finalGeo = geo ? { ...geo, ward: undefined } : undefined;
+    let finalGeo: GeoPoint | undefined = geo ? { ...geo } : undefined;
     if (selectedCityId) {
       const city = CITIES.find(c => c.id === selectedCityId);
       if (city) {
@@ -87,7 +85,7 @@ export default function SubmissionForm({ selectedCityId }: { selectedCityId?: st
         raw_text: text.trim() || undefined,
         audio_base64: audioBase64 || undefined,
         photo_base64: photoBase64 || undefined,
-        language,
+        language: "auto", // AI pipeline auto-detects the language from the submission
         geo: finalGeo,
         channel: "web",
       });
@@ -133,8 +131,6 @@ export default function SubmissionForm({ selectedCityId }: { selectedCityId?: st
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <LanguageSelector value={language} onChange={setLanguage} />
-
       {/* ── Input Mode Selector Row ── */}
       <div>
         <p className="block text-sm font-semibold text-ink-800 mb-3">

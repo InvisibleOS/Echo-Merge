@@ -200,3 +200,19 @@ export async function convertProactiveAlert(id: string): Promise<{ success: bool
     body: JSON.stringify({ id }),
   });
 }
+
+export interface NewsIngestResult {
+  ingested: number;
+  skipped: number;
+  scanned: number;
+  cities: string[];
+  alerts: Array<{ id: string; title: string; category: string; priority: string; location_label: string }>;
+}
+
+/** Crawl live civic news for a city and persist new alerts to the telemetry feed. */
+export async function ingestNews(cityId?: string): Promise<NewsIngestResult> {
+  return safeFetch<NewsIngestResult>("/proactive/ingest", {
+    method: "POST",
+    body: JSON.stringify(cityId ? { cityId } : {}),
+  });
+}

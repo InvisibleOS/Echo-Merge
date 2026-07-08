@@ -4,14 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Hotspot, PriorityItem } from "@/lib/types";
-import { CITIES } from "@/lib/cities";
+import { CityConfig } from "@/lib/cities";
 
 interface Props {
   hotspots: Hotspot[];
   priorities: PriorityItem[];
   selectedId: string | null;
   onSelectMarker: (workId: string) => void;
-  selectedCityId?: string;
+  /** City (or the "All India" sentinel) to fly the map to. */
+  focusCity?: CityConfig;
 }
 
 // Fallback center if no city is selected
@@ -28,7 +29,7 @@ export default function HotspotMap({
   priorities,
   selectedId,
   onSelectMarker,
-  selectedCityId,
+  focusCity,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -37,20 +38,17 @@ export default function HotspotMap({
   const useFallback = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapError;
   const fallbackClusters = useMemo(() => getConstituencyClusters(hotspots), [hotspots]);
 
-  // Handle city teleportation
+  // Fly to the focused city — or zoom out to fit all of India in "All India" view.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedCityId) return;
-    const city = CITIES.find((c) => c.id === selectedCityId);
-    if (city) {
-      map.flyTo({
-        center: [city.lng, city.lat],
-        zoom: city.zoom,
-        duration: 1500,
-        essential: true
-      });
-    }
-  }, [selectedCityId]);
+    if (!map || !focusCity) return;
+    map.flyTo({
+      center: [focusCity.lng, focusCity.lat],
+      zoom: focusCity.zoom,
+      duration: 1500,
+      essential: true,
+    });
+  }, [focusCity]);
 
   // Initialize map once
   useEffect(() => {
@@ -65,8 +63,8 @@ export default function HotspotMap({
       map = new mapboxgl.Map({
         container: containerRef.current,
         style: "mapbox://styles/mapbox/light-v11",
-        center: DEFAULT_CENTER,
-        zoom: 12,
+        center: focusCity ? [focusCity.lng, focusCity.lat] : DEFAULT_CENTER,
+        zoom: focusCity ? focusCity.zoom : 12,
       });
       map.addControl(new mapboxgl.NavigationControl(), "top-right");
       mapRef.current = map;
