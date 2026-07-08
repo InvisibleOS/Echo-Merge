@@ -40,9 +40,30 @@ function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+// Sentinel "city" for the nationwide view — no proximity filter, map fits India.
+const ALL_INDIA: CityConfig = { id: "all", name: "All India", lat: 22.9, lng: 79.5, zoom: 4.2, corporation: "Nationwide" };
+
 function withinCity(geo: { lat?: number; lng?: number } | undefined, city: CityConfig) {
+  if (city.id === "all") return true; // nationwide view — show every complaint
   if (!geo || !Number.isFinite(geo.lat) || !Number.isFinite(geo.lng)) return false;
   return distanceKm(geo.lat as number, geo.lng as number, city.lat, city.lng) <= CITY_FOCUS_RADIUS_KM;
+}
+
+// Sort dimensions map to the AI rating's per-category 1–5 scores (or the /20 total).
+const SORT_OPTIONS = [
+  { value: "overall", label: "Overall Score" },
+  { value: "urgency", label: "Urgency" },
+  { value: "impact", label: "Impact" },
+  { value: "feasibility", label: "Feasibility" },
+  { value: "cost", label: "Cost Efficiency" },
+] as const;
+type SortKey = (typeof SORT_OPTIONS)[number]["value"];
+
+function sortScore(p: PriorityItem, key: SortKey): number {
+  const r = p.ai_rating;
+  if (!r) return p.demand_score ?? 0;
+  if (key === "overall") return r.total ?? 0;
+  return (r[key] as number) ?? 0;
 }
 
 export default function DashboardShell() {
@@ -53,11 +74,12 @@ export default function DashboardShell() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedCityId, setSelectedCityId] = useState<string>("bengaluru");
+  const [selectedCityId, setSelectedCityId] = useState<string>("all");
   const [category, setCategory] = useState<string>("");
+  const [sortBy, setSortBy] = useState<SortKey>("overall");
 
   const activeCity = useMemo(
-    () => CITIES.find((c) => c.id === selectedCityId) || CITIES[0],
+    () => (selectedCityId === "all" ? ALL_INDIA : CITIES.find((c) => c.id === selectedCityId) || CITIES[0]),
     [selectedCityId]
   );
 
@@ -65,7 +87,7 @@ export default function DashboardShell() {
     if (showLoading) setIsLoading(true);
     setError(null);
     try {
-      const city = CITIES.find((c) => c.id === selectedCityId) || CITIES[0];
+      const city = CITIES.find((c) => c.id === selectedCityId);
       const [p, h, deptData] = await Promise.all([
         getPriorities(),
         getHotspots(),
@@ -125,18 +147,17 @@ export default function DashboardShell() {
   // crawled work orders off the public hotspot map. Focus on the selected city
   // by geographic proximity so markers AND heatmap stay consistent.
   const filteredPriorities = useMemo(() => {
-    let filtered = priorities.filter(
+    const filtered = priorities.filter(
       (p) => p.status !== "Resolved" && !isProactive(p) && withinCity(p.hotspot_geo, activeCity)
     );
-    if (category) {
-      filtered = filtered.filter((p) => p.category === category);
-    }
-    // Re-rank from 1 to N within this filtered list (already sorted by AI rating desc)
-    return filtered.map((p, index) => ({
+    const scoped = category ? filtered.filter((p) => p.category === category) : filtered;
+    // Sort by the chosen AI-rating dimension (desc), then re-rank 1..N.
+    const sorted = [...scoped].sort((a, b) => sortScore(b, sortBy) - sortScore(a, sortBy));
+    return sorted.map((p, index) => ({
       ...p,
       rank: index + 1,
     }));
-  }, [priorities, category, activeCity]);
+  }, [priorities, category, activeCity, sortBy]);
 
   // Tab 3 (Management & Delegation): every open work order to delegate,
   // INCLUDING proactively-detected / converted ones (not city-scoped).
@@ -209,6 +230,7 @@ export default function DashboardShell() {
               onChange={(e) => setSelectedCityId(e.target.value)}
               className="text-sm font-medium bg-white/50 border border-surface-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-civic-500/50"
             >
+              <option value="all">🇮🇳 All India (Nationwide)</option>
               {CITIES.map((city) => (
                 <option key={city.id} value={city.id}>
                   {city.name} ({city.corporation})
@@ -221,19 +243,37 @@ export default function DashboardShell() {
         {/* Filters and Portal Switcher */}
         <div className="flex items-center gap-3 flex-wrap">
           {activeTab === "map" && (
-            <select 
-              className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
-                setSelectedId(null);
-              }}
-            >
-              <option value="">All Categories</option>
-              {uniqueCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
+            <>
+              <select
+                className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setSelectedId(null);
+                }}
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+
+              <select
+                title="Rank complaints by AI-rating dimension"
+                className="bg-white text-surface-900 text-xs sm:text-sm border border-surface-200 rounded-lg px-3 py-1.5 outline-none focus:border-civic-500 transition-colors font-medium shadow-sm font-semibold"
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value as SortKey);
+                  setSelectedId(null);
+                }}
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    Sort: {o.label}
+                  </option>
+                ))}
+              </select>
+            </>
           )}
 
           <Link
@@ -358,7 +398,7 @@ export default function DashboardShell() {
                   priorities={filteredPriorities}
                   selectedId={selectedId}
                   onSelectMarker={handleSelect}
-                  selectedCityId={selectedCityId}
+                  focusCity={activeCity}
                 />
               </div>
             </div>
@@ -370,7 +410,7 @@ export default function DashboardShell() {
           <div className="flex-1 overflow-y-auto p-6 min-h-0 animate-slide-up-fade">
             <div className="max-w-7xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-glass">
               <ProactiveAnalysisPanel
-                selectedCityId={selectedCityId}
+                activeCity={activeCity}
                 onConverted={() => {
                   setActiveTab("delegation");
                   void load(false);

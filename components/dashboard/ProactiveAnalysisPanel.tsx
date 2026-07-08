@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/types";
-import { getProactiveAlerts, convertProactiveAlert } from "@/lib/api";
-import { CITIES, CityConfig } from "@/lib/cities";
+import { getProactiveAlerts, convertProactiveAlert, ingestNews } from "@/lib/api";
+import { CityConfig } from "@/lib/cities";
 import { CategoryBadge } from "@/components/ui/Badge";
 import {
   Radio,
@@ -21,6 +21,8 @@ import {
   Zap,
   CheckCircle,
   ArrowLeft,
+  Newspaper,
+  Loader2,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -39,6 +41,7 @@ function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
 }
 
 function nearCity(geo: { lat?: number; lng?: number } | undefined, city: CityConfig) {
+  if (city.id === "all") return true; // nationwide view — show every alert
   if (!geo || !Number.isFinite(geo.lat) || !Number.isFinite(geo.lng)) return false;
   return distanceKm(geo.lat as number, geo.lng as number, city.lat, city.lng) <= CITY_ALERT_RADIUS_KM;
 }
@@ -54,15 +57,11 @@ function projectLocalPoint(lat: number, lng: number, city: CityConfig) {
 interface Props {
   /** Called after an alert is successfully converted into an actionable work order. */
   onConverted?: () => void;
-  /** Currently selected city (from the dashboard header) — scopes + flies the map. */
-  selectedCityId?: string;
+  /** Currently selected city (or the "All India" sentinel) — scopes + flies the map. */
+  activeCity: CityConfig;
 }
 
-export default function ProactiveAnalysisPanel({ onConverted, selectedCityId }: Props) {
-  const activeCity = useMemo(
-    () => CITIES.find((c) => c.id === selectedCityId) || CITIES[0],
-    [selectedCityId]
-  );
+export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Props) {
   const [alerts, setAlerts] = useState<ProactiveAlert[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [filterPriority, setFilterPriority] = useState<string>("All");
@@ -73,6 +72,9 @@ export default function ProactiveAnalysisPanel({ onConverted, selectedCityId }: 
   const [isConvertingId, setIsConvertingId] = useState<string | null>(null);
 
   const [convertedIds, setConvertedIds] = useState<Record<string, boolean>>({});
+
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanMsg, setScanMsg] = useState<string | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -155,6 +157,27 @@ export default function ProactiveAnalysisPanel({ onConverted, selectedCityId }: 
     }
   }
 
+  // Crawl live civic news across ALL supported cities and refresh the feed.
+  async function handleScanNews() {
+    if (isScanning) return;
+    setIsScanning(true);
+    setScanMsg("Crawling live civic news across all supported cities…");
+    try {
+      const res = await ingestNews(); // no cityId → every configured city
+      if (res.ingested > 0) {
+        await fetchAlerts(false);
+        setScanMsg(`Ingested ${res.ingested} new alert${res.ingested > 1 ? "s" : ""} across ${res.cities.length} cities (${res.scanned} articles scanned).`);
+      } else {
+        setScanMsg(`No new alerts — scanned ${res.scanned} articles across ${res.cities.length} cities.`);
+      }
+    } catch (err) {
+      setScanMsg(err instanceof Error ? `Scan failed: ${err.message}` : "Scan failed.");
+    } finally {
+      setIsScanning(false);
+      setTimeout(() => setScanMsg(null), 8000);
+    }
+  }
+
   // Initialize Mapbox map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -164,7 +187,7 @@ export default function ProactiveAnalysisPanel({ onConverted, selectedCityId }: 
 
     let map: mapboxgl.Map;
     try {
-      const initCity = CITIES.find((c) => c.id === selectedCityId) || CITIES[0];
+      const initCity = activeCity;
       mapboxgl.accessToken = token;
       map = new mapboxgl.Map({
         container: mapContainerRef.current,
@@ -349,6 +372,24 @@ export default function ProactiveAnalysisPanel({ onConverted, selectedCityId }: 
           <p className="text-sm text-surface-700 leading-relaxed font-medium">
             Continuously aggregating local news NLP feeds, municipal drain camera computer vision (CV), and water-board SCADA telemetry to predictively identify and remediate infrastructure failures before citizen complaints occur.
           </p>
+        </div>
+
+        <div className="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleScanNews}
+            disabled={isScanning}
+            title="Crawl live civic news across all supported cities"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-civic-600 text-white text-xs font-display font-bold shadow-sm hover:bg-civic-700 active:scale-95 transition-all disabled:opacity-60"
+          >
+            {isScanning ? <Loader2 size={15} className="animate-spin" /> : <Newspaper size={15} />}
+            <span>{isScanning ? "Scanning all cities…" : "Scan Live News"}</span>
+          </button>
+          {scanMsg && (
+            <span className="text-[11px] font-semibold text-surface-600 max-w-[260px] text-right leading-snug">
+              {scanMsg}
+            </span>
+          )}
         </div>
       </div>
 
