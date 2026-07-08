@@ -58,9 +58,10 @@ export default function CitizenComplaintList() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   // complaint id -> resolved city/town/village name (from evidence or geocoding).
   const [labels, setLabels] = useState<Record<string, string>>({});
-  // complaint id -> whether the matched work order has a photo on the server
-  // (lets complaints without a locally-stored image still show it).
+  // complaint id -> whether the matched work order has a photo / voice note on
+  // the server (lets complaints without locally-stored media still show it).
   const [photoEvidence, setPhotoEvidence] = useState<Record<string, boolean>>({});
+  const [audioEvidence, setAudioEvidence] = useState<Record<string, boolean>>({});
 
   async function syncWithServer(showSpinner = false) {
     if (showSpinner) setIsRefreshing(true);
@@ -83,9 +84,11 @@ export default function CitizenComplaintList() {
         // carried on each evidence entry — free labels for submitted complaints.
         const locBySubmission = new Map<string, string>();
         const locByWorkId = new Map<string, string>();
-        // Which submissions / work orders have a photo attached (server-side).
+        // Which submissions / work orders have a photo / voice note (server-side).
         const photoBySubmission = new Set<string>();
         const photoByWorkId = new Set<string>();
+        const audioBySubmission = new Set<string>();
+        const audioByWorkId = new Set<string>();
 
         if (Array.isArray(priorities)) {
           for (const p of priorities) {
@@ -97,6 +100,7 @@ export default function CitizenComplaintList() {
             const evidence = Array.isArray(p.supporting_evidence) ? p.supporting_evidence : [];
             let firstCanon: string | undefined;
             let anyPhoto = false;
+            let anyAudio = false;
             for (const e of evidence) {
               const subId = e?.submission_id || e?.id;
               if (subId) bySubmission.set(subId, live);
@@ -109,20 +113,29 @@ export default function CitizenComplaintList() {
                 if (subId) photoBySubmission.add(subId);
                 anyPhoto = true;
               }
+              if (e?.has_audio) {
+                if (subId) audioBySubmission.add(subId);
+                anyAudio = true;
+              }
             }
             if (p.work_id && firstCanon) locByWorkId.set(p.work_id, firstCanon);
             if (p.work_id && anyPhoto) photoByWorkId.add(p.work_id);
+            if (p.work_id && anyAudio) audioByWorkId.add(p.work_id);
           }
         }
 
         // Resolve a display place name per complaint from the evidence we just saw.
         const labelUpdates: Record<string, string> = {};
         const photoUpdates: Record<string, boolean> = {};
+        const audioUpdates: Record<string, boolean> = {};
         for (const c of data) {
           const canon = locBySubmission.get(c.id) || (c.work_id ? locByWorkId.get(c.work_id) : undefined);
           if (canon) labelUpdates[c.id] = canon;
           if (photoBySubmission.has(c.id) || (c.work_id && photoByWorkId.has(c.work_id))) {
             photoUpdates[c.id] = true;
+          }
+          if (audioBySubmission.has(c.id) || (c.work_id && audioByWorkId.has(c.work_id))) {
+            audioUpdates[c.id] = true;
           }
         }
         if (Object.keys(labelUpdates).length) {
@@ -130,6 +143,9 @@ export default function CitizenComplaintList() {
         }
         if (Object.keys(photoUpdates).length) {
           setPhotoEvidence((prev) => ({ ...prev, ...photoUpdates }));
+        }
+        if (Object.keys(audioUpdates).length) {
+          setAudioEvidence((prev) => ({ ...prev, ...audioUpdates }));
         }
 
         let changed = false;
@@ -347,6 +363,14 @@ export default function CitizenComplaintList() {
                         <span>{rec.predictive_status === "System-Detected" ? "⚡ System-Detected" : "👤 Confirmed"}</span>
                       </span>
                     )}
+                    {(item.voice_lang || item.audio_base64 || audioEvidence[item.id]) && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200"
+                        title="Submitted by voice"
+                      >
+                        🎙 Voice{item.voice_lang ? ` · ${item.voice_lang}` : ""}
+                      </span>
+                    )}
                   </div>
                   <h3 className="font-display font-bold text-base text-surface-900">
                     {item.title}
@@ -364,10 +388,23 @@ export default function CitizenComplaintList() {
                 </p>
               )}
 
-              {(item.photo_base64 || photoEvidence[item.id]) && (
+              {(item.photo_base64 || photoEvidence[item.id] || item.audio_base64 || audioEvidence[item.id]) && (
                 <div className="mt-3.5">
                   <EvidenceAttachments
-                    images={item.photo_base64 ? [{ base64: item.photo_base64 }] : [{ submissionId: item.id }]}
+                    images={
+                      item.photo_base64
+                        ? [{ base64: item.photo_base64 }]
+                        : photoEvidence[item.id]
+                          ? [{ submissionId: item.id }]
+                          : []
+                    }
+                    audios={
+                      item.audio_base64
+                        ? [{ base64: item.audio_base64, mime: item.audio_mime }]
+                        : audioEvidence[item.id]
+                          ? [{ submissionId: item.id }]
+                          : []
+                    }
                   />
                 </div>
               )}

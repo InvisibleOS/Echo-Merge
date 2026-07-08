@@ -207,6 +207,9 @@ export interface CitizenComplaintRecord {
   geo?: GeoPoint;
   constituency?: string;
   location_label?: string; // resolved city/town/village name for display
+  voice_transcript?: string; // browser speech-to-text of the voice note
+  voice_lang?: string; // spoken language name (e.g. "Malayalam")
+  audio_mime?: string; // recorded audio MIME, for local playback in the lightbox
 }
 
 
@@ -230,6 +233,8 @@ export interface SubmitPayload {
   language: string;
   geo?: GeoPoint;
   channel: Channel;
+  voice_lang?: string; // spoken language of a voice note (e.g. "Malayalam"), for display
+  audio_mime?: string; // recorded audio MIME (e.g. "audio/webm"), for local playback
 }
 
 export interface SubmitResponse {

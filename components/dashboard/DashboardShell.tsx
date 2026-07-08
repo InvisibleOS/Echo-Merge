@@ -165,12 +165,14 @@ export default function DashboardShell() {
   // crawled work orders off the public hotspot map. Focus on the selected city
   // by geographic proximity so markers AND heatmap stay consistent.
   const filteredPriorities = useMemo(() => {
-    // Open complaints only: once a complaint is Assigned or Resolved it leaves the
-    // public map/list and lives in the Management & Delegation queue (Tab 3).
+    // Tab 1 holds UNASSIGNED citizen complaints only. The moment a complaint is
+    // assigned to a department (or resolved) it leaves the map and moves to the
+    // Management & Delegation queue (Tab 3).
     const filtered = priorities.filter(
       (p) =>
         p.status !== "Resolved" &&
         p.status !== "Assigned" &&
+        !p.assigned_department &&
         !isProactive(p) &&
         withinCity(p.hotspot_geo, activeCity)
     );
@@ -186,10 +188,15 @@ export default function DashboardShell() {
   // Tab 3 (Management & Delegation): every open work order to delegate,
   // INCLUDING proactively-detected / converted ones (not city-scoped).
   const delegationPriorities = useMemo(() => {
-    const filtered = priorities.filter((p) => p.status !== "Resolved");
-    // Order by recency of activity (post / rescore / convert / assign). "Most
-    // recent" first by default, so a just-assigned or just-converted work order
-    // leads the queue; "oldest" flips it. Tie-break keeps a stable order.
+    // Tab 3 holds ONLY complaints that have already been assigned to a department
+    // (assignment happens on the complaint itself, not here). New/unassigned
+    // complaints never appear until an MP assigns them.
+    const filtered = priorities.filter(
+      (p) => p.status === "Assigned" || p.status === "Resolved" || Boolean(p.assigned_department)
+    );
+    // Order by recency of activity (assign / resolve / rescore). "Most recent"
+    // first by default, so a just-assigned work order leads the queue; "oldest"
+    // flips it. Tie-break keeps a stable order.
     const ts = (p: PriorityItem) => (p.updated_at ? new Date(p.updated_at).getTime() : 0);
     const sorted = [...filtered].sort((a, b) =>
       delegationSort === "oldest" ? ts(a) - ts(b) : ts(b) - ts(a)
@@ -460,7 +467,6 @@ export default function DashboardShell() {
             <div className="max-w-7xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-glass p-6">
               <DelegationPanel
                 priorities={delegationPriorities}
-                onDelegationUpdate={() => load(false)}
                 sortOrder={delegationSort}
                 onSortChange={setDelegationSort}
               />

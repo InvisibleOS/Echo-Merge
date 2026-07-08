@@ -18,6 +18,9 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
   const photoImages = (item.supporting_evidence || [])
     .filter((e) => e.has_photo)
     .map((e) => ({ submissionId: e.submission_id }));
+  const audioClips = (item.supporting_evidence || [])
+    .filter((e) => e.has_audio)
+    .map((e) => ({ submissionId: e.submission_id }));
 
   return (
     <div
@@ -129,9 +132,9 @@ export default function PriorityCard({ item, isSelected, onSelect }: Props) {
         />
       </div>
 
-      {photoImages.length > 0 && (
+      {(photoImages.length > 0 || audioClips.length > 0) && (
         <div className="mt-3">
-          <EvidenceAttachments images={photoImages} />
+          <EvidenceAttachments images={photoImages} audios={audioClips} />
         </div>
       )}
     </div>

@@ -290,6 +290,8 @@ export function addCitizenComplaint(
     raw_text?: string;
     photo_base64?: string;
     audio_base64?: string;
+    voice_lang?: string;
+    audio_mime?: string;
     geo?: GeoPoint;
     constituency?: string;
   }
@@ -310,6 +312,8 @@ export function addCitizenComplaint(
     raw_text: payload.raw_text,
     photo_base64: payload.photo_base64,
     audio_base64: payload.audio_base64,
+    voice_lang: payload.voice_lang,
+    audio_mime: payload.audio_mime,
     // Store the citizen's actual captured location; only tag a constituency when
     // one is genuinely known (no hardcoded "Bengaluru South" for every report).
     geo: payload.geo,
