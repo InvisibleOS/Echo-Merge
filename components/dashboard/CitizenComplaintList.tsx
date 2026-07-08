@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CitizenComplaintRecord, ComplaintStatus } from "@/lib/types";
-import { getCitizenComplaints, subscribeToSync } from "@/lib/storageSync";
+import { getCitizenComplaints } from "@/lib/storageSync";
 import { CategoryBadge } from "@/components/ui/Badge";
 import { CheckCircle2, Clock, AlertCircle, Building2, MapPin, Calendar, RefreshCw } from "lucide-react";
 import clsx from "clsx";
@@ -181,39 +181,14 @@ export default function CitizenComplaintList() {
   }
 
   useEffect(() => {
-    // Pull fresh status the instant the list mounts — i.e. every time the user
-    // switches to the "My Complaints" page/tab (it remounts on tab change).
+    // Refresh ONLY when the user opens this section — the component remounts each
+    // time they switch to the "My Complaints" tab, so this pulls fresh status on
+    // open. There is deliberately NO automatic background refresh (no polling,
+    // focus, visibility, or storage-sync), so the list stays visually stable and
+    // never fluctuates on its own during the demo. The manual refresh button
+    // (load()) re-pulls on demand; navigating away and back also re-syncs.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     syncWithServer(false);
-
-    // Re-sync immediately when the tab/window regains focus, so returning from
-    // the MP dashboard reflects a just-made assignment without waiting for a poll.
-    const onFocus = () => syncWithServer(false);
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") syncWithServer(false);
-    };
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisibility);
-
-    // Cross-window storage events from MP dashboard actions — pull server state
-    // too (not just local) so assignments made in another tab show right away.
-    const unsubscribe = subscribeToSync(() => {
-      syncWithServer(false);
-    });
-
-    // Lightweight fallback poll for eventual consistency. Instant updates already
-    // come from the focus/visibility/storage triggers above, so this can be gentle
-    // — no need to hammer the API every 1.5s (which caused overlapping requests).
-    const interval = setInterval(() => {
-      syncWithServer(false);
-    }, 4000);
-
-    return () => {
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisibility);
-      unsubscribe();
-      clearInterval(interval);
-    };
   }, []);
 
   // Fallback: reverse-geocode any complaint that has coordinates but no place name
