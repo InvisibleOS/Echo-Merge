@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CitizenComplaintRecord, ComplaintStatus } from "@/lib/types";
 import { getCitizenComplaints } from "@/lib/storageSync";
+import { getPriorities } from "@/lib/api";
 import { CategoryBadge } from "@/components/ui/Badge";
 import { CheckCircle2, Clock, AlertCircle, Building2, MapPin, Calendar, RefreshCw } from "lucide-react";
 import clsx from "clsx";
@@ -69,15 +70,15 @@ export default function CitizenComplaintList() {
     setComplaints(data);
 
     try {
-      // Derive live status from /api/priorities rather than the full
-      // /api/submissions join: priorities already carry each item's live status +
-      // department assignment + supporting evidence, and the endpoint is cached
-      // and fast (<1s) — the submissions join is ~5s and times out under polling,
-      // which silently left assignments showing as "Open". Each citizen submission
-      // is matched to the priority that cites it as supporting evidence.
-      const res = await fetch("/api/priorities");
-      if (res.ok) {
-        const priorities = await res.json();
+      // Read the SAME override-aware source the MP dashboard uses (getPriorities →
+      // getSyncedPriorities) so the citizen's status AND assigned department always
+      // match exactly what the MP sees — not a raw /api/priorities row, which can
+      // lag a just-made assignment/resolution (held in local sync overrides) and
+      // can surface a raw "dept-pwd" id instead of the department name the MP set.
+      // Each citizen submission is matched to the priority that cites it as
+      // supporting evidence (or by the stored work_id link).
+      const priorities = await getPriorities();
+      if (priorities) {
         const bySubmission = new Map<string, { status: ComplaintStatus; assigned_department?: string }>();
         const byWorkId = new Map<string, { status: ComplaintStatus; assigned_department?: string }>();
         // Place name (city/town/village) captured from the pipeline's reverse-geocode,
@@ -102,7 +103,7 @@ export default function CitizenComplaintList() {
             let anyPhoto = false;
             let anyAudio = false;
             for (const e of evidence) {
-              const subId = e?.submission_id || e?.id;
+              const subId = e?.submission_id;
               if (subId) bySubmission.set(subId, live);
               const canon = typeof e?.canonical_location === "string" ? e.canonical_location : undefined;
               if (canon) {
@@ -151,13 +152,14 @@ export default function CitizenComplaintList() {
         let changed = false;
         const updatedData = data.map((c) => {
           const live = bySubmission.get(c.id) || (c.work_id ? byWorkId.get(c.work_id) : undefined);
-          if (live && (c.status !== live.status || c.assigned_department !== live.assigned_department)) {
+          if (!live) return c;
+          // Keep the MP's assigned department; only fall back to the existing one
+          // if the live record somehow lacks it, so an "Assigned" complaint never
+          // shows a blank department.
+          const nextDept = live.assigned_department ?? c.assigned_department;
+          if (c.status !== live.status || c.assigned_department !== nextDept) {
             changed = true;
-            return {
-              ...c,
-              status: live.status,
-              assigned_department: live.assigned_department,
-            };
+            return { ...c, status: live.status, assigned_department: nextDept };
           }
           return c;
         });
