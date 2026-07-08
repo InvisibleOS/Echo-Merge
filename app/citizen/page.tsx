@@ -7,11 +7,9 @@ import CitizenComplaintList from "@/components/dashboard/CitizenComplaintList";
 import PageTranslator from "@/components/citizen/PageTranslator";
 import { PlusCircle, ListTodo, ShieldAlert, ArrowLeft, Landmark, ShieldCheck } from "lucide-react";
 import clsx from "clsx";
-import { CITIES } from "@/lib/cities";
 
 export default function CitizenDashboardPage() {
   const [activeTab, setActiveTab] = useState<"submit" | "track">("submit");
-  const [selectedCityId, setSelectedCityId] = useState<string>("bengaluru");
 
   return (
     <div id="citizen-root" className="min-h-screen mesh-bg flex flex-col text-surface-900">
@@ -34,27 +32,6 @@ export default function CitizenDashboardPage() {
                 </p>
               </div>
             </Link>
-
-            <div className="h-8 w-px bg-surface-200 hidden sm:block" />
-
-            {/* City Selector Dropdown */}
-            <div className="flex items-center gap-2">
-              <label htmlFor="city-select-citizen" className="text-xs font-semibold text-surface-700 uppercase tracking-wider">
-                City:
-              </label>
-              <select
-                id="city-select-citizen"
-                value={selectedCityId}
-                onChange={(e) => setSelectedCityId(e.target.value)}
-                className="text-sm font-medium bg-white/50 border border-surface-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-civic-500/50"
-              >
-                {CITIES.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {city.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -113,11 +90,11 @@ export default function CitizenDashboardPage() {
                 Report a Neighborhood Need
               </h2>
               <p className="text-sm text-surface-700 mt-1">
-                Your report will be automatically routed to the correct department in {CITIES.find(c => c.id === selectedCityId)?.name || 'your city'}.
+                Your report is tagged with your current location and routed to the responsible department automatically.
               </p>
             </div>
 
-            <SubmissionForm selectedCityId={selectedCityId} />
+            <SubmissionForm />
           </div>
         )}
 

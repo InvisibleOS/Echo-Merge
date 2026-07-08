@@ -11,7 +11,6 @@ import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { submitComplaint } from "@/lib/api";
 import { GeoPoint } from "@/lib/types";
-import { CITIES } from "@/lib/cities";
 
 type InputMode = "text" | "voice" | "photo";
 
@@ -21,7 +20,7 @@ const INPUT_MODES: { id: InputMode; label: string; icon: typeof Mic }[] = [
   { id: "text", label: "Type Text", icon: Type },
 ];
 
-export default function SubmissionForm({ selectedCityId }: { selectedCityId?: string }) {
+export default function SubmissionForm() {
   const [activeMode, setActiveMode] = useState<InputMode | null>(null);
   const [text, setText] = useState("");
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
@@ -69,16 +68,8 @@ export default function SubmissionForm({ selectedCityId }: { selectedCityId?: st
     setIsSubmitting(true);
     setError(null);
 
-    // Override GPS with selected city center + slight randomization for demo realism
-    let finalGeo: GeoPoint | undefined = geo ? { ...geo } : undefined;
-    if (selectedCityId) {
-      const city = CITIES.find(c => c.id === selectedCityId);
-      if (city) {
-        const latOffset = (Math.random() - 0.5) * 0.05;
-        const lngOffset = (Math.random() - 0.5) * 0.05;
-        finalGeo = { lat: city.lat + latOffset, lng: city.lng + lngOffset };
-      }
-    }
+    // Submit the citizen's actual captured location.
+    const finalGeo: GeoPoint | undefined = geo ? { ...geo } : undefined;
 
     try {
       const res = await submitComplaint({
