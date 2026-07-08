@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   PriorityItem,
   Hotspot,
@@ -15,13 +16,21 @@ import {
 import { subscribeToSync } from "@/lib/storageSync";
 import { CITIES, CityConfig } from "@/lib/cities";
 import PriorityList from "./PriorityList";
-import HotspotMap from "./HotspotMap";
 import DrillDownPanel from "./DrillDownPanel";
 import ProactiveAnalysisPanel from "./ProactiveAnalysisPanel";
 import DelegationPanel from "./DelegationPanel";
 import DepartmentAnalyticsPanel from "./DepartmentAnalyticsPanel";
 import { Map, Cpu, Building2, Users, ShieldCheck } from "lucide-react";
 import clsx from "clsx";
+
+const HotspotMap = dynamic(() => import("./HotspotMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 h-full w-full flex items-center justify-center bg-surface-100 rounded-3xl animate-pulse">
+      <span className="text-surface-500 font-medium text-sm">Loading map...</span>
+    </div>
+  ),
+});
 
 // Complaints within this radius (km) of the selected city's centre are shown on
 // the map/list — so choosing a city both flies there AND reveals that city's

@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import FloatingNav from "@/components/ui/FloatingNav";
+import { Manrope, Noto_Sans } from "next/font/google";
 import "./globals.css";
 
-// Display face for English headings — dashboard, labels, UI chrome.
-// Bypassed next/font/google to prevent sandboxed build network failures.
-const manrope = {
-  variable: "font-sans",
-};
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["500", "700", "800"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const notoSans = Noto_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "People's Priorities — Constituency Development",
@@ -21,14 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Manrope:wght@500;700;800&display=swap"
-        />
-      </head>
-      <body className={`${manrope.variable} font-body bg-paper text-ink-900`}>
+      <body className={`${manrope.variable} ${notoSans.variable} font-body bg-paper text-ink-900`}>
         {children}
         <FloatingNav />
       </body>
