@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { Loader } from "@googlemaps/js-api-loader";
 import { Hotspot, PriorityItem } from "@/lib/types";
 import { CityConfig } from "@/lib/cities";
 
@@ -15,14 +14,21 @@ interface Props {
   focusCity?: CityConfig;
 }
 
-// Fallback center if no city is selected
-const DEFAULT_CENTER: [number, number] = [77.5952, 12.9071];
+// Fallback center if no city is selected ({lat,lng} — Google Maps order).
+const DEFAULT_CENTER = { lat: 12.9071, lng: 77.5952 };
 const INDIA_BOUNDS = {
   minLat: 6,
   maxLat: 36,
   minLng: 68,
   maxLng: 90,
 };
+
+// AdvancedMarkerElement requires a Map ID. A cloud-styled id can be supplied via
+// env; otherwise Google's built-in DEMO_MAP_ID renders fine for the demo.
+const MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID";
+
+const GLOW_BG =
+  "radial-gradient(circle, rgba(245,158,11,.95) 0%, rgba(79,70,229,.5) 46%, rgba(79,70,229,0) 72%)";
 
 export default function HotspotMap({
   hotspots,
@@ -32,106 +38,101 @@ export default function HotspotMap({
   focusCity,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerLibRef = useRef<google.maps.MarkerLibrary | null>(null);
+  const markersRef = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({});
+  const heatMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
-  const useFallback = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapError;
+  const useFallback = !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || mapError;
   const fallbackClusters = useMemo(() => getConstituencyClusters(hotspots), [hotspots]);
 
   // Fly to the focused city — or zoom out to fit all of India in "All India" view.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focusCity) return;
-    map.flyTo({
-      center: [focusCity.lng, focusCity.lat],
-      zoom: focusCity.zoom,
-      duration: 1500,
-      essential: true,
-    });
-  }, [focusCity]);
+    map.panTo({ lat: focusCity.lat, lng: focusCity.lng });
+    map.setZoom(focusCity.zoom);
+  }, [focusCity, mapReady]);
 
-  // Initialize map once
+  // Initialize map once (async — the Google Maps JS API loads on demand).
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) return;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) return;
 
-    let map: mapboxgl.Map;
-    try {
-      mapboxgl.accessToken = token;
-      map = new mapboxgl.Map({
-        container: containerRef.current,
-        style: "mapbox://styles/mapbox/light-v11",
-        center: focusCity ? [focusCity.lng, focusCity.lat] : DEFAULT_CENTER,
-        zoom: focusCity ? focusCity.zoom : 12,
-      });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
-      mapRef.current = map;
-    } catch {
-      // e.g. WebGL unavailable — degrade to the token-free India fallback.
-      setMapError(true);
-      return;
-    }
+    let cancelled = false;
+    const loader = new Loader({ apiKey, version: "weekly" });
 
-    map.on("load", () => {
-      map.addSource("hotspots", {
-        type: "geojson",
-        data: hotspotsToGeoJSON(hotspots),
-      });
+    Promise.all([loader.importLibrary("maps"), loader.importLibrary("marker")])
+      .then(([{ Map }, markerLib]) => {
+        if (cancelled || !containerRef.current) return;
+        markerLibRef.current = markerLib;
 
-      map.addLayer({
-        id: "hotspot-heat",
-        type: "heatmap",
-        source: "hotspots",
-        maxzoom: 16,
-        paint: {
-          "heatmap-weight": ["get", "intensity"],
-          "heatmap-intensity": 1.2,
-          "heatmap-color": [
-            "interpolate",
-            ["linear"],
-            ["heatmap-density"],
-            0,
-            "rgba(79,70,229,0)",
-            0.3,
-            "#818CF8",
-            0.6,
-            "#4F46E5",
-            1,
-            "#F59E0B",
-          ],
-          "heatmap-radius": 40,
-          "heatmap-opacity": 0.75,
-        },
+        const map = new Map(containerRef.current, {
+          center: focusCity ? { lat: focusCity.lat, lng: focusCity.lng } : DEFAULT_CENTER,
+          zoom: focusCity ? focusCity.zoom : 12,
+          mapId: MAP_ID,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          clickableIcons: false,
+        });
+        mapRef.current = map;
+        setMapReady(true);
+      })
+      .catch(() => {
+        // e.g. bad key / WebGL unavailable — degrade to the token-free fallback.
+        if (!cancelled) setMapError(true);
       });
-    });
 
     return () => {
-      map.remove();
+      cancelled = true;
+      Object.values(markersRef.current).forEach((m) => (m.map = null));
+      markersRef.current = {};
+      heatMarkersRef.current.forEach((m) => (m.map = null));
+      heatMarkersRef.current = [];
       mapRef.current = null;
+      markerLibRef.current = null;
+      setMapReady(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update heatmap source when hotspots change
+  // Heatmap: Google removed visualization.HeatmapLayer in Maps JS v3.65, so we
+  // render the same intensity "glow" the fallback uses as low-z marker overlays.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getSource("hotspots")) return;
-    (map.getSource("hotspots") as mapboxgl.GeoJSONSource).setData(
-      hotspotsToGeoJSON(hotspots)
-    );
-  }, [hotspots]);
+    const markerLib = markerLibRef.current;
+    if (!map || !markerLib) return;
+    const { AdvancedMarkerElement } = markerLib;
+
+    heatMarkersRef.current.forEach((m) => (m.map = null));
+    heatMarkersRef.current = [];
+
+    hotspots.slice(0, 300).forEach((h) => {
+      const marker = new AdvancedMarkerElement({
+        map,
+        position: { lat: h.geo.lat, lng: h.geo.lng },
+        content: makeGlowEl(h.intensity),
+        zIndex: 1,
+      });
+      heatMarkersRef.current.push(marker);
+    });
+  }, [hotspots, mapReady]);
 
   // Render numbered markers for each priority, on top of the heatmap
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    const markerLib = markerLibRef.current;
+    if (!map || !markerLib) return;
 
     // Clear old markers
-    Object.values(markersRef.current).forEach((m) => m.remove());
+    Object.values(markersRef.current).forEach((m) => (m.map = null));
     markersRef.current = {};
 
+    const { AdvancedMarkerElement } = markerLib;
     priorities
       .filter((item) => item.status !== "Resolved")
       .forEach((item) => {
@@ -150,19 +151,25 @@ export default function HotspotMap({
       el.style.border = "2px solid white";
       el.style.cursor = "pointer";
       el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+      // AdvancedMarkerElement anchors content by its bottom-center; nudge down
+      // half its height so the circle centers on the coordinate (like Mapbox).
+      el.style.transform = "translateY(50%)";
       el.style.background =
         item.work_id === selectedId ? "#F59E0B" : "#4F46E5";
       el.textContent = String(item.rank);
       el.onclick = () => onSelectMarker(item.work_id);
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([item.hotspot_geo.lng, item.hotspot_geo.lat])
-        .addTo(map);
+      const marker = new AdvancedMarkerElement({
+        map,
+        position: { lat: item.hotspot_geo.lat, lng: item.hotspot_geo.lng },
+        content: el,
+        zIndex: 100,
+      });
 
       markersRef.current[item.work_id] = marker;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priorities, selectedId]);
+  }, [priorities, selectedId, mapReady]);
 
   // Fly to selected priority
   useEffect(() => {
@@ -170,15 +177,12 @@ export default function HotspotMap({
     if (!map || !selectedId) return;
     const item = priorities.find((p) => p.work_id === selectedId);
     if (!item) return;
-    map.flyTo({
-      center: [item.hotspot_geo.lng, item.hotspot_geo.lat],
-      zoom: 14,
-      duration: 800,
-    });
-  }, [selectedId, priorities]);
+    map.panTo({ lat: item.hotspot_geo.lat, lng: item.hotspot_geo.lng });
+    map.setZoom(14);
+  }, [selectedId, priorities, mapReady]);
 
   // Token-free fallback: a lightweight India heatmap so complaints still render
-  // (numbered priority pins + demand glow) when NEXT_PUBLIC_MAPBOX_TOKEN is unset.
+  // (numbered priority pins + demand glow) when NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is unset.
   if (useFallback) {
     const openPriorities = priorities.filter((item) => item.status !== "Resolved");
     return (
@@ -288,7 +292,7 @@ export default function HotspotMap({
               <p className="text-[10px] font-bold uppercase tracking-wide text-white/40">
                 Top National Priorities
               </p>
-              <span className="text-[10px] font-semibold text-white/40">Mapbox optional</span>
+              <span className="text-[10px] font-semibold text-white/40">Google Maps optional</span>
             </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {openPriorities.slice(0, 4).map((item) => (
@@ -315,6 +319,22 @@ export default function HotspotMap({
       className="w-full h-full rounded-lg overflow-hidden border border-ink-900/10"
     />
   );
+}
+
+// One blurred radial-gradient glow, sized/faded by hotspot intensity. Used as
+// AdvancedMarkerElement content to approximate a density heatmap on the map.
+function makeGlowEl(intensity: number) {
+  const el = document.createElement("div");
+  const size = Math.max(28, Math.min(96, 28 + intensity * 64));
+  el.style.width = `${size}px`;
+  el.style.height = `${size}px`;
+  el.style.borderRadius = "50%";
+  el.style.pointerEvents = "none";
+  el.style.filter = "blur(7px)";
+  el.style.transform = "translateY(50%)"; // center the glow on the coordinate
+  el.style.opacity = String(Math.max(0.3, Math.min(0.8, 0.28 + intensity * 0.5)));
+  el.style.background = GLOW_BG;
+  return el;
 }
 
 function projectIndiaPoint(lat: number, lng: number) {
@@ -345,19 +365,4 @@ function getConstituencyClusters(hotspots: Hotspot[]) {
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
-}
-
-function hotspotsToGeoJSON(hotspots: Hotspot[]): GeoJSON.FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: hotspots.map((h) => ({
-      type: "Feature",
-      geometry: { type: "Point", coordinates: [h.geo.lng, h.geo.lat] },
-      properties: {
-        intensity: h.intensity,
-        category: h.category,
-        demand_count: h.demand_count,
-      },
-    })),
-  };
 }
