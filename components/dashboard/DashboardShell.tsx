@@ -330,7 +330,7 @@ export default function DashboardShell() {
           <Cpu size={15} />
           <span>2. Real-time Area Analysis</span>
           <span className="ml-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[10px] font-mono font-bold">
-            ⚡ Proactive Mapbox
+            ⚡ Proactive Intelligence
           </span>
         </button>
 

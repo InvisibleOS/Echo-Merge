@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '../../../../utils/supabase/server';
 import { CITIES } from '../../../../lib/cities';
 import { buildQueries, classifyArticle, titleSimilar } from '../../../../lib/server/newsIngest';
+import { googleWebSearch, isGoogleSearchConfigured } from '../../../../lib/server/googleSearch';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,26 +14,10 @@ const ALERT_COLUMNS = [
 
 const MAX_CANDIDATES = 20;
 
-async function tavilySearch(apiKey, query) {
-  try {
-    const res = await fetch('https://api.tavily.com/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        api_key: apiKey,
-        query,
-        topic: 'news',
-        days: 30,
-        search_depth: 'basic',
-        max_results: 5,
-      }),
-    });
-    if (!res.ok) return [];
-    const data = await res.json().catch(() => ({}));
-    return Array.isArray(data.results) ? data.results : [];
-  } catch {
-    return [];
-  }
+// One civic-news query → recent web results (Google Custom Search). `dateRestrict`
+// biases toward the last month, mirroring the old Tavily `days: 30` news window.
+function newsSearch(query) {
+  return googleWebSearch(query, { num: 5, dateRestrict: 'm1' });
 }
 
 function relativeTime(dateStr) {
@@ -57,11 +42,11 @@ function toRow(candidate) {
  * Crawl live civic news for the given cities, classify → dedup → persist.
  * Shared by POST (UI button, optional cityId) and GET (cron — all cities).
  */
-async function runIngestion(cities, apiKey) {
+async function runIngestion(cities) {
     // 1. Crawl + classify — all cities concurrently.
     const perCity = await Promise.all(
       cities.map(async (city) => {
-        const resultSets = await Promise.all(buildQueries(city).map((q) => tavilySearch(apiKey, q)));
+        const resultSets = await Promise.all(buildQueries(city).map((q) => newsSearch(q)));
         const articles = resultSets.flat();
         const cands = [];
         for (const article of articles) {
@@ -116,8 +101,8 @@ async function runIngestion(cities, apiKey) {
 }
 
 function preflight() {
-  if (!process.env.TAVILY_API_KEY) {
-    return NextResponse.json({ error: 'News ingestion is not configured (missing TAVILY_API_KEY).' }, { status: 501 });
+  if (!isGoogleSearchConfigured()) {
+    return NextResponse.json({ error: 'News ingestion is not configured (missing GOOGLE_SEARCH_API_KEY/GOOGLE_API_KEY or GOOGLE_SEARCH_CX).' }, { status: 501 });
   }
   if (!isSupabaseConfigured) {
     return NextResponse.json({ error: 'Database not configured — cannot persist alerts.' }, { status: 501 });
@@ -146,7 +131,7 @@ export async function POST(request) {
   }
 
   try {
-    return NextResponse.json(await runIngestion(cities, process.env.TAVILY_API_KEY), { status: 200 });
+    return NextResponse.json(await runIngestion(cities), { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Ingestion failed: ' + (error?.message || String(error)) }, { status: 500 });
   }
@@ -157,7 +142,7 @@ export async function GET() {
   const gate = preflight();
   if (gate) return gate;
   try {
-    return NextResponse.json(await runIngestion(CITIES, process.env.TAVILY_API_KEY), { status: 200 });
+    return NextResponse.json(await runIngestion(CITIES), { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Ingestion failed: ' + (error?.message || String(error)) }, { status: 500 });
   }

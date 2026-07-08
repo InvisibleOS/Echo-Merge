@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { Loader } from "@googlemaps/js-api-loader";
 import { ProactiveAlert, ProactivePriorityLevel, IngestionType } from "@/lib/types";
 import { getProactiveAlerts, convertProactiveAlert, ingestNews } from "@/lib/api";
 import { CityConfig } from "@/lib/cities";
@@ -28,6 +27,10 @@ import clsx from "clsx";
 
 // Alerts within this radius (km) of the selected city are shown on the panel.
 const CITY_ALERT_RADIUS_KM = 120;
+
+// AdvancedMarkerElement requires a Map ID; a cloud-styled id can come from env,
+// else Google's built-in DEMO_MAP_ID renders fine for the demo.
+const MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID";
 
 function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371;
@@ -77,10 +80,12 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
   const [scanMsg, setScanMsg] = useState<string | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerLibRef = useRef<google.maps.MarkerLibrary | null>(null);
+  const markersRef = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({});
+  const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
-  const showFallbackMap = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapError;
+  const showFallbackMap = !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || mapError;
 
   // Fetch proactive alerts from database API
   const fetchAlerts = useCallback(async (showLoading = true) => {
@@ -178,47 +183,59 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
     }
   }
 
-  // Initialize Mapbox map
+  // Initialize Google Map (async — the Maps JS API loads on demand).
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) return; // token-free fallback renders instead (see below)
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) return; // key-free fallback renders instead (see below)
 
-    let map: mapboxgl.Map;
-    try {
-      const initCity = activeCity;
-      mapboxgl.accessToken = token;
-      map = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: "mapbox://styles/mapbox/light-v11",
-        center: [initCity.lng, initCity.lat],
-        zoom: initCity.zoom,
+    let cancelled = false;
+    const initCity = activeCity;
+    const loader = new Loader({ apiKey, version: "weekly" });
+
+    Promise.all([loader.importLibrary("maps"), loader.importLibrary("marker")])
+      .then(([{ Map }, markerLib]) => {
+        if (cancelled || !mapContainerRef.current) return;
+        markerLibRef.current = markerLib;
+        mapRef.current = new Map(mapContainerRef.current, {
+          center: { lat: initCity.lat, lng: initCity.lng },
+          zoom: initCity.zoom,
+          mapId: MAP_ID,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          clickableIcons: false,
+        });
+        setMapReady(true);
+      })
+      .catch(() => {
+        // e.g. bad key / WebGL unavailable — degrade to the key-free fallback view.
+        if (!cancelled) setMapError(true);
       });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
-      mapRef.current = map;
-    } catch {
-      // e.g. WebGL unavailable — degrade to the token-free fallback view.
-      setMapError(true);
-      return;
-    }
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      cancelled = true;
+      Object.values(markersRef.current).forEach((m) => (m.map = null));
       markersRef.current = {};
+      mapRef.current = null;
+      markerLibRef.current = null;
+      setMapReady(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update map markers when filtered items change
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    const markerLib = markerLibRef.current;
+    if (!map || !markerLib) return;
 
     // Clear existing markers
-    Object.values(markersRef.current).forEach((m) => m.remove());
+    Object.values(markersRef.current).forEach((m) => (m.map = null));
     markersRef.current = {};
 
+    const { AdvancedMarkerElement } = markerLib;
     filtered.forEach((item) => {
       const el = document.createElement("button");
       el.setAttribute("aria-label", item.title);
@@ -246,6 +263,9 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
       el.style.transition = "all 0.2s ease";
       el.style.backgroundColor = bgColor;
       el.style.zIndex = isSelected ? "10" : "1";
+      // AdvancedMarkerElement anchors content bottom-center; nudge down half its
+      // height so the badge centers on the coordinate (like Mapbox did).
+      el.style.transform = "translateY(50%)";
 
       el.textContent = isCritical ? "⚠" : isWarning ? "⚡" : "ℹ";
 
@@ -253,13 +273,16 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
         setSelectedAlertId(item.id);
       };
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([item.geo.lng, item.geo.lat])
-        .addTo(map);
+      const marker = new AdvancedMarkerElement({
+        map,
+        position: { lat: item.geo.lat, lng: item.geo.lng },
+        content: el,
+        zIndex: isSelected ? 10 : 1,
+      });
 
       markersRef.current[item.id] = marker;
     });
-  }, [filtered, selectedAlertId]);
+  }, [filtered, selectedAlertId, mapReady]);
 
   // Fly to selected alert when clicked
   useEffect(() => {
@@ -268,25 +291,18 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
     const item = alerts.find((a) => a.id === selectedAlertId);
     if (!item) return;
 
-    map.flyTo({
-      center: [item.geo.lng, item.geo.lat],
-      zoom: 14.5,
-      duration: 800,
-    });
-  }, [selectedAlertId, alerts]);
+    map.panTo({ lat: item.geo.lat, lng: item.geo.lng });
+    map.setZoom(14.5);
+  }, [selectedAlertId, alerts, mapReady]);
 
   // Fly to the selected city (from the dashboard header) and reset any selection.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedAlertId(null);
     const map = mapRef.current;
     if (!map) return;
-    map.flyTo({
-      center: [activeCity.lng, activeCity.lat],
-      zoom: activeCity.zoom,
-      duration: 1200,
-      essential: true,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    map.panTo({ lat: activeCity.lat, lng: activeCity.lng });
+    map.setZoom(activeCity.zoom);
   }, [activeCity]);
 
   function getPriorityBadge(priority: ProactivePriorityLevel) {
@@ -652,7 +668,7 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
           )}
         </div>
 
-        {/* Real-Time Telemetry Mapbox Map */}
+        {/* Real-Time Telemetry Google Map */}
         <div className="bg-white rounded-2xl border border-surface-200 overflow-hidden shadow-sm flex flex-col h-[660px]">
           <div className="px-5 py-3 border-b border-surface-200 flex items-center justify-between bg-surface-50/50 shrink-0">
             <div className="flex items-center gap-2">
@@ -710,7 +726,7 @@ export default function ProactiveAnalysisPanel({ onConverted, activeCity }: Prop
                 );
               })}
               <div className="absolute bottom-3 left-3 rounded-md border border-white/10 bg-ink-950/80 px-3 py-1.5 text-[10px] font-semibold text-white/60 backdrop-blur">
-                Live telemetry positions &middot; {filtered.length} alerts &middot; add NEXT_PUBLIC_MAPBOX_TOKEN for the interactive map
+                Live telemetry positions &middot; {filtered.length} alerts &middot; add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for the interactive map
               </div>
             </div>
           )}
